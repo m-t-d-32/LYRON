@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<pldl>
+<string-array name="unterminators">
+</string-array>
+<string-array name="terminators">
+</string-array>
+<string-array name="cfgproductions">
+	<item>S -> C C</item>
+    <item>C -> c C</item>
+    <item>C -> d</item>
+</string-array>
+</pldl>
