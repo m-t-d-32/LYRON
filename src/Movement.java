@@ -19,9 +19,9 @@ public class Movement {
     @Override
     public String toString() {
         if (movement == REGRESSION) {
-            return "r[" + regressionProduction.toString() + "]";
+            return "r" + regressionProduction.getSerialNumber();
         } else {
-            return "s[" + String.valueOf(shiftToStatement) + "]";
+            return "s" + shiftToStatement;
         }
     }
 }

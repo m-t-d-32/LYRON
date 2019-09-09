@@ -20,7 +20,7 @@ public class Solution {
 
         CFG cfg = PreParse.autoRead("TEST.pldl", null);
         cfg.augmentCFG();
-        cfg.getTable();
+        System.out.println(cfg.getTable());
         System.out.println(PLDLParsingWarning.getLoggings());
     }
 }

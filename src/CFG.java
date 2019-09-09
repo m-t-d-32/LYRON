@@ -29,7 +29,9 @@ public class CFG {
         for (int i = 0; i < CFGProductionStrs.size(); ++i) {
             String CFGProductionStr = CFGProductionStrs.get(i);
             try {
-                CFGProductions.add(CFGProduction.GetCFGProductionFromCFGString(CFGProductionStr));
+                CFGProduction production = CFGProduction.GetCFGProductionFromCFGString(CFGProductionStr);
+                production.setSerialNumber(i + 1);
+                CFGProductions.add(production);
             } catch (PLDLParsingException e) {
                 throw new PLDLParsingException("解析失败：上下文无关文法中存在语法错误（位于第 " + String.valueOf(i + 1) + " 行)", e);
             }
@@ -89,6 +91,7 @@ public class CFG {
             List<Symbol> afterSymbols = new ArrayList<>();
             afterSymbols.add(CFGmarkin);
             augmentCFGProduction.setAfterSymbol(afterSymbols);
+            augmentCFGProduction.setSerialNumber(0);
             CFGProductions.add(augmentCFGProduction);
             CFGmarkin = beforeSymbol;
         }
@@ -103,7 +106,7 @@ public class CFG {
             if (!productions.containsKey(cfgproduction.getBeforeSymbol())) {
                 productions.put((Unterminator) cfgproduction.getBeforeSymbol(), new HashSet<>());
             }
-            productions.get((Unterminator) cfgproduction.getBeforeSymbol()).add((CFGProduction) cfgproduction.clone());
+            productions.get(cfgproduction.getBeforeSymbol()).add((CFGProduction) cfgproduction.clone());
         }
         while (!tempSetOfEmpty.isEmpty()) {
             Set<Symbol> nextTempSetOfEmpty = new HashSet<>();
@@ -139,7 +142,7 @@ public class CFG {
         }
     }
 
-    private void setFirstSet() throws PLDLParsingException {
+    public void setFirstSet() throws PLDLParsingException {
         setCanEmpty();
         Map<Unterminator, Set<Unterminator>> signalPasses = new HashMap<>();
         Map<Unterminator, Set<Terminator>> firstSet = new HashMap<>();
@@ -148,10 +151,10 @@ public class CFG {
         for (CFGProduction production : CFGProductions) {
             for (Symbol s : production.getAfterSymbols()) {
                 if (s.getType() == Symbol.UNTERMINATOR) {
-                    if (!signalPasses.containsKey((Unterminator) s)) {
+                    if (!signalPasses.containsKey(s)) {
                         signalPasses.put((Unterminator) s, new HashSet<>());
                     }
-                    signalPasses.get((Unterminator) s).add((Unterminator) production.getBeforeSymbol());
+                    signalPasses.get(s).add((Unterminator) production.getBeforeSymbol());
                     if (!((Unterminator) s).getCanEmpty()) {
                         break;
                     }
@@ -159,7 +162,7 @@ public class CFG {
                     if (!tempFirstSet.containsKey(production.getBeforeSymbol())) {
                         tempFirstSet.put((Unterminator) production.getBeforeSymbol(), new HashSet<>());
                     }
-                    tempFirstSet.get((Unterminator) production.getBeforeSymbol()).add((Terminator) s);
+                    tempFirstSet.get(production.getBeforeSymbol()).add((Terminator) s);
                     break;
                 } else {
                     break;
@@ -209,7 +212,8 @@ public class CFG {
         setFirstSet();
         SymbolPool.addTerminatorStr("eof");
         List<CFGStatement> iterStatements = new ArrayList<>();
-        Set<CFGStatement> checkStatements = new HashSet<>();
+        //Set<CFGStatement> checkStatements = new HashSet<>();
+        Map<CFGStatement, Integer> checkStatements = new HashMap<>();
 
         CFGStatement beginStatement = new CFGStatement();
         for (CFGProduction production : CFGProductions) {
@@ -219,7 +223,9 @@ public class CFG {
         }
         beginStatement.makeClosure();
         iterStatements.add(beginStatement);
-        checkStatements.add(beginStatement);
+        checkStatements.put(beginStatement, 0);
+
+        TransformTable result = new TransformTable();
 
         for (int i = 0; i < iterStatements.size(); ++i) {
             CFGStatement nowStatement = iterStatements.get(i);
@@ -231,21 +237,33 @@ public class CFG {
                         classifiedPointedProductions.put(pointedProduction.getNextSymbol(), new HashSet<>());
                     }
                     classifiedPointedProductions.get(pointedProduction.getNextSymbol()).add(pointedProduction);
+                } else {
+                    if (!classifiedPointedProductions.containsKey(SymbolPool.getTerminator("null"))) {
+                        classifiedPointedProductions.put(SymbolPool.getTerminator("null"), new HashSet<>());
+                    }
+                    classifiedPointedProductions.get(SymbolPool.getTerminator("null")).add(pointedProduction);
                 }
             }
             for (Symbol s : classifiedPointedProductions.keySet()) {
-                CFGStatement statement = new CFGStatement();
-                for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
-                    statement.add(pointedProduction.next());
-                }
-                statement.makeClosure();
-                if (!checkStatements.contains(statement)) {
-                    iterStatements.add(statement);
-                    checkStatements.add(statement);
+                if (s.equals(SymbolPool.getTerminator("null"))) {
+                    for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
+                        result.add(i, pointedProduction.getOutlookTerminator(), pointedProduction.getProduction());
+                    }
+                } else {
+                    CFGStatement statement = new CFGStatement();
+                    for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
+                        statement.add(pointedProduction.next());
+                    }
+                    statement.makeClosure();
+                    if (!checkStatements.containsKey(statement)) {
+                        checkStatements.put(statement, iterStatements.size());
+                        iterStatements.add(statement);
+                    }
+                    result.add(i, s, checkStatements.get(statement));
                 }
             }
         }
         System.out.println(iterStatements.size());
-        return null;
+        return result;
     }
 }

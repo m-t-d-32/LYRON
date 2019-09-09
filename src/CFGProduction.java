@@ -8,6 +8,16 @@ public class CFGProduction implements Cloneable {
 
     private List<Symbol> afterSymbols = null;
 
+    public int getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(int serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    private int serialNumber = -1;
+
     public static CFGProduction GetCFGProductionFromCFGString(String CFGProductionString) throws PLDLParsingException {
         CFGProduction resultProduction = new CFGProduction();
         if (CFGProductionString.contains("->")) {
@@ -30,7 +40,7 @@ public class CFGProduction implements Cloneable {
                             try {
                                 resultProduction.afterSymbols.add(SymbolPool.getSymbol("_" + afterStrs[i]));
                             } catch (PLDLParsingException e) {
-                                throw new PLDLParsingException("产生式右部第 " + String.valueOf(i + 1) + " 个符号既不能识别为终结符，也不能识别为非终结符。是否忘记使用空格隔开？", e);
+                                throw new PLDLParsingException("产生式右部第 " + (i + 1) + " 个符号既不能识别为终结符，也不能识别为非终结符。是否忘记使用空格隔开？", e);
                             }
                         }
                         return resultProduction;
@@ -96,9 +106,7 @@ public class CFGProduction implements Cloneable {
         CFGProduction clonedProduction = new CFGProduction();
         clonedProduction.beforeSymbol = beforeSymbol;
         clonedProduction.afterSymbols = new ArrayList<>();
-        for (Symbol s : afterSymbols) {
-            clonedProduction.afterSymbols.add(s);
-        }
+        clonedProduction.afterSymbols.addAll(afterSymbols);
         return clonedProduction;
     }
 
