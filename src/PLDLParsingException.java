@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class PLDLParsingException extends Exception {
 
     private static final long serialVersionUID = 7894436673704861994L;

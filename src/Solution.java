@@ -1,12 +1,8 @@
-import jdk.nashorn.internal.codegen.CompilerConstants;
 import org.dom4j.DocumentException;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
 
 public class Solution {
 
-    public static void main(String[] args) throws PLDLParsingException, DocumentException {
+    public static void main(String[] args) throws PLDLParsingException, DocumentException, PLDLAnalysisException {
         new Thread() {
             @Override
             public void run() {
@@ -18,9 +14,13 @@ public class Solution {
             }
         }.start();
 
-        CFG cfg = PreParse.autoRead("TEST.pldl", null);
+        PreParse parser = new PreParse("TEST.pldl", null);
+        CFG cfg = parser.getCFG();
         cfg.augmentCFG();
-        System.out.println(cfg.getTable());
+        TransformTable table = cfg.getTable();
+        System.out.println(table);
+        AnalysisTree tree = table.getAnalysisTree(parser.getSymbols("1 + 3 * ( 5 + 6 )"));
+        System.out.println(tree);
         System.out.println(PLDLParsingWarning.getLoggings());
     }
 }

@@ -248,6 +248,10 @@ public class CFG {
                 if (s.equals(SymbolPool.getTerminator("null"))) {
                     for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
                         result.add(i, pointedProduction.getOutlookTerminator(), pointedProduction.getProduction());
+                        if (pointedProduction.getOutlookTerminator().equals(SymbolPool.getTerminator("eof")) 
+                        		&& pointedProduction.getProduction().getBeforeSymbol().equals(CFGmarkin)){
+                        	result.addEndStatement(i);
+                        }
                     }
                 } else {
                     CFGStatement statement = new CFGStatement();
@@ -263,7 +267,7 @@ public class CFG {
                 }
             }
         }
-        System.out.println(iterStatements.size());
+        //System.out.println(iterStatements.size());
         return result;
     }
 }
