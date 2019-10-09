@@ -2,19 +2,28 @@ import java.io.Serializable;
 import java.util.*;
 
 public class TransformTable implements Serializable{
-    final Map<Integer, Map<Symbol, Movement>> table;
-    final Set<Integer> endStatements;
+	
+    private final Map<Integer, Map<Symbol, Movement>> table;
+    
+    private final Set<Integer> endStatements;
+    
+    private final CFG cfg;
+    
+    public Map<Integer, Map<Symbol, Movement>> getTableMap() {
+    	return table;
+    }
 
-    public TransformTable() {
+    public TransformTable(CFG cfg) {
         this.table = new HashMap<>();
         this.endStatements = new HashSet<>();
+        this.cfg = cfg;
     }
     
     public void addEndStatement(int endStatement) {
     	this.endStatements.add(endStatement);
     }
     
-    public Set<Integer> getEndStatement() {
+    public Set<Integer> getEndStatements() {
     	return endStatements;
     }
 
@@ -61,7 +70,7 @@ public class TransformTable implements Serializable{
                 
                 if (table.get(i).containsKey(s)) {
                 	try {                		
-						if (endStatements.contains(i) && s.equals(SymbolPool.getTerminator("eof"))) {
+						if (endStatements.contains(i) && s.equals(cfg.getSymbolPool().getTerminator("eof"))) {
 							result.append("acc");
 						}
 						else {
@@ -78,7 +87,7 @@ public class TransformTable implements Serializable{
         return result.toString();
     }
     
-    public AnalysisTree getAnalysisTree(List<Symbol> symbols) throws PLDLAnalysisException, PLDLParsingException {
+    public AnalysisTree getAnalysisTree(List<SymbolExtra> symbols) throws PLDLAnalysisException, PLDLParsingException {
     	AnalysisTree tree = new AnalysisTree();
     	Stack<Integer> statementStack = new Stack<>();
     	Stack<AnalysisNode> nodeStack = new Stack<>();
@@ -87,25 +96,25 @@ public class TransformTable implements Serializable{
     	if (endStatements.size() <= 0) {
     		return null;
     	}
-    	Symbol beginSymbol = table.get(endStatements.iterator().next()).get(SymbolPool.getTerminator("eof")).getRegressionProduction().getBeforeSymbol();
-    	while(beginI != symbols.size() - 1 || !symbols.get(beginI).equals(beginSymbol)){
+    	Symbol beginSymbol = table.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminator("eof")).getRegressionProduction().getBeforeSymbol();
+    	while(beginI != symbols.size() - 1 || !symbols.get(beginI).getSymbol().equals(beginSymbol)){
     		int nowStatement = statementStack.peek();
-    		Symbol nowSymbol = beginI < symbols.size() ? symbols.get(beginI) : SymbolPool.getTerminator("eof");
-    		Movement movement =  table.get(nowStatement).get(nowSymbol);
+    		SymbolExtra nowSymbolExtra = beginI < symbols.size() ? symbols.get(beginI) : new TerminatorExtra(cfg.getSymbolPool().getTerminator("eof"));
+    		Movement movement =  table.get(nowStatement).get(nowSymbolExtra.getSymbol());
     		if (movement == null) {
-    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法规约。", null);
+    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbolExtra + " 时既无法移进，也无法规约。", null);
     		}
     		else {
 	    		switch(movement.getMovement()) { 
 	    			case Movement.SHIFT:
-	    				nodeStack.push(new AnalysisNode(nowSymbol));
+	    				nodeStack.push(new AnalysisNode(nowSymbolExtra));
 	    			case Movement.GOTO:
 	    				statementStack.push(movement.getShiftTo());
 	    				++beginI;
 	    				break;
 	    			case Movement.REGRESSION:
 	    				CFGProduction production = movement.getRegressionProduction();
-	    				AnalysisNode node = new AnalysisNode(production.getBeforeSymbol());
+	    				AnalysisNode node = new AnalysisNode(new UnterminatorExtra((Unterminator) production.getBeforeSymbol()));
 	    				node.setChildren(new ArrayList<>());
 	    				Stack<AnalysisNode> tempStack = new Stack<>();
 		    			for (Symbol _: production.getAfterSymbols()) {
@@ -115,9 +124,9 @@ public class TransformTable implements Serializable{
 		    			for (Symbol _: production.getAfterSymbols()) {
 		    				node.getChildren().add(tempStack.pop());
 		    			}
-		    			nodeStack.add(node);
+		    			nodeStack.push(node);
 		    			--beginI;
-		    			symbols.set(beginI, production.getBeforeSymbol());
+		    			symbols.set(beginI, node.getValue());
 		    			break;
 	    		}
     		}

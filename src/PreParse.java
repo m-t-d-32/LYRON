@@ -28,13 +28,13 @@ public class PreParse {
                     for (Element e : pdsEl) {
                         String production = e.getText().trim();
                         prods.add(production);
-                        unterminators.add("_" + production.split("->")[0].trim());
+                        unterminators.add(production.split("->")[0].trim());
                     }
                     for (Element e : pdsEl) {
                         String[] afters = e.getText().trim().split("->")[1].trim().split(" +");
                         for (String after : afters) {
-                            if (!unterminators.contains("_" + after.trim()) && !terminators.containsKey("_" + after.trim())) {
-                                terminators.put("_" + after.trim(), Pattern.compile(Pattern.quote(after.trim())));
+                            if (!unterminators.contains(after.trim()) && !terminators.containsKey(after.trim())) {
+                                terminators.put(after.trim(), Pattern.compile(Pattern.quote(after.trim())));
                             }
                         }
                     }
@@ -44,7 +44,7 @@ public class PreParse {
                     for (Element e : terminatorsEl) {
                     	String name = e.element("name").getText().trim();                            
                         Pattern pattern = Pattern.compile(e.element("regex").getText().trim());
-                        terminators.put("_" + name, pattern);
+                        terminators.put(name, pattern);
                     }
                 }
             }
@@ -58,10 +58,10 @@ public class PreParse {
         }
     	return cfg;
     }
-    
-    public List<Symbol> getSymbols(String str) throws PLDLAnalysisException, PLDLParsingException{
+
+	public List<SymbolExtra> getSymbols(String str, CFG cfg) throws PLDLAnalysisException, PLDLParsingException{
 		List<String> rawStrings = new ArrayList<>();
-		List<Symbol> resultTokens = new ArrayList<>();
+		List<SymbolExtra> resultTokens = new ArrayList<>();
 		Scanner fileScanner = new Scanner(new StringBufferInputStream(str));
 		while (fileScanner.hasNext()){
 			String nowString = fileScanner.next();
@@ -78,9 +78,11 @@ public class PreParse {
 				for (String terminatorStr: terminators.keySet()) {
 					Matcher matcher = terminators.get(terminatorStr).matcher(nowString);
 					if (matcher.find() && nowString.indexOf(matcher.group(0)) == 0){
-						Terminator terminator = SymbolPool.getTerminator(terminatorStr);
+						Terminator terminator = cfg.getSymbolPool().getTerminator(terminatorStr);
 						String resultString = matcher.group(0);
-						resultTokens.add(terminator);
+						TerminatorExtra te = new TerminatorExtra(terminator);
+						te.addProperty("name", resultString);
+						resultTokens.add(te);
 						matchIndex = resultString.length();
 						find = true;
 						break;

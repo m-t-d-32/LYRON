@@ -1,11 +1,20 @@
 import java.util.List;
 
 public class AnalysisNode {
-	Symbol value;
+	SymbolExtra value;
+	
+	public SymbolExtra getValue() {
+		return value;
+	}
+
+	public void setValue(SymbolExtra value) {
+		this.value = value;
+	}
+
 	List<AnalysisNode> children;
 	AnalysisNode parent;
 	
-	public AnalysisNode(Symbol value) {
+	public AnalysisNode(SymbolExtra value) {
 		this.value = value;
 		this.parent = null;
 		this.children = null;
@@ -33,7 +42,7 @@ public class AnalysisNode {
 		for (int i = 0; i < tabCount; ++i) {
 			result.append("-");
 		}
-		result.append(value.getName().charAt(0) == '_' ? value.getName().substring(1) : value.getName() + "\'");
+		result.append(value.getSymbol().getName() + "\'");
 		result.append("\n");
 		if (children != null) {
 			for (AnalysisNode node: children) {

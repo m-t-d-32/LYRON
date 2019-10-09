@@ -5,7 +5,7 @@
 <string-array name="terminators">
 	<item>
 		<name> num </name>
-		<regex> ^[0-9]*$ </regex>
+		<regex> [0-9]+ </regex>
 	</item>
 </string-array>
 <string-array name="cfgproductions">

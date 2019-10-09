@@ -2,7 +2,7 @@ import java.util.Set;
 
 public class Unterminator extends Symbol {
 
-    private String name = null;
+	private String name = null;
 
     private Set<Terminator> firstSet = null;
 

@@ -6,8 +6,11 @@ import java.util.Set;
 public class CFGStatement {
 
     private Set<PointedCFGProduction> pointedProductions;
+    
+    private CFG cfg;
 
-    CFGStatement() {
+    CFGStatement(CFG cfg) {
+    	this.cfg = cfg;
         pointedProductions = new HashSet<>();
     }
 
@@ -51,7 +54,7 @@ public class CFGStatement {
             }
         }
         try {
-            result.remove(SymbolPool.getTerminator("null"));
+            result.remove(cfg.getSymbolPool().getTerminator("null"));
         } catch (PLDLParsingException e) {
             e.printStackTrace();
         }

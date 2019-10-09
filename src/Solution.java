@@ -1,3 +1,5 @@
+import java.util.HashSet;
+
 import org.dom4j.DocumentException;
 
 public class Solution {
@@ -14,13 +16,16 @@ public class Solution {
             }
         }.start();
 
-        PreParse parser = new PreParse("TEST.pldl", null);
-        CFG cfg = parser.getCFG();
-        cfg.augmentCFG();
-        TransformTable table = cfg.getTable();
-        System.out.println(table);
-        AnalysisTree tree = table.getAnalysisTree(parser.getSymbols("1 + 3 * ( 5 + 6 )"));
-        System.out.println(tree);
-        System.out.println(PLDLParsingWarning.getLoggings());
+//        PreParse parser = new PreParse("TEST.pldl", null);
+//        CFG cfg = parser.getCFG();
+//        cfg.augmentCFG();
+//        TransformTable table = cfg.getTable();
+//        System.out.println(table);
+//        AnalysisTree tree = table.getAnalysisTree(parser.getSymbols("12+ 34 * (5+62)", cfg));
+//        System.out.println(tree);
+//        System.out.println(PLDLParsingWarning.getLoggings());
+        
+        RE re = new SimpleREApply("a-c|bd*");
+        re.getNFA().draw();
     }
 }

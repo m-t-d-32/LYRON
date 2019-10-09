@@ -4,10 +4,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class SymbolPool {
-    private static Map<String, Unterminator> unterminators = null;
-    private static Map<String, Terminator> terminators = null;
+	
+    private Map<String, Unterminator> unterminators = null;
+    
+    private Map<String, Terminator> terminators = null;
 
-    public static void initUnterminatorString(Set<String> unterminatorStrs) throws PLDLParsingException {
+    public void initUnterminatorString(Set<String> unterminatorStrs) throws PLDLParsingException {
         if (unterminators != null) {
             PLDLParsingWarning.setLog("非终结符集合已经初始化过，重新初始化可能会导致不可预料的问题。");
         }
@@ -17,7 +19,7 @@ public class SymbolPool {
         }
     }
 
-    public static void initTerminatorString(Set<String> terminatorStrs) throws PLDLParsingException {
+    public void initTerminatorString(Set<String> terminatorStrs) throws PLDLParsingException {
         if (terminators != null) {
             PLDLParsingWarning.setLog("终结符集合已经初始化过，重新初始化可能会导致不可预料的问题。");
         }
@@ -28,49 +30,49 @@ public class SymbolPool {
         terminators.put("null", Terminator.getNullTerminator());
     }
 
-    public static Set<String> getTerminatorsStr() {
+    public Set<String> getTerminatorsStr() {
         return terminators.keySet();
     }
 
-    public static Collection<Terminator> getTerminators() {
+    public Collection<Terminator> getTerminators() {
         return terminators.values();
     }
 
-    public static Set<String> getUnterminatorsStr() {
+    public Set<String> getUnterminatorsStr() {
         return unterminators.keySet();
     }
 
-    public static Collection<Unterminator> getUnterminators() {
+    public Collection<Unterminator> getUnterminators() {
         return unterminators.values();
     }
 
-    public static void addUnterminatorStr(String str) {
+    public void addUnterminatorStr(String str) {
         if (!unterminators.containsKey(str)) {
             unterminators.put(str, new Unterminator(str));
         }
     }
 
-    public static void addTerminatorStr(String str) {
+    public void addTerminatorStr(String str) {
         if (!terminators.containsKey(str)) {
             terminators.put(str, new Terminator(str));
         }
     }
 
-    public static Unterminator getUnterminator(String name) throws PLDLParsingException {
+    public Unterminator getUnterminator(String name) throws PLDLParsingException {
         if (unterminators.containsKey(name)) {
             return unterminators.get(name);
         }
         throw new PLDLParsingException("符号 " + name + " 不能识别为非终结符。", null);
     }
 
-    public static Terminator getTerminator(String name) throws PLDLParsingException {
+    public Terminator getTerminator(String name) throws PLDLParsingException {
         if (terminators.containsKey(name)) {
             return terminators.get(name);
         }
         throw new PLDLParsingException("符号 " + name + " 不能识别为终结符。", null);
     }
 
-    public static Symbol getSymbol(String name) throws PLDLParsingException {
+    public Symbol getSymbol(String name) throws PLDLParsingException {
         if (unterminators.containsKey(name)) {
             return getUnterminator(name);
         } else if (terminators.containsKey(name)) {

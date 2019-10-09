@@ -11,7 +11,35 @@ public class CFG {
 
     private List<CFGProduction> CFGProductions;
 
-    private Unterminator CFGmarkin;
+    public void setCFGProductions(List<? extends CFGProduction> prods) {
+    	CFGProductions = new ArrayList<>();
+    	for (CFGProduction prod: prods) {
+    		CFGProductions.add(prod);
+    	}
+	}
+
+	private Unterminator CFGmarkin;
+    
+    private SymbolPool symbolPool;
+    
+    public CFG(SymbolPool pool,
+    		List<CFGProduction> productions,
+    		String markinStr) throws PLDLParsingException {
+    	symbolPool = pool;
+    	CFGProductions = productions;
+    	if (markinStr == null) {
+            CFGmarkin = (Unterminator) CFGProductions.get(0).getBeforeSymbol();
+            PLDLParsingWarning.setLog("警告：您没有传递任何参数作为开始符号，因而自动将第一个产生式的左部符号 " + CFGmarkin.getName() + " 作为开始符号。");
+        } else {
+            markinStr = markinStr.trim();
+            if (pool.getUnterminatorsStr().contains(markinStr)) {
+                CFGmarkin = new Unterminator(markinStr);
+            } else {
+                throw new PLDLParsingException("解析失败：开始符号不是非终结符。", null);
+            }
+        }
+    	
+    }
 
     public CFG(List<String> CFGProductionStrs,
                Set<String> CFGTerminators,
@@ -23,13 +51,14 @@ public class CFG {
         if (CFGUnterminators.contains("null")) {
             throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他非终结符，请更换非终结符的名字。", null);
         }
-        SymbolPool.initTerminatorString(CFGTerminators);
-        SymbolPool.initUnterminatorString(CFGUnterminators);
+        symbolPool = new SymbolPool();
+        symbolPool.initTerminatorString(CFGTerminators);
+        symbolPool.initUnterminatorString(CFGUnterminators);
         this.CFGProductions = new ArrayList<>();
         for (int i = 0; i < CFGProductionStrs.size(); ++i) {
             String CFGProductionStr = CFGProductionStrs.get(i);
             try {
-                CFGProduction production = CFGProduction.GetCFGProductionFromCFGString(CFGProductionStr);
+                CFGProduction production = CFGProduction.getCFGProductionFromCFGString(CFGProductionStr, this);
                 production.setSerialNumber(i + 1);
                 CFGProductions.add(production);
             } catch (PLDLParsingException e) {
@@ -61,11 +90,11 @@ public class CFG {
     }
 
     public Set<String> getCFGTerminators() {
-        return SymbolPool.getTerminatorsStr();
+        return symbolPool.getTerminatorsStr();
     }
 
     public Set<String> getCFGUnterminators() {
-        return SymbolPool.getUnterminatorsStr();
+        return symbolPool.getUnterminatorsStr();
     }
 
     public List<CFGProduction> getCFGProductions() {
@@ -84,13 +113,13 @@ public class CFG {
         if (getCFGUnterminators().contains(newMarkinStr)) {
             PLDLParsingWarning.setLog("该文法已经进行过增广，不能再次增广。");
         } else {
-            SymbolPool.addUnterminatorStr(newMarkinStr);
+        	symbolPool.addUnterminatorStr(newMarkinStr);
             CFGProduction augmentCFGProduction = new CFGProduction();
             Unterminator beforeSymbol = new Unterminator(newMarkinStr);
             augmentCFGProduction.setBeforeSymbol(beforeSymbol);
             List<Symbol> afterSymbols = new ArrayList<>();
             afterSymbols.add(CFGmarkin);
-            augmentCFGProduction.setAfterSymbol(afterSymbols);
+            augmentCFGProduction.setAfterSymbols(afterSymbols);
             augmentCFGProduction.setSerialNumber(0);
             CFGProductions.add(augmentCFGProduction);
             CFGmarkin = beforeSymbol;
@@ -100,7 +129,7 @@ public class CFG {
     public void setCanEmpty() throws PLDLParsingException {
         Map<Unterminator, Set<CFGProduction>> productions = new HashMap<>();
         Set<Symbol> tempSetOfEmpty = new HashSet<>(), setOfEmpty = new HashSet<>();
-        Symbol nullSymbol = SymbolPool.getTerminator("null");
+        Symbol nullSymbol = symbolPool.getTerminator("null");
         tempSetOfEmpty.add(nullSymbol);
         for (CFGProduction cfgproduction : CFGProductions) {
             if (!productions.containsKey(cfgproduction.getBeforeSymbol())) {
@@ -147,7 +176,7 @@ public class CFG {
         Map<Unterminator, Set<Unterminator>> signalPasses = new HashMap<>();
         Map<Unterminator, Set<Terminator>> firstSet = new HashMap<>();
         Map<Unterminator, Set<Terminator>> tempFirstSet = new HashMap<>();
-        Terminator nullSymbol = SymbolPool.getTerminator("null");
+        Terminator nullSymbol = symbolPool.getTerminator("null");
         for (CFGProduction production : CFGProductions) {
             for (Symbol s : production.getAfterSymbols()) {
                 if (s.getType() == Symbol.UNTERMINATOR) {
@@ -195,7 +224,7 @@ public class CFG {
                 }
             }
         }
-        for (Unterminator unterminator : SymbolPool.getUnterminators()) {
+        for (Unterminator unterminator : symbolPool.getUnterminators()) {
             if (!firstSet.containsKey(unterminator)) {
                 firstSet.put(unterminator, new HashSet<>());
             }
@@ -210,22 +239,22 @@ public class CFG {
     public TransformTable getTable() throws PLDLParsingException {
         setBeginProductions();
         setFirstSet();
-        SymbolPool.addTerminatorStr("eof");
+        symbolPool.addTerminatorStr("eof");
         List<CFGStatement> iterStatements = new ArrayList<>();
         //Set<CFGStatement> checkStatements = new HashSet<>();
         Map<CFGStatement, Integer> checkStatements = new HashMap<>();
 
-        CFGStatement beginStatement = new CFGStatement();
+        CFGStatement beginStatement = new CFGStatement(this);
         for (CFGProduction production : CFGProductions) {
             if (production.getBeforeSymbol().equals(CFGmarkin)) {
-                beginStatement.add(new PointedCFGProduction(production, SymbolPool.getTerminator("eof")));
+                beginStatement.add(new PointedCFGProduction(production, symbolPool.getTerminator("eof")));
             }
         }
         beginStatement.makeClosure();
         iterStatements.add(beginStatement);
         checkStatements.put(beginStatement, 0);
 
-        TransformTable result = new TransformTable();
+        TransformTable result = new TransformTable(this);
 
         for (int i = 0; i < iterStatements.size(); ++i) {
             CFGStatement nowStatement = iterStatements.get(i);
@@ -238,23 +267,23 @@ public class CFG {
                     }
                     classifiedPointedProductions.get(pointedProduction.getNextSymbol()).add(pointedProduction);
                 } else {
-                    if (!classifiedPointedProductions.containsKey(SymbolPool.getTerminator("null"))) {
-                        classifiedPointedProductions.put(SymbolPool.getTerminator("null"), new HashSet<>());
+                    if (!classifiedPointedProductions.containsKey(symbolPool.getTerminator("null"))) {
+                        classifiedPointedProductions.put(symbolPool.getTerminator("null"), new HashSet<>());
                     }
-                    classifiedPointedProductions.get(SymbolPool.getTerminator("null")).add(pointedProduction);
+                    classifiedPointedProductions.get(symbolPool.getTerminator("null")).add(pointedProduction);
                 }
             }
             for (Symbol s : classifiedPointedProductions.keySet()) {
-                if (s.equals(SymbolPool.getTerminator("null"))) {
+                if (s.equals(symbolPool.getTerminator("null"))) {
                     for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
                         result.add(i, pointedProduction.getOutlookTerminator(), pointedProduction.getProduction());
-                        if (pointedProduction.getOutlookTerminator().equals(SymbolPool.getTerminator("eof")) 
+                        if (pointedProduction.getOutlookTerminator().equals(symbolPool.getTerminator("eof")) 
                         		&& pointedProduction.getProduction().getBeforeSymbol().equals(CFGmarkin)){
                         	result.addEndStatement(i);
                         }
                     }
                 } else {
-                    CFGStatement statement = new CFGStatement();
+                    CFGStatement statement = new CFGStatement(this);
                     for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
                         statement.add(pointedProduction.next());
                     }
@@ -270,4 +299,8 @@ public class CFG {
         //System.out.println(iterStatements.size());
         return result;
     }
+
+	public SymbolPool getSymbolPool() {
+		return symbolPool;
+	}
 }

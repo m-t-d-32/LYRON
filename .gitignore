@@ -1,3 +1,7 @@
 .idea/*
 dom4j-2.0.2.jar
 out/*
+.classpath
+.project
+.settings/
+bin/*

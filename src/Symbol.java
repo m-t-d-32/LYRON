@@ -1,9 +1,5 @@
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 public abstract class Symbol {
+	
     public static final int TERMINATOR = 0x01, UNTERMINATOR = 0xff;
 
     @Override

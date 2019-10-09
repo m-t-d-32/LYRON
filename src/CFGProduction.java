@@ -7,6 +7,18 @@ public class CFGProduction implements Cloneable {
     private Symbol beforeSymbol = null;
 
     private List<Symbol> afterSymbols = null;
+    
+    private CFG cfg = null;
+    
+    public CFGProduction() {
+    	
+    }
+    
+    public CFGProduction(CFGProduction another) {
+    	setBeforeSymbol((Unterminator) another.beforeSymbol);
+    	setAfterSymbols(another.afterSymbols);
+    	setCFG(another.cfg);
+    }
 
     public int getSerialNumber() {
         return serialNumber;
@@ -18,8 +30,9 @@ public class CFGProduction implements Cloneable {
 
     private int serialNumber = -1;
 
-    public static CFGProduction GetCFGProductionFromCFGString(String CFGProductionString) throws PLDLParsingException {
+    public static CFGProduction getCFGProductionFromCFGString(String CFGProductionString, CFG cfg) throws PLDLParsingException {
         CFGProduction resultProduction = new CFGProduction();
+        resultProduction.setCFG(cfg);
         if (CFGProductionString.contains("->")) {
             String[] splits = CFGProductionString.split("->");
             if (splits.length == 2) {
@@ -27,18 +40,18 @@ public class CFGProduction implements Cloneable {
                 String[] beforeStrs = beforeStr.trim().split(" +"), afterStrs = afterStr.trim().split(" +");
                 if (beforeStrs.length == 1) {
                     try {
-                        resultProduction.beforeSymbol = SymbolPool.getUnterminator("_" + beforeStrs[0]);
+                        resultProduction.beforeSymbol = cfg.getSymbolPool().getUnterminator(beforeStrs[0]);
                     } catch (PLDLParsingException e) {
                         throw new PLDLParsingException("产生式左部不是非终结符，因而这不是一个合法的产生式。", e);
                     }
                     resultProduction.afterSymbols = new ArrayList<>();
                     if (afterStrs.length == 1 && afterStrs[0].equals("null")) {
-                        resultProduction.afterSymbols.add(SymbolPool.getTerminator("null"));
+                        resultProduction.afterSymbols.add(cfg.getSymbolPool().getTerminator("null"));
                         return resultProduction;
                     } else if (afterStrs.length > 0 && afterStrs[0].length() > 0) {
                         for (int i = 0; i < afterStrs.length; ++i) {
                             try {
-                                resultProduction.afterSymbols.add(SymbolPool.getSymbol("_" + afterStrs[i]));
+                                resultProduction.afterSymbols.add(cfg.getSymbolPool().getSymbol(afterStrs[i]));
                             } catch (PLDLParsingException e) {
                                 throw new PLDLParsingException("产生式右部第 " + (i + 1) + " 个符号既不能识别为终结符，也不能识别为非终结符。是否忘记使用空格隔开？", e);
                             }
@@ -80,7 +93,7 @@ public class CFGProduction implements Cloneable {
         return afterSymbols;
     }
 
-    public void setAfterSymbol(List<Symbol> symbols) {
+    public void setAfterSymbols(List<Symbol> symbols) {
         afterSymbols = symbols;
     }
 
@@ -118,4 +131,12 @@ public class CFGProduction implements Cloneable {
         }
         return hash;
     }
+
+	public CFG getCFG() {
+		return cfg;
+	}
+
+	public void setCFG(CFG cfg) {
+		this.cfg = cfg;
+	}
 }
