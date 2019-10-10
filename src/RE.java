@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.dom4j.DocumentException;
+import sun.misc.REException;
 
 public abstract class RE {
 	
@@ -15,7 +16,7 @@ public abstract class RE {
 		return reString;
 	}
 
-	public void setReString(String reString) throws PLDLAnalysisException, PLDLParsingException {
+	public void setReString(String reString) throws PLDLAnalysisException, PLDLParsingException, REParsingException {
 		this.reString = reString;
 		setNFA();
 	}
@@ -24,7 +25,7 @@ public abstract class RE {
 	
 	protected CFG cfg = null;
 	
-	public RE(String reString) throws PLDLAnalysisException, PLDLParsingException, DocumentException {
+	public RE(String reString) throws PLDLAnalysisException, PLDLParsingException, REParsingException {
 		setCFG();
 		this.reString = reString;
 		setNFA();
@@ -32,39 +33,39 @@ public abstract class RE {
 	
 	protected abstract void setCFG();
 	
-	protected abstract List<SymbolExtra> getSymbols();
+	protected abstract List<Symbol> getSymbols() throws REParsingException;
 	
 	public NFA getNFA() {
 		return letNFA;
 	}
 
-	public void setNFA() throws PLDLAnalysisException, PLDLParsingException {
+	public void setNFA() throws PLDLAnalysisException, PLDLParsingException, REParsingException {
 		if (letNFA == null) {
 			TransformTable table = cfg.getTable();
-			Map<Integer, Map<Symbol, Movement>> tableMap = table.getTableMap();
+			Map<Integer, Map<AbstractSymbol, Movement>> tableMap = table.getTableMap();
 			Set<Integer> endStatements = table.getEndStatements();
 	    	Stack<Integer> statementStack = new Stack<>();
 	    	Stack<NFA> nodeStack = new Stack<>();
-	    	Stack<SymbolExtra> symbolStack = new Stack<>();
+	    	Stack<Symbol> symbolStack = new Stack<>();
 	    	statementStack.push(0);
-	    	List<SymbolExtra> symbols = getSymbols();
+	    	List<Symbol> symbols = getSymbols();
 	    	int beginI = 0;
 	    	if (endStatements.size() <= 0) {
 	    		throw new PLDLAnalysisException("状态数为0或者小于0，程序失败。", null);
 	    	}
-	    	Symbol beginSymbol = tableMap.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminator("eof")).getRegressionProduction().getBeforeSymbol();
-	    	while(beginI != symbols.size() - 1 || !symbols.get(beginI).getSymbol().equals(beginSymbol)){
+	    	AbstractSymbol beginAbstractSymbol = tableMap.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminator("eof")).getRegressionProduction().getBeforeAbstractSymbol();
+	    	while(beginI != symbols.size() - 1 || !symbols.get(beginI).getAbstractSymbol().equals(beginAbstractSymbol)){
 	    		int nowStatement = statementStack.peek();
-	    		SymbolExtra nowSymbolExtra = beginI < symbols.size() ? symbols.get(beginI) : new TerminatorExtra(cfg.getSymbolPool().getTerminator("eof"));
-	    		Movement movement =  tableMap.get(nowStatement).get(nowSymbolExtra.getSymbol());
+	    		Symbol nowSymbol = beginI < symbols.size() ? symbols.get(beginI) : new Terminator(cfg.getSymbolPool().getTerminator("eof"));
+	    		Movement movement =  tableMap.get(nowStatement).get(nowSymbol.getAbstractSymbol());
 	    		if (movement == null) {
-	    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbolExtra + " 时既无法移进，也无法规约。", null);
+	    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法规约。", null);
 	    		}
 	    		else {
 		    		switch(movement.getMovement()) { 
 		    			case Movement.SHIFT:
 		    				nodeStack.push(new NFA());
-		    				symbolStack.push(nowSymbolExtra);
+		    				symbolStack.push(nowSymbol);
 		    			case Movement.GOTO:
 		    				statementStack.push(movement.getShiftTo());
 		    				++beginI;
@@ -72,8 +73,8 @@ public abstract class RE {
 		    			case Movement.REGRESSION:
 		    				REProduction production = (REProduction) movement.getRegressionProduction();
 		    				List<NFA> tempNFA = new ArrayList<>();
-		    				List<SymbolExtra> tempSymbol = new ArrayList<>();
-			    			for (Symbol _: production.getAfterSymbols()) {
+		    				List<Symbol> tempSymbol = new ArrayList<>();
+			    			for (AbstractSymbol _: production.getAfterAbstractSymbols()) {
 			    				statementStack.pop();
 			    				tempNFA.add(nodeStack.pop());
 			    				tempSymbol.add(symbolStack.pop());
@@ -81,10 +82,10 @@ public abstract class RE {
 			    			Collections.reverse(tempNFA);
 			    			Collections.reverse(tempSymbol);
 			    			nodeStack.push(production.getNFANode(tempNFA, tempSymbol));
-			    			SymbolExtra newSymbolExtra = new UnterminatorExtra((Unterminator) production.getBeforeSymbol());
-			    			symbolStack.push(newSymbolExtra);
+			    			Symbol newSymbol = new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol());
+			    			symbolStack.push(newSymbol);
 			    			--beginI;
-			    			symbols.set(beginI, newSymbolExtra);
+			    			symbols.set(beginI, newSymbol);
 			    			break;
 		    		}
 	    		}

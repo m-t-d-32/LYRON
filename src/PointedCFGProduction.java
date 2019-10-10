@@ -4,29 +4,29 @@ public class PointedCFGProduction {
 
     private final CFGProduction cfgproduction;
 
-    private Terminator outlookTerminator;
+    private AbstractTerminator outlookAbstractTerminator;
 
-    public PointedCFGProduction(CFGProduction cfgproduction, Terminator outlookTerminator) {
+    public PointedCFGProduction(CFGProduction cfgproduction, AbstractTerminator outlookAbstractTerminator) {
         this.cfgproduction = cfgproduction;
         this.pointer = 0;
-        this.outlookTerminator = outlookTerminator;
+        this.outlookAbstractTerminator = outlookAbstractTerminator;
     }
 
-    public Symbol getNextSymbol() {
-        return cfgproduction.getAfterSymbols().get(pointer);
+    public AbstractSymbol getNextSymbol() {
+        return cfgproduction.getAfterAbstractSymbols().get(pointer);
     }
 
     public boolean finished() {
-        if (pointer >= cfgproduction.getAfterSymbols().size()) {
+        if (pointer >= cfgproduction.getAfterAbstractSymbols().size()) {
             return true;
-        } else if (cfgproduction.getAfterSymbols().get(0).getName().equals("null")) {
+        } else if (cfgproduction.getAfterAbstractSymbols().get(0).getName().equals("null")) {
             return true;
         }
         return false;
     }
 
     public PointedCFGProduction next() {
-        PointedCFGProduction pointedProduction = new PointedCFGProduction(cfgproduction, outlookTerminator);
+        PointedCFGProduction pointedProduction = new PointedCFGProduction(cfgproduction, outlookAbstractTerminator);
         pointedProduction.pointer = pointer + 1;
         return pointedProduction;
     }
@@ -36,7 +36,7 @@ public class PointedCFGProduction {
         PointedCFGProduction argument = (PointedCFGProduction) obj;
         return argument.pointer == pointer
                 && argument.cfgproduction.equals(cfgproduction)
-                && argument.outlookTerminator.equals(outlookTerminator);
+                && argument.outlookAbstractTerminator.equals(outlookAbstractTerminator);
     }
 
     @Override
@@ -47,29 +47,29 @@ public class PointedCFGProduction {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append(cfgproduction.getBeforeSymbol().toString());
+        result.append(cfgproduction.getBeforeAbstractSymbol().toString());
         result.append(" ->");
         for (int i = 0; i < pointer; ++i) {
             result.append(" ");
-            result.append(cfgproduction.getAfterSymbols().get(i).toString());
+            result.append(cfgproduction.getAfterAbstractSymbols().get(i).toString());
         }
         result.append(" ·");
-        for (int i = pointer; i < cfgproduction.getAfterSymbols().size(); ++i) {
+        for (int i = pointer; i < cfgproduction.getAfterAbstractSymbols().size(); ++i) {
             result.append(" ");
-            result.append(cfgproduction.getAfterSymbols().get(i).toString());
+            result.append(cfgproduction.getAfterAbstractSymbols().get(i).toString());
         }
         result.append("（展望符：");
-        result.append(outlookTerminator);
+        result.append(outlookAbstractTerminator);
         result.append("）");
         return result.toString();
     }
 
-    public Terminator getOutlookTerminator() {
-        return outlookTerminator;
+    public AbstractTerminator getOutlookAbstractTerminator() {
+        return outlookAbstractTerminator;
     }
 
-    public void setOutlookTerminator(Terminator outlookTerminator) {
-        this.outlookTerminator = outlookTerminator;
+    public void setOutlookAbstractTerminator(AbstractTerminator outlookAbstractTerminator) {
+        this.outlookAbstractTerminator = outlookAbstractTerminator;
     }
 
     public int getPointer() {

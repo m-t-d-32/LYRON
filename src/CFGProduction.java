@@ -4,9 +4,9 @@ import java.util.List;
 
 public class CFGProduction implements Cloneable {
 
-    private Symbol beforeSymbol = null;
+    private AbstractSymbol beforeAbstractSymbol = null;
 
-    private List<Symbol> afterSymbols = null;
+    private List<AbstractSymbol> afterAbstractSymbols = null;
     
     private CFG cfg = null;
     
@@ -15,8 +15,8 @@ public class CFGProduction implements Cloneable {
     }
     
     public CFGProduction(CFGProduction another) {
-    	setBeforeSymbol((Unterminator) another.beforeSymbol);
-    	setAfterSymbols(another.afterSymbols);
+    	setBeforeAbstractSymbol((AbstractUnterminator) another.beforeAbstractSymbol);
+    	setAfterAbstractSymbols(another.afterAbstractSymbols);
     	setCFG(another.cfg);
     }
 
@@ -40,18 +40,18 @@ public class CFGProduction implements Cloneable {
                 String[] beforeStrs = beforeStr.trim().split(" +"), afterStrs = afterStr.trim().split(" +");
                 if (beforeStrs.length == 1) {
                     try {
-                        resultProduction.beforeSymbol = cfg.getSymbolPool().getUnterminator(beforeStrs[0]);
+                        resultProduction.beforeAbstractSymbol = cfg.getSymbolPool().getUnterminator(beforeStrs[0]);
                     } catch (PLDLParsingException e) {
                         throw new PLDLParsingException("产生式左部不是非终结符，因而这不是一个合法的产生式。", e);
                     }
-                    resultProduction.afterSymbols = new ArrayList<>();
+                    resultProduction.afterAbstractSymbols = new ArrayList<>();
                     if (afterStrs.length == 1 && afterStrs[0].equals("null")) {
-                        resultProduction.afterSymbols.add(cfg.getSymbolPool().getTerminator("null"));
+                        resultProduction.afterAbstractSymbols.add(cfg.getSymbolPool().getTerminator("null"));
                         return resultProduction;
                     } else if (afterStrs.length > 0 && afterStrs[0].length() > 0) {
                         for (int i = 0; i < afterStrs.length; ++i) {
                             try {
-                                resultProduction.afterSymbols.add(cfg.getSymbolPool().getSymbol(afterStrs[i]));
+                                resultProduction.afterAbstractSymbols.add(cfg.getSymbolPool().getSymbol(afterStrs[i]));
                             } catch (PLDLParsingException e) {
                                 throw new PLDLParsingException("产生式右部第 " + (i + 1) + " 个符号既不能识别为终结符，也不能识别为非终结符。是否忘记使用空格隔开？", e);
                             }
@@ -71,43 +71,43 @@ public class CFGProduction implements Cloneable {
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("产生式：【");
-        result.append(beforeSymbol.toString());
+        result.append(beforeAbstractSymbol.toString());
         result.append("】->");
-        for (Symbol afterSymbolName : afterSymbols) {
+        for (AbstractSymbol afterAbstractSymbolName : afterAbstractSymbols) {
             result.append("【");
-            result.append(afterSymbolName.toString());
+            result.append(afterAbstractSymbolName.toString());
             result.append("】");
         }
         return result.toString();
     }
 
-    public Symbol getBeforeSymbol() {
-        return beforeSymbol;
+    public AbstractSymbol getBeforeAbstractSymbol() {
+        return beforeAbstractSymbol;
     }
 
-    public void setBeforeSymbol(Unterminator symbol) {
-        beforeSymbol = symbol;
+    public void setBeforeAbstractSymbol(AbstractUnterminator symbol) {
+        beforeAbstractSymbol = symbol;
     }
 
-    public List<Symbol> getAfterSymbols() {
-        return afterSymbols;
+    public List<AbstractSymbol> getAfterAbstractSymbols() {
+        return afterAbstractSymbols;
     }
 
-    public void setAfterSymbols(List<Symbol> symbols) {
-        afterSymbols = symbols;
+    public void setAfterAbstractSymbols(List<AbstractSymbol> abstractSymbols) {
+        afterAbstractSymbols = abstractSymbols;
     }
 
     @Override
     public boolean equals(Object obj) {
         CFGProduction argument = (CFGProduction) (obj);
-        if (!beforeSymbol.equals(argument.beforeSymbol)) {
+        if (!beforeAbstractSymbol.equals(argument.beforeAbstractSymbol)) {
             return false;
-        } else if (afterSymbols.size() != argument.afterSymbols.size()) {
+        } else if (afterAbstractSymbols.size() != argument.afterAbstractSymbols.size()) {
             return false;
         }
-        for (int i = 0; i < afterSymbols.size(); ++i) {
-            if (afterSymbols.get(i).getType() != argument.afterSymbols.get(i).getType() ||
-                    !afterSymbols.get(i).equals(argument.afterSymbols.get(i))) {
+        for (int i = 0; i < afterAbstractSymbols.size(); ++i) {
+            if (afterAbstractSymbols.get(i).getType() != argument.afterAbstractSymbols.get(i).getType() ||
+                    !afterAbstractSymbols.get(i).equals(argument.afterAbstractSymbols.get(i))) {
                 return false;
             }
         }
@@ -117,16 +117,16 @@ public class CFGProduction implements Cloneable {
     @Override
     protected Object clone() {
         CFGProduction clonedProduction = new CFGProduction();
-        clonedProduction.beforeSymbol = beforeSymbol;
-        clonedProduction.afterSymbols = new ArrayList<>();
-        clonedProduction.afterSymbols.addAll(afterSymbols);
+        clonedProduction.beforeAbstractSymbol = beforeAbstractSymbol;
+        clonedProduction.afterAbstractSymbols = new ArrayList<>();
+        clonedProduction.afterAbstractSymbols.addAll(afterAbstractSymbols);
         return clonedProduction;
     }
 
     @Override
     public int hashCode() {
-        int hash = beforeSymbol.hashCode();
-        for (Symbol s : afterSymbols) {
+        int hash = beforeAbstractSymbol.hashCode();
+        for (AbstractSymbol s : afterAbstractSymbols) {
             hash ^= s.hashCode();
         }
         return hash;

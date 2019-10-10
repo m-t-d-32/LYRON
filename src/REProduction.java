@@ -6,6 +6,6 @@ public abstract class REProduction extends CFGProduction {
 		super(part);
 	}
 
-	public abstract NFA getNFANode(List<NFA> nodes, List<SymbolExtra> childs) ;
+	public abstract NFA getNFANode(List<NFA> nodes, List<Symbol> childs) ;
 	
 }

@@ -38,17 +38,17 @@ public class CFGStatement {
         return pointedProductions;
     }
 
-    private Set<Terminator> getFirstsOfSymbolList(List<Symbol> symbols) {
-        Set<Terminator> result = new HashSet<>();
-        for (Symbol symbol : symbols) {
-            if (symbol.getType() == Symbol.UNTERMINATOR) {
-                result.addAll(((Unterminator) symbol).getFirstSet());
-                if (!((Unterminator) symbol).getCanEmpty()) {
+    private Set<AbstractTerminator> getFirstsOfSymbolList(List<AbstractSymbol> abstractSymbols) {
+        Set<AbstractTerminator> result = new HashSet<>();
+        for (AbstractSymbol abstractSymbol : abstractSymbols) {
+            if (abstractSymbol.getType() == AbstractSymbol.UNTERMINATOR) {
+                result.addAll(((AbstractUnterminator) abstractSymbol).getFirstSet());
+                if (!((AbstractUnterminator) abstractSymbol).getCanEmpty()) {
                     break;
                 }
             } else {
-                result.add((Terminator) symbol);
-                if (!symbol.getName().equals("null")) {
+                result.add((AbstractTerminator) abstractSymbol);
+                if (!abstractSymbol.getName().equals("null")) {
                     break;
                 }
             }
@@ -67,18 +67,18 @@ public class CFGStatement {
         for (int i = 0; i < iterPointedProductions.size(); ++i) {
             PointedCFGProduction pointedProduction = iterPointedProductions.get(i);
             if (!pointedProduction.finished()) {
-                Symbol symbol = pointedProduction.getNextSymbol();
-                if (symbol.getType() == Symbol.UNTERMINATOR) {
-                    List<Symbol> outlookSymbols = new ArrayList<>();
+                AbstractSymbol abstractSymbol = pointedProduction.getNextSymbol();
+                if (abstractSymbol.getType() == AbstractSymbol.UNTERMINATOR) {
+                    List<AbstractSymbol> outlookAbstractSymbols = new ArrayList<>();
                     for (int j = pointedProduction.getPointer() + 1;
-                         j < pointedProduction.getProduction().getAfterSymbols().size();
+                         j < pointedProduction.getProduction().getAfterAbstractSymbols().size();
                          ++j) {
-                        outlookSymbols.add(pointedProduction.getProduction().getAfterSymbols().get(j));
+                        outlookAbstractSymbols.add(pointedProduction.getProduction().getAfterAbstractSymbols().get(j));
                     }
-                    outlookSymbols.add(pointedProduction.getOutlookTerminator());
-                    Set<Terminator> firstsOfList = getFirstsOfSymbolList(outlookSymbols);
-                    for (CFGProduction production : ((Unterminator) symbol).getBeginProductions()) {
-                        for (Terminator outlookSymbol : firstsOfList) {
+                    outlookAbstractSymbols.add(pointedProduction.getOutlookAbstractTerminator());
+                    Set<AbstractTerminator> firstsOfList = getFirstsOfSymbolList(outlookAbstractSymbols);
+                    for (CFGProduction production : ((AbstractUnterminator) abstractSymbol).getBeginProductions()) {
+                        for (AbstractTerminator outlookSymbol : firstsOfList) {
                             PointedCFGProduction generatedProduction = new PointedCFGProduction(production, outlookSymbol);
                             if (!checkPointedProductions.contains(generatedProduction)) {
                                 checkPointedProductions.add(generatedProduction);

@@ -2,7 +2,7 @@ import org.dom4j.DocumentException;
 
 public class Solution {
 
-    public static void main(String[] args) throws PLDLParsingException, DocumentException, PLDLAnalysisException {
+    public static void main(String[] args) throws PLDLParsingException, DocumentException, PLDLAnalysisException, REParsingException {
         new Thread() {
             @Override
             public void run() {
@@ -23,8 +23,10 @@ public class Solution {
 //        System.out.println(tree);
 //        System.out.println(PLDLParsingWarning.getLoggings());
         
-        //RE re = new SimpleREApply("a-c|bd*");
-        DFA dfa = DFA.fastDFA("abcdef");
+        RE re = new SimpleREApply("a|e");
+        NFA nfa = re.getNFA();
+        //nfa.draw();
+        DFA dfa = nfa.toDFA();
         dfa.simplify();
         dfa.draw();
     }

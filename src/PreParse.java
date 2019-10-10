@@ -59,8 +59,8 @@ public class PreParse {
     	return cfg;
     }
 
-	public List<SymbolExtra> getSymbols(String str, CFG cfg) throws PLDLAnalysisException, PLDLParsingException{
-		List<SymbolExtra> resultTokens = new ArrayList<>();
+	public List<Symbol> getSymbols(String str, CFG cfg) throws PLDLAnalysisException, PLDLParsingException{
+		List<Symbol> resultTokens = new ArrayList<>();
 		Scanner fileScanner = new Scanner(new StringBufferInputStream(str));
 		while (fileScanner.hasNext()){
 			String nowString = fileScanner.next();
@@ -77,9 +77,9 @@ public class PreParse {
 				for (String terminatorStr: terminators.keySet()) {
 					Matcher matcher = terminators.get(terminatorStr).matcher(nowString);
 					if (matcher.find() && nowString.indexOf(matcher.group(0)) == 0){
-						Terminator terminator = cfg.getSymbolPool().getTerminator(terminatorStr);
+						AbstractTerminator abstractTerminator = cfg.getSymbolPool().getTerminator(terminatorStr);
 						String resultString = matcher.group(0);
-						TerminatorExtra te = new TerminatorExtra(terminator);
+						Terminator te = new Terminator(abstractTerminator);
 						te.addProperty("name", resultString);
 						resultTokens.add(te);
 						matchIndex = resultString.length();

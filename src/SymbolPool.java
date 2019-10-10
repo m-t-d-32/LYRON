@@ -5,9 +5,9 @@ import java.util.Set;
 
 public class SymbolPool {
 	
-    private Map<String, Unterminator> unterminators = null;
+    private Map<String, AbstractUnterminator> unterminators = null;
     
-    private Map<String, Terminator> terminators = null;
+    private Map<String, AbstractTerminator> terminators = null;
 
     public void initUnterminatorString(Set<String> unterminatorStrs) throws PLDLParsingException {
         if (unterminators != null) {
@@ -15,7 +15,7 @@ public class SymbolPool {
         }
         unterminators = new HashMap<>();
         for (String str : unterminatorStrs) {
-            unterminators.put(str, new Unterminator(str));
+            unterminators.put(str, new AbstractUnterminator(str));
         }
     }
 
@@ -25,16 +25,16 @@ public class SymbolPool {
         }
         terminators = new HashMap<>();
         for (String str : terminatorStrs) {
-            terminators.put(str, new Terminator(str));
+            terminators.put(str, new AbstractTerminator(str));
         }
-        terminators.put("null", Terminator.getNullTerminator());
+        terminators.put("null", AbstractTerminator.getNullTerminator());
     }
 
     public Set<String> getTerminatorsStr() {
         return terminators.keySet();
     }
 
-    public Collection<Terminator> getTerminators() {
+    public Collection<AbstractTerminator> getTerminators() {
         return terminators.values();
     }
 
@@ -42,37 +42,37 @@ public class SymbolPool {
         return unterminators.keySet();
     }
 
-    public Collection<Unterminator> getUnterminators() {
+    public Collection<AbstractUnterminator> getUnterminators() {
         return unterminators.values();
     }
 
     public void addUnterminatorStr(String str) {
         if (!unterminators.containsKey(str)) {
-            unterminators.put(str, new Unterminator(str));
+            unterminators.put(str, new AbstractUnterminator(str));
         }
     }
 
     public void addTerminatorStr(String str) {
         if (!terminators.containsKey(str)) {
-            terminators.put(str, new Terminator(str));
+            terminators.put(str, new AbstractTerminator(str));
         }
     }
 
-    public Unterminator getUnterminator(String name) throws PLDLParsingException {
+    public AbstractUnterminator getUnterminator(String name) throws PLDLParsingException {
         if (unterminators.containsKey(name)) {
             return unterminators.get(name);
         }
         throw new PLDLParsingException("符号 " + name + " 不能识别为非终结符。", null);
     }
 
-    public Terminator getTerminator(String name) throws PLDLParsingException {
+    public AbstractTerminator getTerminator(String name) throws PLDLParsingException {
         if (terminators.containsKey(name)) {
             return terminators.get(name);
         }
         throw new PLDLParsingException("符号 " + name + " 不能识别为终结符。", null);
     }
 
-    public Symbol getSymbol(String name) throws PLDLParsingException {
+    public AbstractSymbol getSymbol(String name) throws PLDLParsingException {
         if (unterminators.containsKey(name)) {
             return getUnterminator(name);
         } else if (terminators.containsKey(name)) {

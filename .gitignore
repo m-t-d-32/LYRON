@@ -5,3 +5,5 @@ out/*
 .project
 .settings/
 bin/*
+pldlparser.iml
+images/test.png

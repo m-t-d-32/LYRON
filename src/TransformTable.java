@@ -3,13 +3,13 @@ import java.util.*;
 
 public class TransformTable implements Serializable{
 	
-    private final Map<Integer, Map<Symbol, Movement>> table;
+    private final Map<Integer, Map<AbstractSymbol, Movement>> table;
     
     private final Set<Integer> endStatements;
     
     private final CFG cfg;
     
-    public Map<Integer, Map<Symbol, Movement>> getTableMap() {
+    public Map<Integer, Map<AbstractSymbol, Movement>> getTableMap() {
     	return table;
     }
 
@@ -27,9 +27,9 @@ public class TransformTable implements Serializable{
     	return endStatements;
     }
 
-    public void add(int statementIndex, Symbol nextSymbol, int nextStatementIndex) {
+    public void add(int statementIndex, AbstractSymbol nextAbstractSymbol, int nextStatementIndex) {
         Movement movement;
-        if (nextSymbol.getType() == Symbol.UNTERMINATOR) {
+        if (nextAbstractSymbol.getType() == AbstractSymbol.UNTERMINATOR) {
             movement = new Movement(Movement.GOTO, nextStatementIndex);
         } else {
             movement = new Movement(Movement.SHIFT, nextStatementIndex);
@@ -37,35 +37,35 @@ public class TransformTable implements Serializable{
         if (!table.containsKey(statementIndex)) {
             table.put(statementIndex, new HashMap<>());
         }
-        table.get(statementIndex).put(nextSymbol, movement);
+        table.get(statementIndex).put(nextAbstractSymbol, movement);
     }
 
-    public void add(int statementIndex, Symbol nextSymbol, CFGProduction production) {
+    public void add(int statementIndex, AbstractSymbol nextAbstractSymbol, CFGProduction production) {
         Movement movement = new Movement(production);
         if (!table.containsKey(statementIndex)) {
             table.put(statementIndex, new HashMap<>());
         }
-        table.get(statementIndex).put(nextSymbol, movement);
+        table.get(statementIndex).put(nextAbstractSymbol, movement);
     }
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        Set<Symbol> allSymbols = new HashSet<>();
+        Set<AbstractSymbol> allAbstractSymbols = new HashSet<>();
         for (Integer i : table.keySet()) {
-            allSymbols.addAll(table.get(i).keySet());
+            allAbstractSymbols.addAll(table.get(i).keySet());
         }
         List<Integer> sortedStatementIndexes = new ArrayList<>(table.keySet());
         Collections.sort(sortedStatementIndexes);
-        List<Symbol> certainAllSymbols = new ArrayList<>(allSymbols);
-        for (Symbol s : certainAllSymbols) {
+        List<AbstractSymbol> certainAllAbstractSymbols = new ArrayList<>(allAbstractSymbols);
+        for (AbstractSymbol s : certainAllAbstractSymbols) {
             result.append("\t");
             result.append(s.getName());
         }
         result.append("\n");
         for (Integer i : sortedStatementIndexes) {
             result.append(i);
-            for (Symbol s : certainAllSymbols) {
+            for (AbstractSymbol s : certainAllAbstractSymbols) {
                 result.append("\t");
                 
                 if (table.get(i).containsKey(s)) {
@@ -87,7 +87,7 @@ public class TransformTable implements Serializable{
         return result.toString();
     }
     
-    public AnalysisTree getAnalysisTree(List<SymbolExtra> symbols) throws PLDLAnalysisException, PLDLParsingException {
+    public AnalysisTree getAnalysisTree(List<Symbol> symbols) throws PLDLAnalysisException, PLDLParsingException {
     	AnalysisTree tree = new AnalysisTree();
     	Stack<Integer> statementStack = new Stack<>();
     	Stack<AnalysisNode> nodeStack = new Stack<>();
@@ -96,32 +96,32 @@ public class TransformTable implements Serializable{
     	if (endStatements.size() <= 0) {
     		return null;
     	}
-    	Symbol beginSymbol = table.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminator("eof")).getRegressionProduction().getBeforeSymbol();
-    	while(beginI != symbols.size() - 1 || !symbols.get(beginI).getSymbol().equals(beginSymbol)){
+    	AbstractSymbol beginAbstractSymbol = table.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminator("eof")).getRegressionProduction().getBeforeAbstractSymbol();
+    	while(beginI != symbols.size() - 1 || !symbols.get(beginI).getAbstractSymbol().equals(beginAbstractSymbol)){
     		int nowStatement = statementStack.peek();
-    		SymbolExtra nowSymbolExtra = beginI < symbols.size() ? symbols.get(beginI) : new TerminatorExtra(cfg.getSymbolPool().getTerminator("eof"));
-    		Movement movement =  table.get(nowStatement).get(nowSymbolExtra.getSymbol());
+    		Symbol nowSymbol = beginI < symbols.size() ? symbols.get(beginI) : new Terminator(cfg.getSymbolPool().getTerminator("eof"));
+    		Movement movement =  table.get(nowStatement).get(nowSymbol.getAbstractSymbol());
     		if (movement == null) {
-    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbolExtra + " 时既无法移进，也无法规约。", null);
+    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法规约。", null);
     		}
     		else {
 	    		switch(movement.getMovement()) { 
 	    			case Movement.SHIFT:
-	    				nodeStack.push(new AnalysisNode(nowSymbolExtra));
+	    				nodeStack.push(new AnalysisNode(nowSymbol));
 	    			case Movement.GOTO:
 	    				statementStack.push(movement.getShiftTo());
 	    				++beginI;
 	    				break;
 	    			case Movement.REGRESSION:
 	    				CFGProduction production = movement.getRegressionProduction();
-	    				AnalysisNode node = new AnalysisNode(new UnterminatorExtra((Unterminator) production.getBeforeSymbol()));
+	    				AnalysisNode node = new AnalysisNode(new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol()));
 	    				node.setChildren(new ArrayList<>());
 	    				Stack<AnalysisNode> tempStack = new Stack<>();
-		    			for (Symbol _: production.getAfterSymbols()) {
+		    			for (AbstractSymbol _: production.getAfterAbstractSymbols()) {
 		    				statementStack.pop();
 		    				tempStack.push(nodeStack.pop());
 		    			}
-		    			for (Symbol _: production.getAfterSymbols()) {
+		    			for (AbstractSymbol _: production.getAfterAbstractSymbols()) {
 		    				node.getChildren().add(tempStack.pop());
 		    			}
 		    			nodeStack.push(node);
