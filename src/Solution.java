@@ -1,5 +1,3 @@
-import java.util.HashSet;
-
 import org.dom4j.DocumentException;
 
 public class Solution {
@@ -25,7 +23,9 @@ public class Solution {
 //        System.out.println(tree);
 //        System.out.println(PLDLParsingWarning.getLoggings());
         
-        RE re = new SimpleREApply("a-c|bd*");
-        re.getNFA().draw();
+        //RE re = new SimpleREApply("a-c|bd*");
+        DFA dfa = DFA.fastDFA("abcdef");
+        dfa.simplify();
+        dfa.draw();
     }
 }

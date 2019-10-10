@@ -6,6 +6,10 @@ public class NFANode {
 	
 	private Map<String, Set<NFANode> > stateTransformTable;
 	
+	public Map<String, Set<NFANode>> getStateTransformTable() {
+		return stateTransformTable;
+	}
+
 	private boolean isFinal = false;
 	
 	public boolean isFinal() {

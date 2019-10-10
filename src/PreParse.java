@@ -60,7 +60,6 @@ public class PreParse {
     }
 
 	public List<SymbolExtra> getSymbols(String str, CFG cfg) throws PLDLAnalysisException, PLDLParsingException{
-		List<String> rawStrings = new ArrayList<>();
 		List<SymbolExtra> resultTokens = new ArrayList<>();
 		Scanner fileScanner = new Scanner(new StringBufferInputStream(str));
 		while (fileScanner.hasNext()){
