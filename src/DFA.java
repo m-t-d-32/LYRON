@@ -36,6 +36,9 @@ public class DFA {
 	DFA(DFANode root){
 		this.root = root;
 		finalNodes = new HashSet<>();
+		if (root.isFinal()) {
+			finalNodes.add(root);
+		}
 		bannedLookingForwardStrs = new HashSet<>();
 	}
 	
@@ -96,7 +99,7 @@ public class DFA {
 	        			for (String s: node.getStateTransformTable().keySet()) {
 	        				DFANode nodeNext = node.getStateTransformTable().get(s);
 	    					DFANode nodeAnotherNode = anotherNode.getStateTransformTable().get(s);
-	    					if (nodeNext.isFinal() ^ nodeAnotherNode.isFinal()) {
+	    					if (node.isFinal() != anotherNode.isFinal()) {
 	    						willState = DFALinkState.STATE_DIFF;
 	    						break;
 	    					}

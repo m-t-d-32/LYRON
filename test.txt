@@ -2,6 +2,8 @@ void main(){
 	int a = 0;
 	int i;
 	if (!a ){
-		i = 1;
+	/* hello world1231 """""" is good!!!!! */
+		i = 1; //fuck your self
+		int x = "/* this is in my String !!!";
 	}
 }

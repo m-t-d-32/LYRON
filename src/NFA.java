@@ -30,6 +30,9 @@ public class NFA {
 	NFA(NFANode root){
 		this.root = root;
 		finalNodes = new HashSet<>();
+		if (root.isFinal()) {
+			finalNodes.add(root);
+		}
 	}
 	
 	public NFANode getRoot() {

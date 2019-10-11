@@ -79,17 +79,8 @@ public class Solution {
                 }
             }
         }.start();
-
-//        PreParse parser = new PreParse("TEST.pldl", null);
-//        CFG cfg = parser.getCFG();
-//        cfg.augmentCFG();
-//        TransformTable table = cfg.getTable();
-//        System.out.println(table);
-//        AnalysisTree tree = table.getAnalysisTree(parser.getSymbols("12+ 34 * (5+62)", cfg));
-//        System.out.println(tree);
-//        System.out.println(PLDLParsingWarning.getLoggings());
         
-        Graphviz.setFilePath("C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe", "images");
+        //Graphviz.setFilePath("C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe", "images");
         List<DFA> cDFAs = new ArrayList<>();
         String _DigitLetter = getDigit() + getLetter() + "_";
         String _Digit = getDigit();
@@ -116,7 +107,7 @@ public class Solution {
         cDFAs.add(getFastDFA("*=", "multiple equals", null, null));
         cDFAs.add(getFastDFA("*", "multiple", "=", null));
         cDFAs.add(getFastDFA("/=", "divide equals", null, null));
-        cDFAs.add(getFastDFA("/", "divide", "/=", null));
+        cDFAs.add(getFastDFA("/", "divide", "/*=", null));
         cDFAs.add(getFastDFA("%=", "mod equals", null, null));
         cDFAs.add(getFastDFA("%", "mod", "%=", null));
         cDFAs.add(getFastDFA("^=", "xor equals", null, null));
@@ -135,6 +126,8 @@ public class Solution {
         cDFAs.add(getFastDFA(">", "more", "<=", null));
         cDFAs.add(getDFA("[1-9][0-9]*|0", "num", _Digit, null));
         cDFAs.add(getDFA("[_a-zA-Z][_a-zA-Z0-9]*", "var", _DigitLetter, null));
+        cDFAs.add(getDFA("\".*\"", "string", null, null));
+        cDFAs.add(getDFA("\'.*\'", "char", null, null));
         cDFAs.add(getDFA("/\\*.*\\*/", "comment1", null, null));
         cDFAs.add(getDFA("//.*", "comment2", null, "\r\n"));
         AnalysisByDFAs analysis = new AnalysisByDFAs(cDFAs);
