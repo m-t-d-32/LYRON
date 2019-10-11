@@ -51,4 +51,9 @@ public class DFALinkState {
 		
 	}
 	
+	@Override
+	public String toString() {
+		return state == STATE_SAME ? "same" : (state == STATE_DIFF ? "diff" : "undefined");
+	}
+	
 }

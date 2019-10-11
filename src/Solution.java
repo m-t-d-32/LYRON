@@ -25,10 +25,10 @@ public class Solution {
 //        System.out.println(tree);
 //        System.out.println(PLDLParsingWarning.getLoggings());
         
-        Graphviz.setFilePath("C:\\Program Files\\Graphviz 2.28\\bin\\dot.exe", "images");
-        RE re = new SimpleREApply("[a-ce]bf*");
+        Graphviz.setFilePath("C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe", "images");
+        RE re = new SimpleREApply("[ab\\t]");
         NFA nfa = re.getNFA();
-        //nfa.draw();
+        nfa.draw(new File("images\\nfa.png"));
         DFA dfa = nfa.toDFA();
         dfa.simplify();
         dfa.draw(new File("images\\dfa.png"));

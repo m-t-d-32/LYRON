@@ -1,7 +1,7 @@
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -75,7 +75,9 @@ public class DFA {
         
         for (DFANode node: nodes) {
         	for (DFANode anotherNode: nodes) {
-    			map.put(new Pair<>(node, anotherNode), new DFALinkState());
+        		if (node != anotherNode) {
+        			map.put(new Pair<>(node, anotherNode), new DFALinkState());
+        		}
         	}
         }
         Stack<Pair<DFANode, DFANode>> willProceed = new Stack<>();
@@ -84,24 +86,23 @@ public class DFA {
         	for (DFANode anotherNode: nodes) {
         		if (node != anotherNode) {
         			int willState = DFALinkState.STATE_UNDEFINED;
-        			for (String s: node.getStateTransformTable().keySet()) {
-        				if (anotherNode.getStateTransformTable().containsKey(s)) {
-        					DFANode nodeNext = node.getStateTransformTable().get(s);
-        					DFANode nodeAnotherNode = anotherNode.getStateTransformTable().get(s);
-        					if (nodeNext.isFinal() ^ nodeAnotherNode.isFinal()) {
-        						//diff
-        						willState = DFALinkState.STATE_DIFF;
-        						break;
-        					}
-        					else if (nodeNext != nodeAnotherNode) {
-        						map.get(new Pair<>(node, anotherNode)).addSlot(nodeNext, nodeAnotherNode);
-        						map.get(new Pair<>(nodeNext, nodeAnotherNode)).addSignal(node, anotherNode);
-        					}
-        				}
-        				else {
-        					willState = DFALinkState.STATE_DIFF;
-        					break;
-        				}
+        			if (node.getStateTransformTable().keySet().containsAll(anotherNode.getStateTransformTable().keySet())
+        					&& node.getStateTransformTable().size() == anotherNode.getStateTransformTable().size()) {
+	        			for (String s: node.getStateTransformTable().keySet()) {
+	        				DFANode nodeNext = node.getStateTransformTable().get(s);
+	    					DFANode nodeAnotherNode = anotherNode.getStateTransformTable().get(s);
+	    					if (nodeNext.isFinal() ^ nodeAnotherNode.isFinal()) {
+	    						willState = DFALinkState.STATE_DIFF;
+	    						break;
+	    					}
+	    					else if (nodeNext != nodeAnotherNode) {
+	    						map.get(new Pair<>(node, anotherNode)).addSlot(nodeNext, nodeAnotherNode);
+	    						map.get(new Pair<>(nodeNext, nodeAnotherNode)).addSignal(node, anotherNode);
+	    					}
+	        			}
+        			}
+        			else {
+        				willState = DFALinkState.STATE_DIFF;
         			}
         			if (willState == DFALinkState.STATE_DIFF) {
         				map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_DIFF);
@@ -111,7 +112,7 @@ public class DFA {
         				map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_SAME);
         				willProceed.add(new Pair<>(node, anotherNode));
         			}
-        		}
+	        	}
         	}
         }
         
@@ -135,17 +136,62 @@ public class DFA {
         	}
         }
         
+        Map<DFANode, Set<DFANode>> linkedNodes = new HashMap<>();
         for (DFANode node: nodes) {
+        	linkedNodes.put(node, new HashSet<>());
+        }
+        for (DFANode node: nodes) {        	
         	for (DFANode anotherNode: nodes) {
-        		if (map.get(new Pair<>(node, anotherNode)).getState() != DFALinkState.STATE_DIFF) {
-        			map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_SAME);
+        		if (node != anotherNode && map.get(new Pair<>(node, anotherNode)).getState() != DFALinkState.STATE_DIFF) {
+        			linkedNodes.get(node).add(anotherNode);
+        		}
+        	}
+        }
+
+        Set<Set<DFANode> > mergedNodes = new HashSet<>();
+        Map<DFANode, Set<DFANode>> mergedNodesMap = new HashMap<>();
+        while (!nodes.isEmpty()) {
+        	DFANode node = nodes.iterator().next();
+        	Set<DFANode> partMergedNodes = new HashSet<>();
+        	partMergedNodes.add(node);
+    		dfsMakeMerged(node, linkedNodes, partMergedNodes);
+    		for (DFANode mergedNode: partMergedNodes) {
+    			mergedNodesMap.put(mergedNode, partMergedNodes);
+    		}
+    		mergedNodes.add(partMergedNodes);
+    		nodes.removeAll(partMergedNodes);
+        }
+        Map<Set<DFANode>, DFANode> finalNodesMap = new HashMap<>();
+        for (Set<DFANode> partMergedNodes: mergedNodes) {
+        	finalNodesMap.put(partMergedNodes, new DFANode());
+        }
+        finalNodes.clear();
+        for (Set<DFANode> partMergedNodes: mergedNodes) {
+        	for (DFANode node: partMergedNodes) {
+        		DFANode finalMapNode = finalNodesMap.get(mergedNodesMap.get(node));
+        		if (node.isFinal()) {
+        			finalMapNode.setFinal(true);
+        			finalNodes.add(finalMapNode);
+        		}
+        		for (String transformStr: node.getStateTransformTable().keySet()) {
+        			finalMapNode.addToTransformTable(transformStr, finalNodesMap.get(mergedNodesMap.get(node.getStateTransformTable().get(transformStr))));
         		}
         	}
         }
         
-        
+        root = finalNodesMap.get(mergedNodesMap.get(root));
 	}
 	
+	private void dfsMakeMerged(DFANode node, Map<DFANode, Set<DFANode>> linkedNodes, Set<DFANode> partMergedNodes) {
+		Set<DFANode> anotherNodes = linkedNodes.get(node);
+		for (DFANode anotherNode: anotherNodes) {
+			if (!partMergedNodes.contains(anotherNode)) {
+				partMergedNodes.add(anotherNode);
+				dfsMakeMerged(anotherNode, linkedNodes, partMergedNodes);
+			}
+		}
+	}
+
 	public static DFA fastDFA(String str) {
 		DFANode root = new DFANode();
 		DFANode pointer = root;

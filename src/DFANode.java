@@ -34,7 +34,15 @@ public class DFANode {
 	public void setTransformTableByText(Set<String> result){
 		for (String trans: stateTransformTable.keySet()) {
 			DFANode end = stateTransformTable.get(trans);
-			String willAdd = getSerial() + " -> " + end.getSerial() + "[label=\"" + trans + "\"]";
+			String printTrans = trans;
+			switch(trans) {
+	        	case "\t": printTrans = "\\\\t"; break;
+	        	case "\r": printTrans = "\\\\r"; break;
+	        	case "\n": printTrans = "\\\\n"; break;
+	        	case "\f": printTrans = "\\\\f"; break;
+	        	case "\\": printTrans = "\\\\"; break;
+	    	}
+			String willAdd = getSerial() + " -> " + end.getSerial() + "[label=\"" + printTrans + "\"]";
 			if (!result.contains(willAdd)) {
 				result.add(willAdd);
 				end.setTransformTableByText(result);

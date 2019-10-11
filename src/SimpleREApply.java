@@ -1,7 +1,5 @@
 import java.util.*;
 
-import org.dom4j.DocumentException;
-
 public class SimpleREApply extends RE{
 
 	public SimpleREApply(String str) throws PLDLParsingException, PLDLAnalysisException, REParsingException {
@@ -101,6 +99,7 @@ public class SimpleREApply extends RE{
 							for (NFANode node : nodes.get(0).getFinalNodes()) {
 								node.addToTransformTable("null", nodes.get(0).getRoot());
 								node.addToTransformTable("null", endNode);
+								node.setFinal(false);
 							}
 							beginNode.addToTransformTable("null", endNode);
 							NFA result = new NFA(beginNode);
@@ -120,6 +119,7 @@ public class SimpleREApply extends RE{
 							for (NFANode node: nodes.get(0).getFinalNodes()) {
 								node.addToTransformTable("null", nodes.get(0).getRoot());
 								node.addToTransformTable("null", endNode);
+								node.setFinal(false);
 							}
 							NFA result = new NFA(beginNode);
 							result.getFinalNodes().add(endNode);
