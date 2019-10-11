@@ -1,21 +1,39 @@
 import java.util.List;
+import java.util.Set;
 
 public class AnalysisByDFAs {
 
 	private List<DFA> dfas;
-	
-	private List<String> todos;
 
-	AnalysisByDFAs(List<DFA> dfas, List<String> todos) throws Exception{
+	AnalysisByDFAs(List<DFA> dfas){
 		this.dfas = dfas;
-		this.todos = todos;
-		
-		if (dfas.size() != todos.size()) {
-			throw new Exception("DFA个数与输出个数不匹配", null);
-		}
 	}
 	
-	void Analysis(String str) {
-		
+	void Analysis(String str, Set<Character> emptyChars) {
+		int pointer = 0;
+		while (pointer < str.length()) {
+			if (!emptyChars.contains(str.charAt(pointer))) {
+				int subIndex = 0, dfaSerial = -1;
+				for (int i = 0; i < dfas.size(); ++i) {
+					int analysisEnd = dfas.get(i).analysis(str.substring(pointer));
+					if (analysisEnd != -1) {
+						subIndex = analysisEnd;
+						dfaSerial = i;
+						break;
+					}
+				}
+				if (dfaSerial != -1) {
+					System.out.println("matched: " + str.substring(pointer, pointer + subIndex) + " by " + dfas.get(dfaSerial).getName());
+					pointer += subIndex;
+				}
+				else {
+					System.err.println("error: ");
+					++pointer;
+				}
+			}
+			else {
+				++pointer;
+			}
+		}
 	}
 }

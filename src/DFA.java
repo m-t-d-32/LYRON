@@ -11,7 +11,11 @@ public class DFA {
 	
 	private DFANode root = null;
 	
+	private String name = null;
+	
 	private Set<DFANode> finalNodes = null;
+	
+	private Set<String> bannedLookingForwardStrs = null;
 	
 	public Set<DFANode> getFinalNodes() {
 		return finalNodes;
@@ -26,11 +30,13 @@ public class DFA {
 		root.setFinal(true);
 		finalNodes = new HashSet<>();
 		finalNodes.add(root);
+		bannedLookingForwardStrs = new HashSet<>();
 	}
 	
 	DFA(DFANode root){
 		this.root = root;
 		finalNodes = new HashSet<>();
+		bannedLookingForwardStrs = new HashSet<>();
 	}
 	
 	public DFANode getRoot() {
@@ -203,4 +209,52 @@ public class DFA {
 		pointer.setFinal(true);
 		return new DFA(root);
 	}
+
+	public Set<String> getBannedLookingForwardStrs() {
+		return bannedLookingForwardStrs;
+	}
+
+	public void setBannedLookingForwardStrs(Set<String> bannedLookingForwardStrs) {
+		this.bannedLookingForwardStrs = bannedLookingForwardStrs;
+	}
+	
+	public void setAllowedLookingForwardStrs(Set<String> allowedLookingForwardStrs) {
+		bannedLookingForwardStrs.clear();
+		for (char c = 32; c < 127; ++c) {
+			if (!allowedLookingForwardStrs.contains(String.valueOf(c))) {
+				bannedLookingForwardStrs.add(String.valueOf(c));
+			}
+		}
+	}
+	
+	public void addBannedLookingForwardStrs(String str) {
+		bannedLookingForwardStrs.add(str);
+	}
+
+	public Integer analysis(String substring) {
+		DFANode node = getRoot();
+		int pointer = 0;
+		while (pointer < substring.length() && (
+				!node.isFinal() || 
+				bannedLookingForwardStrs.contains(String.valueOf(substring.charAt(pointer))))) {
+			char c = substring.charAt(pointer);
+			if (node.getStateTransformTable().containsKey(String.valueOf(c))) {
+				node = node.getStateTransformTable().get(String.valueOf(c));
+			}
+			else {
+				return -1;
+			}
+			++pointer;
+		}
+		return pointer;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 }
