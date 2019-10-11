@@ -1,7 +1,11 @@
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
+
+import javafx.util.Pair;
 
 public class DFA {
 	
@@ -33,7 +37,7 @@ public class DFA {
 		return root;
 	}
 	
-	public void draw() {       
+	public void draw(File file) {       
         Graphviz gv = new Graphviz();
         gv.addln(gv.start_graph());//SATRT
         gv.addln("edge[fontname=\"DFKai-SB\" fontsize=15 fontcolor=\"black\" color=\"brown\" style=\"filled\"]");
@@ -60,12 +64,86 @@ public class DFA {
 
         String type = "png";
 
-        File out = new File("images/test." + type);   // Linux
-        gv.writeGraphToFile( gv.getGraph( gv.getDotSource(), type ), out );
+        //File out = new File("images/test." + type);   // Linux
+        gv.writeGraphToFile( gv.getGraph( gv.getDotSource(), type ), file );
     }
 	
 	public void simplify() {
-		
+		HashMap<Pair<DFANode, DFANode>, DFALinkState> map = new HashMap<>();
+		Set<DFANode> nodes = new HashSet<>();
+        root.setLinkedNodes(nodes);
+        
+        for (DFANode node: nodes) {
+        	for (DFANode anotherNode: nodes) {
+    			map.put(new Pair<>(node, anotherNode), new DFALinkState());
+        	}
+        }
+        Stack<Pair<DFANode, DFANode>> willProceed = new Stack<>();
+        
+        for (DFANode node: nodes) {
+        	for (DFANode anotherNode: nodes) {
+        		if (node != anotherNode) {
+        			int willState = DFALinkState.STATE_UNDEFINED;
+        			for (String s: node.getStateTransformTable().keySet()) {
+        				if (anotherNode.getStateTransformTable().containsKey(s)) {
+        					DFANode nodeNext = node.getStateTransformTable().get(s);
+        					DFANode nodeAnotherNode = anotherNode.getStateTransformTable().get(s);
+        					if (nodeNext.isFinal() ^ nodeAnotherNode.isFinal()) {
+        						//diff
+        						willState = DFALinkState.STATE_DIFF;
+        						break;
+        					}
+        					else if (nodeNext != nodeAnotherNode) {
+        						map.get(new Pair<>(node, anotherNode)).addSlot(nodeNext, nodeAnotherNode);
+        						map.get(new Pair<>(nodeNext, nodeAnotherNode)).addSignal(node, anotherNode);
+        					}
+        				}
+        				else {
+        					willState = DFALinkState.STATE_DIFF;
+        					break;
+        				}
+        			}
+        			if (willState == DFALinkState.STATE_DIFF) {
+        				map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_DIFF);
+        				willProceed.add(new Pair<>(node, anotherNode));
+        			}
+        			else if (map.get(new Pair<>(node, anotherNode)).getSlot().size() <= 0) {
+        				map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_SAME);
+        				willProceed.add(new Pair<>(node, anotherNode));
+        			}
+        		}
+        	}
+        }
+        
+        while (!willProceed.empty()) {
+        	Pair<DFANode, DFANode> pair = willProceed.pop();
+        	if (map.get(pair).getState() == DFALinkState.STATE_DIFF) {
+        		for (Pair<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
+        			map.get(signalPair).setState(DFALinkState.STATE_DIFF);
+        			willProceed.add(signalPair);
+        		}
+        	}
+        	else if (map.get(pair).getState() == DFALinkState.STATE_SAME) {
+        		for (Pair<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
+        			map.get(signalPair).removeSlot(pair);
+        			if (map.get(signalPair).getSlot().size() <= 0) {
+        				map.get(signalPair).setState(DFALinkState.STATE_SAME);
+        				willProceed.add(signalPair);
+        			}
+        		}
+        		map.get(pair).clearSignal();
+        	}
+        }
+        
+        for (DFANode node: nodes) {
+        	for (DFANode anotherNode: nodes) {
+        		if (map.get(new Pair<>(node, anotherNode)).getState() != DFALinkState.STATE_DIFF) {
+        			map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_SAME);
+        		}
+        	}
+        }
+        
+        
 	}
 	
 	public static DFA fastDFA(String str) {

@@ -8,6 +8,10 @@ public class DFANode {
 	
 	private Map<String, DFANode> stateTransformTable;
 	
+	public Map<String, DFANode> getStateTransformTable() {
+		return stateTransformTable;
+	}
+
 	private boolean isFinal = false;
 	
 	public boolean isFinal() {

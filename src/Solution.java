@@ -1,3 +1,5 @@
+import java.io.File;
+
 import org.dom4j.DocumentException;
 
 public class Solution {
@@ -23,11 +25,12 @@ public class Solution {
 //        System.out.println(tree);
 //        System.out.println(PLDLParsingWarning.getLoggings());
         
-        RE re = new SimpleREApply("a|e");
+        Graphviz.setFilePath("C:\\Program Files\\Graphviz 2.28\\bin\\dot.exe", "images");
+        RE re = new SimpleREApply("[a-ce]bf*");
         NFA nfa = re.getNFA();
         //nfa.draw();
         DFA dfa = nfa.toDFA();
         dfa.simplify();
-        dfa.draw();
+        dfa.draw(new File("images\\dfa.png"));
     }
 }

@@ -102,7 +102,7 @@ public class NFA {
 		}
 	}
 
-	public void draw() {       
+	public void draw(File file) {       
         Graphviz gv = new Graphviz();
         gv.addln(gv.start_graph());
         gv.addln("edge[fontname=\"DFKai-SB\" fontsize=15 fontcolor=\"black\" color=\"brown\" style=\"filled\"]");
@@ -129,7 +129,7 @@ public class NFA {
 
         String type = "png";
 
-        File out = new File("images/test." + type);   // Linux
-        gv.writeGraphToFile( gv.getGraph( gv.getDotSource(), type ), out );
+        //File out = new File("images/test." + type);   // Linux
+        gv.writeGraphToFile( gv.getGraph( gv.getDotSource(), type ), file );
     }
 }
