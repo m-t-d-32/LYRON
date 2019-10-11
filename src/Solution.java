@@ -26,7 +26,7 @@ public class Solution {
 //        System.out.println(PLDLParsingWarning.getLoggings());
         
         Graphviz.setFilePath("C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe", "images");
-        RE re = new SimpleREApply("[ab\\t]");
+        RE re = new SimpleREApply("[^a-zA-Zs].*");
         NFA nfa = re.getNFA();
         nfa.draw(new File("images\\nfa.png"));
         DFA dfa = nfa.toDFA();

@@ -8,7 +8,7 @@ public class SimpleREApply extends RE{
 
 	@Override
 	protected void setCFG() {
-		Set<String> terminatorStrs = new HashSet<>(Arrays.asList("|","(", ")", "*", "+", "[", "]", "-", "char"));
+		Set<String> terminatorStrs = new HashSet<>(Arrays.asList("|","(", ")", "*", "+", "[", "]", "-", "char", "^", "."));
 		Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("E", "T", "F", "Fx", "Fxs"));
 		SymbolPool pool = new SymbolPool();
 		try {
@@ -133,6 +133,21 @@ public class SimpleREApply extends RE{
 							return nodes.get(0);
 						}
 					},
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> .", cfg)) {
+
+						@Override
+						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
+							NFANode beginNode = new NFANode();
+							for (char c = 32; c < 127; ++c) {
+								beginNode.addToTransformTable(String.valueOf(c), nodes.get(0).getRoot());
+							}
+							nodes.get(0).getRoot().setFinal(true);
+							NFA result = new NFA(beginNode);
+							result.getFinalNodes().add(nodes.get(0).getRoot());
+							return result;
+						}
+						
+					},
 					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> char", cfg)) {
 
 						@Override
@@ -169,22 +184,16 @@ public class SimpleREApply extends RE{
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
-							//2 nodes
-							NFANode beginNode = new NFANode();
-							NFANode endNode = new NFANode();
-							endNode.setFinal(true);
-							beginNode.addToTransformTable("null", nodes.get(0).getRoot());
-							beginNode.addToTransformTable("null", nodes.get(1).getRoot());
-							for (NFANode node : nodes.get(0).getFinalNodes()) {
-								node.setFinal(false);
-								node.addToTransformTable("null", endNode);
+							//2 nodes							
+							NFA result = nodes.get(0);
+							NFANode beginNode = result.getRoot();
+							beginNode.getStateTransformTable().putAll(nodes.get(1).getRoot().getStateTransformTable());
+							for (NFANode end: nodes.get(1).getFinalNodes()) {
+								for (NFANode trueEnd: nodes.get(0).getFinalNodes()) {
+									end.addToTransformTable("null", trueEnd);
+									end.setFinal(false);
+								}
 							}
-							for (NFANode node : nodes.get(1).getFinalNodes()) {
-								node.setFinal(false);
-								node.addToTransformTable("null", endNode);
-							}
-							NFA result = new NFA(beginNode);
-							result.getFinalNodes().add(endNode);
 							return result;
 						}
 
@@ -202,6 +211,29 @@ public class SimpleREApply extends RE{
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
 							return nodes.get(1);
+						}
+
+					},
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> [ ^ Fxs ]", cfg)) {
+
+						@Override
+						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
+							//Assert: nodes.get(2).getRoot().getStateTransformTable().values().size() == 1							
+
+							NFANode beginNode = new NFANode();
+							Set<String> chars = new HashSet<>();
+							for (char c = 32; c < 127; ++c) {
+								chars.add(String.valueOf(c));
+							}
+							chars.removeAll(nodes.get(2).getRoot().getStateTransformTable().keySet());
+							NFANode next = nodes.get(2).getRoot().getStateTransformTable().values()
+									.iterator().next().iterator().next();							
+							for (String s: chars) {
+								beginNode.addToTransformTable(s, next);
+							}
+							NFA result = new NFA(beginNode);
+							result.setFinalNodes(nodes.get(2).getFinalNodes());
+							return result;
 						}
 
 					}));
@@ -242,6 +274,8 @@ public class SimpleREApply extends RE{
 							case '[':
 							case ']':
 							case '(':
+							case '^':
+							case '.':
 							case ')': result.add(getCharTerminator(c)); break;
 							case 'r': result.add(getCharTerminator('\r')); break;
 							case 'n': result.add(getCharTerminator('\n')); break;
@@ -251,7 +285,7 @@ public class SimpleREApply extends RE{
 						}
 					}
 				}
-				else if (c == '-' || c == '+' || c == '*' || c == '|' || c == '(' || c == ')' || c == '[' || c == ']') {
+				else if (c == '-' || c == '+' || c == '*' || c == '|' || c == '(' || c == ')' || c == '[' || c == ']' || c == '^' || c == '.') {
 					AbstractTerminator abstractTerminator = cfg.getSymbolPool().getTerminator(String.valueOf(c));
 					Terminator sym = new Terminator(abstractTerminator);
 					result.add(sym);

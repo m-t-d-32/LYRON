@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.dom4j.DocumentException;
-import sun.misc.REException;
-
 public abstract class RE {
 	
 	private String reString = null;
@@ -59,7 +56,7 @@ public abstract class RE {
 	    		Symbol nowSymbol = beginI < symbols.size() ? symbols.get(beginI) : new Terminator(cfg.getSymbolPool().getTerminator("eof"));
 	    		Movement movement =  tableMap.get(nowStatement).get(nowSymbol.getAbstractSymbol());
 	    		if (movement == null) {
-	    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法规约。", null);
+	    			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
 	    		}
 	    		else {
 		    		switch(movement.getMovement()) { 
@@ -91,7 +88,7 @@ public abstract class RE {
 	    		}
 	    	}
 	    	if (nodeStack.size() != 1) {
-	    		throw new PLDLAnalysisException("程序最终没有规约结束。符号栈中剩余：" + nodeStack, null);
+	    		throw new PLDLAnalysisException("程序最终没有归约结束。符号栈中剩余：" + nodeStack, null);
 	    	}
 	    	else {
 	    		letNFA = nodeStack.pop();

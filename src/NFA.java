@@ -106,7 +106,6 @@ public class NFA {
         Graphviz gv = new Graphviz();
         gv.addln(gv.start_graph());
         gv.addln("edge[fontname=\"DFKai-SB\" fontsize=15 fontcolor=\"black\" color=\"brown\" style=\"filled\"]");
-        gv.addln("size =\"8,8\";");
 
         Set<NFANode> nodes = new HashSet<>();
         root.setLinkedNodes(nodes);

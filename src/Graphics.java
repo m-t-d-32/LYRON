@@ -2,7 +2,9 @@ import javax.swing.*;
 
 public class Graphics extends JFrame {
 
-    public static Graphics getOpenWindow() {
+	private static final long serialVersionUID = -4825279720757909719L;
+
+	public static Graphics getOpenWindow() {
         Graphics jf = new Graphics();
         ImageIcon icon = new ImageIcon("images/back.jpg");
         jf.setUndecorated(true);
