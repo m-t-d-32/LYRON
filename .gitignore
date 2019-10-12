@@ -7,3 +7,4 @@ out/*
 bin/*
 pldlparser.iml
 images/test.png
+/bin/

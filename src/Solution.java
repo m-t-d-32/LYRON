@@ -104,7 +104,7 @@ public class Solution {
         cDFAs.add(getFastDFA("+", "plus", "+=", null));
         cDFAs.add(getFastDFA("-=", "minus equals", null, null));
         cDFAs.add(getFastDFA("--", "minus minus", null, null));
-        cDFAs.add(getFastDFA("-", "minus", "-=", null));
+        cDFAs.add(getFastDFA("-", "minus", "-=" + getDigit(), null));
         cDFAs.add(getFastDFA("*=", "multiple equals", null, null));
         cDFAs.add(getFastDFA("*", "multiple", "=", null));
         cDFAs.add(getFastDFA("/=", "divide equals", null, null));
@@ -125,7 +125,7 @@ public class Solution {
         cDFAs.add(getFastDFA(">=", "more or equal", null, null));
         cDFAs.add(getFastDFA(">>", "right shift", "=", null));
         cDFAs.add(getFastDFA(">", "more", "<=", null));
-        cDFAs.add(getDFA("[1-9][0-9]*|0", "num", _DigitLetter, null));
+        cDFAs.add(getDFA("[1-9][0-9]*|0|\\-[1-9][0-9]*", "num", _DigitLetter, null));
         cDFAs.add(getDFA("[_a-zA-Z][_a-zA-Z0-9]*", "var", _DigitLetter, null));
         cDFAs.add(getDFA("\".*\"", "string", null, null));
         cDFAs.add(getDFA("\'.*\'", "char", null, null));

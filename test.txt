@@ -1,5 +1,5 @@
 void main(){
-	int a = 0aa;
+	int a = -a;
 	int i;
 	if (!a ){
 	/*	false String
@@ -8,7 +8,7 @@ void main(){
 		int x = "/* this is in my String !!!";
 	}
 	for (;;);
-	a*=1;
+	a*=-1;
 	a<<=1;
 	a>>=1;
 	a!=1;

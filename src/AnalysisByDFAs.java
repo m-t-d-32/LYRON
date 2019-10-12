@@ -33,7 +33,7 @@ public class AnalysisByDFAs {
 					pointer += subIndex;
 				}
 				else {
-					throw new PLDLAnalysisException("´Ê·¨·ÖÎö´íÎó³öÏÖÔÚµÚ  " + getRow(pointer, str) + " ĞĞ£¬µÚ " + getColumn(pointer, str) + " ÁĞ", null);
+					throw new PLDLAnalysisException("è¯æ³•åˆ†æé”™è¯¯å‡ºç°åœ¨ç¬¬  " + getRow(pointer, str) + " è¡Œï¼Œç¬¬ " + getColumn(pointer, str) + " åˆ—", null);
 				}
 			}
 			else {
