@@ -223,7 +223,7 @@ public class DFA {
 	
 	public void setAllowedLookingForwardStrs(Set<String> allowedLookingForwardStrs) {
 		bannedLookingForwardStrs.clear();
-		for (char c = 32; c < 127; ++c) {
+		for (char c = 1; c < 127; ++c) {
 			if (!allowedLookingForwardStrs.contains(String.valueOf(c))) {
 				bannedLookingForwardStrs.add(String.valueOf(c));
 			}

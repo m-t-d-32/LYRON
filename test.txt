@@ -2,8 +2,16 @@ void main(){
 	int a = 0;
 	int i;
 	if (!a ){
-	/* hello world1231 """""" is good!!!!! */
-		i = 1; //fuck your self
+	/*	false String
+		***********************************/
+		i = 1; //i am good
 		int x = "/* this is in my String !!!";
 	}
+	for (;;);
+	a*=1;
+	a<<=1;
+	a>>=1;
+	a!=1;
+	a!1;
+	a*123
 }

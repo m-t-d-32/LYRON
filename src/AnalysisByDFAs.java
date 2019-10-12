@@ -14,8 +14,9 @@ public class AnalysisByDFAs {
 		while (pointer < str.length()) {
 			if (!emptyChars.contains(str.charAt(pointer))) {
 				int subIndex = 0, dfaSerial = -1;
+				String substring = str.substring(pointer);
 				for (int i = 0; i < dfas.size(); ++i) {
-					int analysisEnd = dfas.get(i).analysis(str.substring(pointer));
+					int analysisEnd = dfas.get(i).analysis(substring);
 					if (analysisEnd != -1) {
 						subIndex = analysisEnd;
 						dfaSerial = i;

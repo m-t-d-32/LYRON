@@ -80,10 +80,11 @@ public class Solution {
             }
         }.start();
         
-        //Graphviz.setFilePath("C:\\Program Files (x86)\\Graphviz 2.28\\bin\\dot.exe", "images");
         List<DFA> cDFAs = new ArrayList<>();
         String _DigitLetter = getDigit() + getLetter() + "_";
         String _Digit = getDigit();
+        cDFAs.add(getDFA("/\\*.*\\*/", "comment1", null, null));
+        cDFAs.add(getDFA("//.*", "comment2", null, "\r\n"));
         cDFAs.add(getFastDFA("int", "int", _DigitLetter, null));
         cDFAs.add(getFastDFA("main", "main", _DigitLetter, null));
         cDFAs.add(getFastDFA("if", "if", _DigitLetter, null));
@@ -128,8 +129,7 @@ public class Solution {
         cDFAs.add(getDFA("[_a-zA-Z][_a-zA-Z0-9]*", "var", _DigitLetter, null));
         cDFAs.add(getDFA("\".*\"", "string", null, null));
         cDFAs.add(getDFA("\'.*\'", "char", null, null));
-        cDFAs.add(getDFA("/\\*.*\\*/", "comment1", null, null));
-        cDFAs.add(getDFA("//.*", "comment2", null, "\r\n"));
+
         AnalysisByDFAs analysis = new AnalysisByDFAs(cDFAs);
         Set<Character> emptyChars = new HashSet<>();
         emptyChars.add(' ');
