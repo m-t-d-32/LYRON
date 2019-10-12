@@ -1,5 +1,5 @@
 void main(){
-	int a = 0;
+	int a = 0aa;
 	int i;
 	if (!a ){
 	/*	false String

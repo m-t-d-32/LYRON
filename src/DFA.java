@@ -249,7 +249,7 @@ public class DFA {
 			}
 			++pointer;
 		}
-		return pointer;
+		return node.isFinal() ? pointer : -1;
 	}
 
 	public String getName() {
