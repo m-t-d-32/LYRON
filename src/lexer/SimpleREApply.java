@@ -29,8 +29,7 @@ public class SimpleREApply extends RE {
 		try {
 			pool.initTerminatorString(terminatorStrs);
 			pool.initUnterminatorString(unterminatorStrs);
-			cfg = new CFG(pool, null, "E");
-			List<REProduction> res = new ArrayList<REProduction>(Arrays.asList(
+			List<REProduction> res = new ArrayList<>(Arrays.asList(
 					new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> E | T", cfg)) {
 
 						@Override
@@ -131,7 +130,7 @@ public class SimpleREApply extends RE {
 							NFANode endNode = new NFANode();
 							endNode.setFinal(true);
 							beginNode.addToTransformTable("null", nodes.get(0).getRoot());
-							for (NFANode node: nodes.get(0).getFinalNodes()) {
+							for (NFANode node : nodes.get(0).getFinalNodes()) {
 								node.addToTransformTable("null", nodes.get(0).getRoot());
 								node.addToTransformTable("null", endNode);
 								node.setFinal(false);
@@ -140,7 +139,7 @@ public class SimpleREApply extends RE {
 							result.getFinalNodes().add(endNode);
 							return result;
 						}
-											
+
 					},
 					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> Fx", cfg)) {
 						@Override
@@ -161,7 +160,7 @@ public class SimpleREApply extends RE {
 							result.getFinalNodes().add(nodes.get(0).getRoot());
 							return result;
 						}
-						
+
 					},
 					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> char", cfg)) {
 
@@ -184,7 +183,7 @@ public class SimpleREApply extends RE {
 							String tempEnd = (String) childs.get(2).getProperties().get("name");
 							char beginSymbol = (char) Math.min(tempBegin.charAt(0), tempEnd.charAt(0));
 							char endSymbol = (char) Math.max(tempBegin.charAt(0), tempEnd.charAt(0));
-							
+
 							NFANode beginNode = new NFANode();
 							for (char t = beginSymbol; t <= endSymbol; ++t) {
 								beginNode.addToTransformTable(String.valueOf(t), nodes.get(0).getRoot());
@@ -203,8 +202,8 @@ public class SimpleREApply extends RE {
 							NFA result = nodes.get(0);
 							NFANode beginNode = result.getRoot();
 							beginNode.getStateTransformTable().putAll(nodes.get(1).getRoot().getStateTransformTable());
-							for (NFANode end: nodes.get(1).getFinalNodes()) {
-								for (NFANode trueEnd: nodes.get(0).getFinalNodes()) {
+							for (NFANode end : nodes.get(1).getFinalNodes()) {
+								for (NFANode trueEnd : nodes.get(0).getFinalNodes()) {
 									end.addToTransformTable("null", trueEnd);
 									end.setFinal(false);
 								}
@@ -242,8 +241,8 @@ public class SimpleREApply extends RE {
 							}
 							chars.removeAll(nodes.get(2).getRoot().getStateTransformTable().keySet());
 							NFANode next = nodes.get(2).getRoot().getStateTransformTable().values()
-									.iterator().next().iterator().next();							
-							for (String s: chars) {
+									.iterator().next().iterator().next();
+							for (String s : chars) {
 								beginNode.addToTransformTable(s, next);
 							}
 							NFA result = new NFA(beginNode);
@@ -252,7 +251,7 @@ public class SimpleREApply extends RE {
 						}
 
 					}));
-			cfg.setCFGProductions(res);
+			cfg = new CFG(pool, res, "E");
 		} catch (PLDLParsingException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();

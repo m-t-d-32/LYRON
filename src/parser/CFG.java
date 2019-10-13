@@ -4,12 +4,7 @@ import exception.PLDLParsingException;
 import exception.PLDLParsingWarning;
 import symbol.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CFG {
 
@@ -19,9 +14,7 @@ public class CFG {
 
     public void setCFGProductions(List<? extends CFGProduction> prods) {
     	CFGProductions = new ArrayList<>();
-    	for (CFGProduction prod: prods) {
-    		CFGProductions.add(prod);
-    	}
+        CFGProductions.addAll(prods);
 	}
 
 	private AbstractUnterminator CFGmarkin;
@@ -29,10 +22,11 @@ public class CFG {
     private SymbolPool symbolPool;
     
     public CFG(SymbolPool pool,
-               List<CFGProduction> productions,
+               Collection<? extends CFGProduction> productions,
                String markinStr) throws PLDLParsingException {
     	symbolPool = pool;
-    	CFGProductions = productions;
+    	CFGProductions = new ArrayList<>();
+        CFGProductions.addAll(productions);
     	if (markinStr == null) {
             CFGmarkin = (AbstractUnterminator) CFGProductions.get(0).getBeforeAbstractSymbol();
             PLDLParsingWarning.setLog("警告：您没有传递任何参数作为开始符号，因而自动将第一个产生式的左部符号 " + CFGmarkin.getName() + " 作为开始符号。");
@@ -47,19 +41,10 @@ public class CFG {
     	
     }
 
-    public CFG(List<String> CFGProductionStrs,
-               Set<String> CFGTerminators,
-               Set<String> CFGUnterminators,
+    public CFG(SymbolPool pool,
+               List<String> CFGProductionStrs,
                String markinStr) throws PLDLParsingException {
-        if (CFGTerminators.contains("null")) {
-            throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他终结符，请更换终结符的名字。", null);
-        }
-        if (CFGUnterminators.contains("null")) {
-            throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他非终结符，请更换非终结符的名字。", null);
-        }
-        symbolPool = new SymbolPool();
-        symbolPool.initTerminatorString(CFGTerminators);
-        symbolPool.initUnterminatorString(CFGUnterminators);
+        symbolPool = pool;
         this.CFGProductions = new ArrayList<>();
         for (int i = 0; i < CFGProductionStrs.size(); ++i) {
             String CFGProductionStr = CFGProductionStrs.get(i);
@@ -72,7 +57,7 @@ public class CFG {
             PLDLParsingWarning.setLog("警告：您没有传递任何参数作为开始符号，因而自动将第一个产生式的左部符号 " + CFGmarkin.getName() + " 作为开始符号。");
         } else {
             markinStr = markinStr.trim();
-            if (CFGUnterminators.contains(markinStr)) {
+            if (pool.getUnterminatorsStr().contains(markinStr)) {
                 CFGmarkin = new AbstractUnterminator(markinStr);
             } else {
                 throw new PLDLParsingException("解析失败：开始符号不是非终结符。", null);

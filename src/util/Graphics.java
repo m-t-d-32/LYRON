@@ -23,7 +23,7 @@ public class Graphics extends JFrame {
     public static void main() throws InterruptedException {
         Graphics g = getOpenWindow();
         g.setVisible(true);
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         g.setVisible(false);
         g.dispose();
     }

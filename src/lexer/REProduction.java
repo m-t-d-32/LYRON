@@ -1,6 +1,5 @@
 package lexer;
 
-import lexer.NFA;
 import parser.CFGProduction;
 import symbol.Symbol;
 

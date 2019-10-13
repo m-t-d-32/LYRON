@@ -21,6 +21,9 @@ public class SymbolPool {
         if (unterminators != null) {
             PLDLParsingWarning.setLog("非终结符集合已经初始化过，重新初始化可能会导致不可预料的问题。");
         }
+        if (unterminatorStrs.contains("null")) {
+            throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他非终结符，请更换非终结符的名字。", null);
+        }
         unterminators = new HashMap<>();
         for (String str : unterminatorStrs) {
             unterminators.put(str, new AbstractUnterminator(str));
@@ -30,6 +33,9 @@ public class SymbolPool {
     public void initTerminatorString(Set<String> terminatorStrs) throws PLDLParsingException {
         if (terminators != null) {
             PLDLParsingWarning.setLog("终结符集合已经初始化过，重新初始化可能会导致不可预料的问题。");
+        }
+        if (terminatorStrs.contains("null")){
+            throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他终结符，请更换终结符的名字。", null);
         }
         terminators = new HashMap<>();
         for (String str : terminatorStrs) {
