@@ -3,12 +3,13 @@ package parser;
 import exception.PLDLParsingException;
 import symbol.AbstractSymbol;
 import symbol.AbstractUnterminator;
+import symbol.SymbolPool;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class CFGProduction implements Cloneable {
+public class CFGProduction{
 
     private AbstractSymbol beforeAbstractSymbol = null;
 
@@ -34,7 +35,7 @@ public class CFGProduction implements Cloneable {
 
     private int serialNumber = -1;
 
-    public static CFGProduction getCFGProductionFromCFGString(String CFGProductionString, CFG cfg) throws PLDLParsingException {
+    public static CFGProduction getCFGProductionFromCFGString(String CFGProductionString, SymbolPool pool) throws PLDLParsingException {
         CFGProduction resultProduction = new CFGProduction();
         if (CFGProductionString.contains("->")) {
             String[] splits = CFGProductionString.split("->");
@@ -43,18 +44,18 @@ public class CFGProduction implements Cloneable {
                 String[] beforeStrs = beforeStr.trim().split(" +"), afterStrs = afterStr.trim().split(" +");
                 if (beforeStrs.length == 1) {
                     try {
-                        resultProduction.beforeAbstractSymbol = cfg.getSymbolPool().getUnterminator(beforeStrs[0]);
+                        resultProduction.beforeAbstractSymbol = pool.getUnterminator(beforeStrs[0]);
                     } catch (PLDLParsingException e) {
                         throw new PLDLParsingException("产生式左部不是非终结符，因而这不是一个合法的产生式。", e);
                     }
                     resultProduction.afterAbstractSymbols = new ArrayList<>();
                     if (afterStrs.length == 1 && afterStrs[0].equals("null")) {
-                        resultProduction.afterAbstractSymbols.add(cfg.getSymbolPool().getTerminator("null"));
+                        resultProduction.afterAbstractSymbols.add(pool.getTerminator("null"));
                         return resultProduction;
                     } else if (afterStrs.length > 0 && afterStrs[0].length() > 0) {
                         for (int i = 0; i < afterStrs.length; ++i) {
                             try {
-                                resultProduction.afterAbstractSymbols.add(cfg.getSymbolPool().getSymbol(afterStrs[i]));
+                                resultProduction.afterAbstractSymbols.add(pool.getSymbol(afterStrs[i]));
                             } catch (PLDLParsingException e) {
                                 throw new PLDLParsingException("产生式右部第 " + (i + 1) + " 个符号既不能识别为终结符，也不能识别为非终结符。是否忘记使用空格隔开？", e);
                             }

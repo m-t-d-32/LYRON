@@ -59,13 +59,13 @@ public class PreParse {
         }
     }
     
-    public CFG getCFG() throws PLDLParsingException {
-    	CFG cfg = null;
-    	if (prods != null && terminators != null && unterminators != null) {
-            cfg = new CFG(prods, terminators.keySet(), unterminators, markinStr);
-        }
-    	return cfg;
-    }
+//    public CFG getCFG() throws PLDLParsingException {
+//    	CFG cfg = null;
+//    	if (prods != null && terminators != null && unterminators != null) {
+//            cfg = new CFG(prods, terminators.keySet(), unterminators, markinStr);
+//        }
+//    	return cfg;
+//    }
 
 	public List<Symbol> getSymbols(String str, CFG cfg) throws PLDLAnalysisException, PLDLParsingException{
 		List<Symbol> resultTokens = new ArrayList<>();
@@ -95,7 +95,7 @@ public class PreParse {
 						break;
 					}
 				}
-				if (find == false){
+				if (!find){
 					throw new PLDLAnalysisException("表达式无效", null);
 				}
 			}

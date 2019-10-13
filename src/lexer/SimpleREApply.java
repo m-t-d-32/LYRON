@@ -17,7 +17,7 @@ import java.util.*;
 
 public class SimpleREApply extends RE {
 
-	public SimpleREApply(String str) throws PLDLParsingException, PLDLAnalysisException, REParsingException {
+	public SimpleREApply(String str) throws PLDLParsingException, PLDLAnalysisException {
 		super(str);		
 	}
 
@@ -30,7 +30,7 @@ public class SimpleREApply extends RE {
 			pool.initTerminatorString(terminatorStrs);
 			pool.initUnterminatorString(unterminatorStrs);
 			List<REProduction> res = new ArrayList<>(Arrays.asList(
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> E | T", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> E | T", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -54,7 +54,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> T", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> T", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -62,7 +62,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("T -> T F", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("T -> T F", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -86,7 +86,7 @@ public class SimpleREApply extends RE {
 
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("T -> F", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("T -> F", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -94,7 +94,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> ( E )", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> ( E )", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -102,7 +102,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> F *", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> F *", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -122,7 +122,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> F +", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> F +", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -141,13 +141,13 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> Fx", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> Fx", pool)) {
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
 							return nodes.get(0);
 						}
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> .", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> .", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -162,7 +162,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> char", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> char", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -175,7 +175,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> char - char", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fx -> char - char", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -194,7 +194,7 @@ public class SimpleREApply extends RE {
 							return result;
 						}
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fxs -> Fxs Fx", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fxs -> Fxs Fx", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -212,7 +212,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fxs -> Fx", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("Fxs -> Fx", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -220,7 +220,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> [ Fxs ]", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> [ Fxs ]", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
@@ -228,7 +228,7 @@ public class SimpleREApply extends RE {
 						}
 
 					},
-					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> [ ^ Fxs ]", cfg)) {
+					new REProduction(CFGProduction.getCFGProductionFromCFGString("F -> [ ^ Fxs ]", pool)) {
 
 						@Override
 						public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {

@@ -48,7 +48,7 @@ public class CFG {
         this.CFGProductions = new ArrayList<>();
         for (int i = 0; i < CFGProductionStrs.size(); ++i) {
             String CFGProductionStr = CFGProductionStrs.get(i);
-            CFGProduction production = CFGProduction.getCFGProductionFromCFGString(CFGProductionStr, this);
+            CFGProduction production = CFGProduction.getCFGProductionFromCFGString(CFGProductionStr, pool);
             production.setSerialNumber(i + 1);
             CFGProductions.add(production);
         }
