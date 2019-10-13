@@ -1,13 +1,8 @@
 package lexer;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
-import javafx.util.Pair;
 import org.graph.Graphviz;
 
 public class DFA {
@@ -80,18 +75,18 @@ public class DFA {
     }
 	
 	public void simplify() {
-		HashMap<Pair<DFANode, DFANode>, DFALinkState> map = new HashMap<>();
+		HashMap<Map.Entry<DFANode, DFANode>, DFALinkState> map = new HashMap<>();
 		Set<DFANode> nodes = new HashSet<>();
         root.setLinkedNodes(nodes);
         
         for (DFANode node: nodes) {
         	for (DFANode anotherNode: nodes) {
         		if (node != anotherNode) {
-        			map.put(new Pair<>(node, anotherNode), new DFALinkState());
+        			map.put(new AbstractMap.SimpleEntry<>(node, anotherNode), new DFALinkState());
         		}
         	}
         }
-        Stack<Pair<DFANode, DFANode>> willProceed = new Stack<>();
+        Stack<Map.Entry<DFANode, DFANode>> willProceed = new Stack<>();
         
         for (DFANode node: nodes) {
         	for (DFANode anotherNode: nodes) {
@@ -107,8 +102,8 @@ public class DFA {
 	    						break;
 	    					}
 	    					else if (nodeNext != nodeAnotherNode) {
-	    						map.get(new Pair<>(node, anotherNode)).addSlot(nodeNext, nodeAnotherNode);
-	    						map.get(new Pair<>(nodeNext, nodeAnotherNode)).addSignal(node, anotherNode);
+	    						map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).addSlot(nodeNext, nodeAnotherNode);
+	    						map.get(new AbstractMap.SimpleEntry<>(nodeNext, nodeAnotherNode)).addSignal(node, anotherNode);
 	    					}
 	        			}
         			}
@@ -116,27 +111,27 @@ public class DFA {
         				willState = DFALinkState.STATE_DIFF;
         			}
         			if (willState == DFALinkState.STATE_DIFF) {
-        				map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_DIFF);
-        				willProceed.add(new Pair<>(node, anotherNode));
+        				map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).setState(DFALinkState.STATE_DIFF);
+        				willProceed.add(new AbstractMap.SimpleEntry<>(node, anotherNode));
         			}
-        			else if (map.get(new Pair<>(node, anotherNode)).getSlot().size() <= 0) {
-        				map.get(new Pair<>(node, anotherNode)).setState(DFALinkState.STATE_SAME);
-        				willProceed.add(new Pair<>(node, anotherNode));
+        			else if (map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).getSlot().size() <= 0) {
+        				map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).setState(DFALinkState.STATE_SAME);
+        				willProceed.add(new AbstractMap.SimpleEntry<>(node, anotherNode));
         			}
 	        	}
         	}
         }
         
         while (!willProceed.empty()) {
-        	Pair<DFANode, DFANode> pair = willProceed.pop();
+			Map.Entry<DFANode, DFANode> pair = willProceed.pop();
         	if (map.get(pair).getState() == DFALinkState.STATE_DIFF) {
-        		for (Pair<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
+        		for (Map.Entry<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
         			map.get(signalPair).setState(DFALinkState.STATE_DIFF);
         			willProceed.add(signalPair);
         		}
         	}
         	else if (map.get(pair).getState() == DFALinkState.STATE_SAME) {
-        		for (Pair<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
+        		for (Map.Entry<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
         			map.get(signalPair).removeSlot(pair);
         			if (map.get(signalPair).getSlot().size() <= 0) {
         				map.get(signalPair).setState(DFALinkState.STATE_SAME);
@@ -153,7 +148,7 @@ public class DFA {
         }
         for (DFANode node: nodes) {        	
         	for (DFANode anotherNode: nodes) {
-        		if (node != anotherNode && map.get(new Pair<>(node, anotherNode)).getState() != DFALinkState.STATE_DIFF) {
+        		if (node != anotherNode && map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).getState() != DFALinkState.STATE_DIFF) {
         			linkedNodes.get(node).add(anotherNode);
         		}
         	}
