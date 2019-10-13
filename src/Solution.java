@@ -6,7 +6,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import exception.PLDLAnalysisException;
+import exception.PLDLParsingException;
+import exception.REParsingException;
+import lexer.AnalysisByDFAs;
+import lexer.DFA;
+import lexer.SimpleREApply;
 import org.dom4j.DocumentException;
+import util.Graphics;
 
 public class Solution {
 	
@@ -68,7 +75,7 @@ public class Solution {
 		return s.toString();
 	}
 
-    public static void main(String[] args) throws PLDLParsingException, DocumentException, PLDLAnalysisException, REParsingException, IOException {
+    public static void main(String[] args) throws PLDLParsingException, PLDLAnalysisException, IOException {
         new Thread() {
             @Override
             public void run() {
@@ -130,7 +137,7 @@ public class Solution {
         cDFAs.add(getDFA("\".*\"", "string", null, null));
         cDFAs.add(getDFA("\'.*\'", "char", null, null));
 
-        AnalysisByDFAs analysis = new AnalysisByDFAs(cDFAs);
+        AnalysisByDFAs a = new AnalysisByDFAs(cDFAs);
         Set<Character> emptyChars = new HashSet<>();
         emptyChars.add(' ');
         emptyChars.add('\t');
@@ -145,6 +152,6 @@ public class Solution {
         in.read(filecontent);
         String s = new String(filecontent);
         //System.out.println(s);
-        analysis.Analysis(s, emptyChars);
+        a.analysis(s, emptyChars);
     }
 }
