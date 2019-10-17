@@ -1,10 +1,6 @@
-.idea/*
-dom4j-2.0.2.jar
-out/*
-.classpath
-.project
-.settings/
-bin/*
-pldlparser.iml
-images/test.png
-/bin/
+.idea/
+images/
+!images/back.jpg
+*.iml
+target/
+out/
