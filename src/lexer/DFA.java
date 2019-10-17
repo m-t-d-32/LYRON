@@ -232,22 +232,39 @@ public class DFA {
 		bannedLookingForwardStrs.add(str);
 	}
 
-	public Integer analysis(String substring) {
+	public Map.Entry<String, Integer> analysis(String substring) {
 		DFANode node = getRoot();
+		Stack<Map.Entry<DFANode, Integer>> finalNodes = new Stack<>();
+		DFANode finalNode = null;
 		int pointer = 0;
-		while (pointer < substring.length() && (
-				!node.isFinal() || 
-				bannedLookingForwardStrs.contains(String.valueOf(substring.charAt(pointer))))) {
-			char c = substring.charAt(pointer);
-			if (node.getStateTransformTable().containsKey(String.valueOf(c))) {
-				node = node.getStateTransformTable().get(String.valueOf(c));
+		while (pointer < substring.length()) {
+			String next = String.valueOf(substring.charAt(pointer));
+			if (node.isFinal()){
+				finalNodes.push(new AbstractMap.SimpleEntry<>(node, pointer));
+			}
+
+			if (node.getStateTransformTable().containsKey(next)) {
+				node = node.getStateTransformTable().get(next);
 			}
 			else {
-				return -1;
+				break;
 			}
 			++pointer;
 		}
-		return node.isFinal() ? pointer : -1;
+		if (node.isFinal()){
+			finalNodes.push(new AbstractMap.SimpleEntry<>(node, pointer));
+		}
+		while (!finalNodes.empty()){
+			Map.Entry<DFANode, Integer> analyzeFinal = finalNodes.pop();
+			for (String str: analyzeFinal.getKey().getFinalNames()){
+				if (analyzeFinal.getValue() + 1 >= substring.length() ||
+					!analyzeFinal.getKey().getFinalNamesToBannedStrs().containsKey(str) ||
+					!analyzeFinal.getKey().getFinalNamesToBannedStrs().get(str).contains(String.valueOf(substring.charAt(analyzeFinal.getValue() + 1)))){
+					return new AbstractMap.SimpleEntry<>(str, pointer);
+				}
+			}
+		}
+		return null;
 	}
 
 	public String getName() {

@@ -9,12 +9,22 @@ public class NFANode {
 	private String serialCode = null;
 	
 	private Map<String, Set<NFANode> > stateTransformTable;
+
+	private String finalName = null;
+
+	private boolean isFinal = false;
+
+	public String getFinalName() {
+		return finalName;
+	}
+
+	public void setFinalName(String finalName) {
+		this.finalName = finalName;
+	}
 	
 	public Map<String, Set<NFANode>> getStateTransformTable() {
 		return stateTransformTable;
 	}
-
-	private boolean isFinal = false;
 	
 	public boolean isFinal() {
 		return isFinal;
@@ -76,5 +86,5 @@ public class NFANode {
 	public String toString() {
 		return getSerial();
 	}
-	
+
 }
