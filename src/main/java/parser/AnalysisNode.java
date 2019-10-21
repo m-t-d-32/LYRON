@@ -16,6 +16,17 @@ public class AnalysisNode {
 	}
 
 	List<AnalysisNode> children;
+
+	public CFGProduction getProduction() {
+		return production;
+	}
+
+	public void setProduction(CFGProduction production) {
+		this.production = production;
+	}
+
+	CFGProduction production;
+
 	AnalysisNode parent;
 	
 	public AnalysisNode(Symbol value) {

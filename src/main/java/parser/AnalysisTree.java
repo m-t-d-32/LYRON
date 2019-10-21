@@ -3,15 +3,15 @@ package parser;
 public class AnalysisTree {
 	AnalysisNode root;
 	
-	AnalysisTree(){
+	public AnalysisTree(){
 		root = null;
 	}
 	
-	AnalysisNode getRoot() {
+	public AnalysisNode getRoot() {
 		return root;
 	}
 	
-	void setRoot(AnalysisNode root) {
+	public void setRoot(AnalysisNode root) {
 		this.root = root;
 	}
 	

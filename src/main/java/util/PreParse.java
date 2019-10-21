@@ -1,105 +1,87 @@
 package util;
 
 import java.io.File;
-import java.io.StringBufferInputStream;
 import java.util.*;
-import java.util.regex.*;
 
-import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
+import lexer.DFA;
+import lexer.NFA;
+import lexer.SimpleREApply;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import parser.CFG;
-import symbol.AbstractTerminator;
-import symbol.Symbol;
-import symbol.Terminator;
+import parser.CFGProduction;
+import symbol.SymbolPool;
+import translator.MovementProduction;
 
 public class PreParse {
-	
+
+    Set<String> terminators = new HashSet<>();
     Set<String> unterminators = new HashSet<>();
-    Map<String, Pattern> terminators = new HashMap<>();
+    List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
     List<String> prods = new ArrayList<>();
+    List<List<String> > movementsStrs = new ArrayList<>();
     String markinStr = null;
 	
-    public PreParse(String filename, String markinStr) throws DocumentException {
+    public PreParse(String filename, String markinStr) throws Exception {
     	this.markinStr = markinStr;
         SAXReader reader = new SAXReader();
         Document document = reader.read(new File(filename));
         Element root = document.getRootElement();
         if (root.getName().equals("pldl")) {
-            for (Iterator<Element> i = root.elementIterator(); i.hasNext(); ) {
-                Element el = i.next();
-                if (el.attribute("name").getValue().equals("cfgproductions")) {
-                    List<Element> pdsEl = el.elements("item");
-                    for (Element e : pdsEl) {
-                        String production = e.getText().trim();
-                        prods.add(production);
-                        unterminators.add(production.split("->")[0].trim());
-                    }
-                    for (Element e : pdsEl) {
-                        String[] afters = e.getText().trim().split("->")[1].trim().split(" +");
-                        for (String after : afters) {
-                            if (!unterminators.contains(after.trim()) && !terminators.containsKey(after.trim())) {
-                                terminators.put(after.trim(), Pattern.compile(Pattern.quote(after.trim())));
-                            }
-                        }
-                    }
+            Element el = root.element("terminators");
+            List<Element> terminatorsEl = el.elements("item");
+            for (Element e : terminatorsEl) {
+                String name = e.element("name").getText().trim();
+                String regex = e.element("regex").getText().trim();
+                terminatorsNFA.add(new AbstractMap.SimpleEntry<>(name, new SimpleREApply(regex).getNFA()));
+                terminators.add(name);
+            }
+            el = root.element("cfgproductions");
+            List<Element> pdsEl = el.elements("item");
+            for (Element e : pdsEl) {
+                String production =  e.element("production").getText().trim();
+                prods.add(production);
+                unterminators.add(production.split("->")[0].trim());
+                List<Element> movements = e.element("movement").elements("item");
+                List<String> movementsStr = new ArrayList<>();
+                for (Element movement: movements){
+                    movementsStr.add(movement.getText().trim());
                 }
-                else if (el.attribute("name").getValue().equals("terminators")){
-                	List<Element> terminatorsEl = el.elements("item");
-                    for (Element e : terminatorsEl) {
-                    	String name = e.element("name").getText().trim();                            
-                        Pattern pattern = Pattern.compile(e.element("regex").getText().trim());
-                        terminators.put(name, pattern);
+                movementsStrs.add(movementsStr);
+            }
+            for (Element e : pdsEl){
+                String production = e.element("production").getText().trim();
+                String[] afters = production.split("->")[1].trim().split(" +");
+                for (String after : afters) {
+                    if (!unterminators.contains(after.trim()) && !terminators.contains(after.trim())) {
+                        terminatorsNFA.add(new AbstractMap.SimpleEntry<>(after.trim(), NFA.fastNFA(after.trim())));
+                        terminators.add(after.trim());
                     }
                 }
             }
         }
     }
     
-//    public CFG getCFG() throws PLDLParsingException {
-//    	CFG cfg = null;
-//    	if (prods != null && terminators != null && unterminators != null) {
-//            cfg = new CFG(prods, terminators.keySet(), unterminators, markinStr);
-//        }
-//    	return cfg;
-//    }
+    public CFG getCFG() throws PLDLParsingException {
+    	SymbolPool pool = new SymbolPool();
+    	pool.initTerminatorString(terminators);
+    	pool.initUnterminatorString(unterminators);
+    	Set<MovementProduction> productions = new HashSet<>();
+    	for (int i = 0; i < prods.size(); ++i){
+    	    String s = prods.get(i);
+            List<String> movementsStr = movementsStrs.get(i);
+    	    productions.add(new MovementProduction(CFGProduction.getCFGProductionFromCFGString(s, pool), movementsStr));
+        }
+    	return new CFG(pool, productions, markinStr);
+    }
 
-	public List<Symbol> getSymbols(String str, CFG cfg) throws PLDLAnalysisException, PLDLParsingException{
-		List<Symbol> resultTokens = new ArrayList<>();
-		Scanner fileScanner = new Scanner(new StringBufferInputStream(str));
-		while (fileScanner.hasNext()){
-			String nowString = fileScanner.next();
-			int matchIndex = 0;
-			while (true){
-				if (matchIndex >= nowString.length()){
-					break;
-				}
-				else {
-					nowString = nowString.substring(matchIndex);
-				}
-				boolean find = false;
-				System.out.println(nowString);
-				for (String terminatorStr: terminators.keySet()) {
-					Matcher matcher = terminators.get(terminatorStr).matcher(nowString);
-					if (matcher.find() && nowString.indexOf(matcher.group(0)) == 0){
-						AbstractTerminator abstractTerminator = cfg.getSymbolPool().getTerminator(terminatorStr);
-						String resultString = matcher.group(0);
-						Terminator te = new Terminator(abstractTerminator);
-						te.addProperty("name", resultString);
-						resultTokens.add(te);
-						matchIndex = resultString.length();
-						find = true;
-						break;
-					}
-				}
-				if (!find){
-					throw new PLDLAnalysisException("表达式无效", null);
-				}
-			}
-		}
-		return resultTokens;
+    public List<Map.Entry<String, NFA>> getTerminatorRegexes() {
+        return terminatorsNFA;
+    }
+
+    public Map<String, String> getBannedStrs() {
+        return null;
     }
 }

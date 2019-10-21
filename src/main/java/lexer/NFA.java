@@ -160,6 +160,7 @@ public class NFA {
 			pointer = next;
 		}
 		pointer.setFinal(true);
+		pointer.setFinalName(str);
 		NFA result = new NFA(root);
 		result.getFinalNodes().add(pointer);
 		return result;

@@ -95,7 +95,7 @@ public class TransformTable implements Serializable{
         }
         return result.toString();
     }
-    
+
     public AnalysisTree getAnalysisTree(List<Symbol> symbols) throws PLDLAnalysisException, PLDLParsingException {
     	AnalysisTree tree = new AnalysisTree();
     	Stack<Integer> statementStack = new Stack<>();
@@ -114,7 +114,7 @@ public class TransformTable implements Serializable{
     			throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
     		}
     		else {
-	    		switch(movement.getMovement()) { 
+	    		switch(movement.getMovement()) {
 	    			case Movement.SHIFT:
 	    				nodeStack.push(new AnalysisNode(nowSymbol));
 	    			case Movement.GOTO:
@@ -124,6 +124,7 @@ public class TransformTable implements Serializable{
 	    			case Movement.REGRESSION:
 	    				CFGProduction production = movement.getRegressionProduction();
 	    				AnalysisNode node = new AnalysisNode(new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol()));
+	    				node.setProduction(production);
 	    				node.setChildren(new ArrayList<>());
 	    				Stack<AnalysisNode> tempStack = new Stack<>();
 		    			for (AbstractSymbol ignored : production.getAfterAbstractSymbols()) {

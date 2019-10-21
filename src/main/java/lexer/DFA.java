@@ -95,10 +95,15 @@ public class DFA {
         
         for (DFANode node: nodes) {
         	for (DFANode anotherNode: nodes) {
-        		if (node != anotherNode) {
-        			map.put(new AbstractMap.SimpleEntry<>(node, anotherNode), new DFALinkState());
-        		}
-        	}
+        		DFALinkState dfaLinkState = new DFALinkState();
+        		if (node == anotherNode){
+        			dfaLinkState.setState(DFALinkState.STATE_SAME);
+				}
+        		else {
+        			dfaLinkState.setState(DFALinkState.STATE_UNDEFINED);
+				}
+				map.put(new AbstractMap.SimpleEntry<>(node, anotherNode), dfaLinkState);
+			}
         }
         Stack<Map.Entry<DFANode, DFANode>> willProceed = new Stack<>();
         
@@ -106,25 +111,20 @@ public class DFA {
         	for (DFANode anotherNode: nodes) {
         		if (node != anotherNode) {
         			int willState = DFALinkState.STATE_UNDEFINED;
-        			if (node.getStateTransformTable().keySet().containsAll(anotherNode.getStateTransformTable().keySet())
-        					&& node.getStateTransformTable().size() == anotherNode.getStateTransformTable().size()) {
-	        			for (String s: node.getStateTransformTable().keySet()) {
-	        				DFANode nodeNext = node.getStateTransformTable().get(s);
-	    					DFANode nodeAnotherNode = anotherNode.getStateTransformTable().get(s);
-	    					if (node.isFinal() != anotherNode.isFinal() ||
-							node.isFinal() && anotherNode.isFinal() && !node.getFinalNames().equals(anotherNode.getFinalNames()) ||
-							node.isFinal() && anotherNode.isFinal() && !node.getFinalNamesToBannedStrs().equals(anotherNode.getFinalNamesToBannedStrs())) {
-	    						willState = DFALinkState.STATE_DIFF;
-	    						break;
-	    					}
-	    					else if (nodeNext != nodeAnotherNode) {
-	    						map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).addSlot(nodeNext, nodeAnotherNode);
-	    						map.get(new AbstractMap.SimpleEntry<>(nodeNext, nodeAnotherNode)).addSignal(node, anotherNode);
-	    					}
-	        			}
+        			if (!node.getStateTransformTable().keySet().containsAll(anotherNode.getStateTransformTable().keySet())
+        					|| !(node.getStateTransformTable().size() == anotherNode.getStateTransformTable().size())
+							|| node.isFinal() != anotherNode.isFinal()
+							|| node.isFinal() && anotherNode.isFinal() && !node.getFinalNames().equals(anotherNode.getFinalNames())
+							|| node.isFinal() && anotherNode.isFinal() && !node.getFinalNamesToBannedStrs().equals(anotherNode.getFinalNamesToBannedStrs())) {
+						willState = DFALinkState.STATE_DIFF;
         			}
         			else {
-        				willState = DFALinkState.STATE_DIFF;
+						for (String s: node.getStateTransformTable().keySet()) {
+							DFANode nodeNext = node.getStateTransformTable().get(s);
+							DFANode nodeAnotherNode = anotherNode.getStateTransformTable().get(s);
+							map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).addSlot(nodeNext, nodeAnotherNode);
+							map.get(new AbstractMap.SimpleEntry<>(nodeNext, nodeAnotherNode)).addSignal(node, anotherNode);
+						}
         			}
         			if (willState == DFALinkState.STATE_DIFF) {
         				map.get(new AbstractMap.SimpleEntry<>(node, anotherNode)).setState(DFALinkState.STATE_DIFF);

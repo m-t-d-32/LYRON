@@ -36,10 +36,11 @@ public class Lexer {
 			}
 		}
 		NFA allNFA = NFA.getJoinedNFA(regexesNFAs);
-		allNFA.draw(new File("images/nfa.png"));
+		//allNFA.draw(new File("images/nfa.png"));
 		dfa = allNFA.toDFA(regexesOrders, regexesBannedOrders);
+		//dfa.draw(new File("images/dfa_raw.png"));
 		dfa.simplify();
-		dfa.draw(new File("images/dfa.png"));
+		//dfa.draw(new File("images/dfa.png"));
 	}
 	
 	public List<Symbol> analysis(String str, Set<Character> emptyChars) throws PLDLAnalysisException {
@@ -52,9 +53,9 @@ public class Lexer {
 					Map.Entry<String, Integer> analysisResult = dfa.analysis(substring);
 					if (analysisResult != null) {
 						Terminator simpleResult = new Terminator(new AbstractTerminator(analysisResult.getKey()));
-						simpleResult.addProperty("name", str.substring(pointer, pointer + analysisResult.getValue()));
+						simpleResult.addProperty("val", str.substring(pointer, pointer + analysisResult.getValue()));
 						result.add(simpleResult);
-						System.out.println("matched: " + str.substring(pointer, pointer + analysisResult.getValue()) + " by " + analysisResult.getKey());
+						//System.out.println("matched: " + str.substring(pointer, pointer + analysisResult.getValue()) + " by " + analysisResult.getKey());
 						pointer += analysisResult.getValue();
 					} else {
 						throw new PLDLAnalysisException("词法分析错误出现在第  " + getRow(pointer, str) + " 行，第 " + getColumn(pointer, str) + " 列", null);
@@ -70,7 +71,7 @@ public class Lexer {
 				Terminator simpleResult = new Terminator(new AbstractTerminator(analysisResult.getKey()));
 				simpleResult.addProperty("name", str.substring(pointer, pointer + analysisResult.getValue()));
 				result.add(simpleResult);
-				System.out.println("matched: " + str.substring(pointer, pointer + analysisResult.getValue()) + " by " + analysisResult.getKey());
+				//System.out.println("matched: " + str.substring(pointer, pointer + analysisResult.getValue()) + " by " + analysisResult.getKey());
 			}
 		}
 		return result;

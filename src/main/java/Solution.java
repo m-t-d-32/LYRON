@@ -15,54 +15,13 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import parser.AnalysisTree;
+import parser.CFG;
+import translator.Translator;
 import util.Graphics;
+import util.PreParse;
 
 public class Solution {
-	
-	private static String getDigit() {
-		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < 9; ++i) {
-			s.append(String.valueOf(i));
-		}
-		return s.toString();
-	}
-	private static String getLetter() {
-		StringBuilder s = new StringBuilder();
-		for (char c = 'a'; c < 'z'; ++c) {
-			s.append(String.valueOf(c));
-		}
-		for (char c = 'A'; c < 'Z'; ++c) {
-			s.append(String.valueOf(c));
-		}
-		return s.toString();
-	}
-
-	private static List<Map.Entry<String, NFA>> getNFAFromFile(String filename) throws DocumentException, PLDLParsingException, PLDLAnalysisException, IOException {
-        List<Map.Entry<String, NFA>> result = new ArrayList<>();
-        SAXReader reader = new SAXReader();
-        Document document = reader.read(new File(filename));
-        Element root = document.getRootElement();
-        if (root.getName().equals("re")) {
-            String []regexes = root.element("regex").getText().trim().split("\n");
-            for (String e: regexes){
-                String []splits = e.split(":");
-                String s = splits[0].trim();
-                NFA nfa = new SimpleREApply(splits[1].trim()).getNFA();
-                nfa.draw(new File("images/nfa_" + s + ".png"));
-                result.add(new AbstractMap.SimpleEntry<>(s, nfa));
-            }
-            String []fastRegexes = root.element("faststring").getText().trim().split("\n");
-            for (String e: fastRegexes){
-                String []splits = e.split(":");
-                String s = splits[0].trim();
-                NFA nfa = NFA.fastNFA(splits[1].trim());
-                nfa.draw(new File("images/nfa_" + s + ".png"));
-                result.add(new AbstractMap.SimpleEntry<>(s, nfa));
-            }
-        }
-        return result;
-    }
-
     public static void main(String[] args) throws Exception {
         new Thread() {
             @Override
@@ -75,18 +34,22 @@ public class Solution {
             }
         }.start();
 
-        List<Map.Entry<String, NFA>> regexes = getNFAFromFile("test.re");
-
-        Lexer a = new Lexer(regexes, null);
+        PreParse preparse = new PreParse("calculator.xml", "S");
+        Lexer lexer = new Lexer(preparse.getTerminatorRegexes(), preparse.getBannedStrs());
+        CFG cfg = preparse.getCFG();
         Set<Character> emptyChars = new HashSet<>();
         emptyChars.add(' ');
         emptyChars.add('\t');
         emptyChars.add('\n');
         emptyChars.add('\r');
         emptyChars.add('\f');
-        a.analysis("", emptyChars);
-        while (true) {
-            a.analysis(new Scanner(System.in).next(), emptyChars);
-        }
+
+        Scanner in = new Scanner(System.in);
+        AnalysisTree tree = cfg.getTable().getAnalysisTree(lexer.analysis(in.nextLine(), emptyChars));
+        //System.out.println(tree);
+        Translator translator = new Translator(tree);
+        List<String> results = new ArrayList<>();
+        translator.doTranslate(results);
+        System.out.println(results);
     }
 }
