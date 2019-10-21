@@ -15,8 +15,10 @@ public class Translator {
         this.tree = tree;
     }
 
-    public void doTranslate(List<String> generations){
-        rrTranslate(tree.getRoot(), generations);
+    public List<String> doTranslate(){
+        List<String> result = new ArrayList<>();
+        rrTranslate(tree.getRoot(), result);
+        return result;
     }
 
     private void rrTranslate(AnalysisNode root, List<String> generations) {

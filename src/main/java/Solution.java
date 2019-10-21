@@ -36,20 +36,17 @@ public class Solution {
 
         PreParse preparse = new PreParse("calculator.xml", "S");
         Lexer lexer = new Lexer(preparse.getTerminatorRegexes(), preparse.getBannedStrs());
-        CFG cfg = preparse.getCFG();
         Set<Character> emptyChars = new HashSet<>();
         emptyChars.add(' ');
         emptyChars.add('\t');
         emptyChars.add('\n');
         emptyChars.add('\r');
         emptyChars.add('\f');
-
         Scanner in = new Scanner(System.in);
-        AnalysisTree tree = cfg.getTable().getAnalysisTree(lexer.analysis(in.nextLine(), emptyChars));
+        AnalysisTree tree = preparse.getCFG().getTable().getAnalysisTree(lexer.analysis(in.nextLine(), emptyChars));
         //System.out.println(tree);
         Translator translator = new Translator(tree);
-        List<String> results = new ArrayList<>();
-        translator.doTranslate(results);
+        List<String> results = translator.doTranslate();
         System.out.println(results);
     }
 }
