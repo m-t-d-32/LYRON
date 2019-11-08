@@ -126,13 +126,18 @@ public class TransformTable implements Serializable{
 	    				AnalysisNode node = new AnalysisNode(new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol()));
 	    				node.setProduction(production);
 	    				node.setChildren(new ArrayList<>());
+	    				AbstractTerminator nullTerminator = cfg.getSymbolPool().getTerminator("null");
 	    				Stack<AnalysisNode> tempStack = new Stack<>();
-		    			for (AbstractSymbol ignored : production.getAfterAbstractSymbols()) {
-		    				statementStack.pop();
-		    				tempStack.push(nodeStack.pop());
+		    			for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+		    				if (symbol != nullTerminator) {
+								statementStack.pop();
+								tempStack.push(nodeStack.pop());
+							}
 		    			}
-		    			for (AbstractSymbol ignored : production.getAfterAbstractSymbols()) {
-		    				node.getChildren().add(tempStack.pop());
+		    			for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+		    				if (symbol != nullTerminator) {
+								node.getChildren().add(tempStack.pop());
+							}
 		    			}
 		    			nodeStack.push(node);
 		    			--beginI;

@@ -82,10 +82,13 @@ public abstract class RE {
 						REProduction production = (REProduction) movement.getRegressionProduction();
 						List<NFA> tempNFA = new ArrayList<>();
 						List<Symbol> tempSymbol = new ArrayList<>();
-						for (AbstractSymbol ignored : production.getAfterAbstractSymbols()) {
-							statementStack.pop();
-							tempNFA.add(nodeStack.pop());
-							tempSymbol.add(symbolStack.pop());
+						AbstractTerminator nullTerminator = cfg.getSymbolPool().getTerminator("null");
+						for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+							if (symbol != nullTerminator) {
+								statementStack.pop();
+								tempNFA.add(nodeStack.pop());
+								tempSymbol.add(symbolStack.pop());
+							}
 						}
 						Collections.reverse(tempNFA);
 						Collections.reverse(tempSymbol);

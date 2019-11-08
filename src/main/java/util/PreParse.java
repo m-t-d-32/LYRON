@@ -12,6 +12,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import parser.CFG;
 import parser.CFGProduction;
+import symbol.AbstractTerminator;
 import symbol.SymbolPool;
 import translator.MovementProduction;
 
@@ -32,34 +33,40 @@ public class PreParse {
         if (root.getName().equals("pldl")) {
             Element el = root.element("terminators");
             List<Element> terminatorsEl = el.elements("item");
-            for (Element e : terminatorsEl) {
-                String name = e.element("name").getText().trim();
-                String regex = e.element("regex").getText().trim();
-                terminatorsNFA.add(new AbstractMap.SimpleEntry<>(name, new SimpleREApply(regex).getNFA()));
-                terminators.add(name);
-            }
+
             el = root.element("cfgproductions");
             List<Element> pdsEl = el.elements("item");
             for (Element e : pdsEl) {
                 String production =  e.element("production").getText().trim();
                 prods.add(production);
                 unterminators.add(production.split("->")[0].trim());
-                List<Element> movements = e.element("movement").elements("item");
-                List<String> movementsStr = new ArrayList<>();
-                for (Element movement: movements){
-                    movementsStr.add(movement.getText().trim());
-                }
-                movementsStrs.add(movementsStr);
+//                List<Element> movements = e.element("movement").elements("item");
+//                List<String> movementsStr = new ArrayList<>();
+//                for (Element movement: movements){
+//                    movementsStr.add(movement.getText().trim());
+//                }
+//                movementsStrs.add(movementsStr);
+            }
+            for (Element e : terminatorsEl) {
+                String name = e.element("name").getText().trim();
+                terminators.add(name);
             }
             for (Element e : pdsEl){
                 String production = e.element("production").getText().trim();
                 String[] afters = production.split("->")[1].trim().split(" +");
                 for (String after : afters) {
-                    if (!unterminators.contains(after.trim()) && !terminators.contains(after.trim())) {
+                    if (!after.equals("null") &&
+                            !unterminators.contains(after.trim()) && !terminators.contains(after.trim())) {
                         terminatorsNFA.add(new AbstractMap.SimpleEntry<>(after.trim(), NFA.fastNFA(after.trim())));
                         terminators.add(after.trim());
                     }
                 }
+            }
+            for (Element e : terminatorsEl) {
+                String name = e.element("name").getText().trim();
+                String regex = e.element("regex").getText().trim();
+                terminatorsNFA.add(new AbstractMap.SimpleEntry<>(name, new SimpleREApply(regex).getNFA()));
+                terminators.add(name);
             }
         }
     }
@@ -68,11 +75,14 @@ public class PreParse {
     	SymbolPool pool = new SymbolPool();
     	pool.initTerminatorString(terminators);
     	pool.initUnterminatorString(unterminators);
-    	Set<MovementProduction> productions = new HashSet<>();
+    	Set<CFGProduction> productions = new HashSet<>();
     	for (int i = 0; i < prods.size(); ++i){
     	    String s = prods.get(i);
-            List<String> movementsStr = movementsStrs.get(i);
-    	    productions.add(new MovementProduction(CFGProduction.getCFGProductionFromCFGString(s, pool), movementsStr));
+//          List<String> movementsStr = movementsStrs.get(i);
+//    	    productions.add(new MovementProduction(CFGProduction.getCFGProductionFromCFGString(s, pool), movementsStr));
+            CFGProduction production = CFGProduction.getCFGProductionFromCFGString(s, pool);
+            production.setSerialNumber(i + 1);
+            productions.add(production);
         }
     	return new CFG(pool, productions, markinStr);
     }

@@ -1,25 +1,15 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import exception.PLDLAnalysisException;
-import exception.PLDLParsingException;
-import exception.REParsingException;
 import lexer.Lexer;
-import lexer.DFA;
-import lexer.NFA;
-import lexer.SimpleREApply;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import parser.AnalysisTree;
-import parser.CFG;
-import translator.Translator;
+import parser.TransformTable;
+import symbol.Symbol;
 import util.Graphics;
 import util.PreParse;
+
+import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Solution {
     public static void main(String[] args) throws Exception {
@@ -34,7 +24,7 @@ public class Solution {
             }
         }.start();
 
-        PreParse preparse = new PreParse("calculator.xml", "S");
+        PreParse preparse = new PreParse("c.xml", "Program");
         Lexer lexer = new Lexer(preparse.getTerminatorRegexes(), preparse.getBannedStrs());
         Set<Character> emptyChars = new HashSet<>();
         emptyChars.add(' ');
@@ -42,11 +32,23 @@ public class Solution {
         emptyChars.add('\n');
         emptyChars.add('\r');
         emptyChars.add('\f');
-        Scanner in = new Scanner(System.in);
-        AnalysisTree tree = preparse.getCFG().getTable().getAnalysisTree(lexer.analysis(in.nextLine(), emptyChars));
-        //System.out.println(tree);
-        Translator translator = new Translator(tree);
-        List<String> results = translator.doTranslate();
-        System.out.println(results);
+        TransformTable table = preparse.getCFG().getTable();
+        System.out.println(table.getTableMap().size());
+
+        FileInputStream in = new FileInputStream("test.c");
+        int size = in.available();
+        byte[] buffer = new byte[size];
+        in.read(buffer);
+        in.close();
+        String s = new String(buffer, StandardCharsets.UTF_8);
+        List<Symbol> symbols = lexer.analysis(s, emptyChars);
+        System.out.println(symbols.size());
+        AnalysisTree tree = table.getAnalysisTree(symbols);
+        System.out.println(tree);
+        //Scanner in = new Scanner(System.in);
+        //AnalysisTree tree = table.getAnalysisTree(lexer.analysis(in.nextLine(), emptyChars));
+        //Translator translator = new Translator(tree);
+        //List<String> results = translator.doTranslate();
+        //System.out.println(results);
     }
 }
