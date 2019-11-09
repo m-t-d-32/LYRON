@@ -28,16 +28,19 @@
 			<production> FunctionName -> var </production>
 		</item>
 		<item>
-			<production> Variables -> TypedVar CommaVariables </production>
+			<production> Variables -> null </production>
+		</item>
+		<item>
+			<production> Variables -> InnerVariables</production>
+		</item>
+		<item>
+			<production> InnerVariables -> TypedVar CommaVariables </production>
 		</item>
 		<item>
 			<production> CommaVariables -> null </production>
 		</item>
 		<item>
-			<production> Variables -> null </production>
-		</item>
-		<item>
-			<production> CommaVariables -> , Variables </production>
+			<production> CommaVariables -> , InnerVariables </production>
 		</item>
 		<item>
 			<production> TypedVar -> Type var </production>
@@ -85,6 +88,9 @@
 			<production> ForStatement -> for ( Expression ; Expression ; Expression ) Block </production>
 		</item>
 		<item>
+			<production> Statement -> ; </production>
+		</item>
+		<item>
 			<production> Statement -> IfStatement </production>
 		</item>
 		<item>
@@ -109,40 +115,28 @@
 			<production> DoWhileStatement -> do Block while ( Expression ) </production>
 		</item>
 		<item>
+			<production> Statement -> return Expression ;</production>
+		</item>
+		<item>
 			<production> Statement -> Expression ; </production>
 		</item>
 		<item>
-			<production> Expression -> FunctionCall </production>
+			<production> Expression -> ExpressionComma </production>
 		</item>
 		<item>
-			<production> FunctionCall -> FunctionName ( Vars ) </production>
-		</item>
-		<item>
-			<production> Vars -> var CommaVars </production>
-		</item>
-		<item>
-			<production> CommaVars -> , Vars </production>
-		</item>
-		<item>
-			<production> CommaVars -> null </production>
-		</item>
-		<item>
-			<production> Expression -> ExpressionAssignment </production>
-		</item>
-		<item>
-			<production> ExpressionAssignment -> ExpressionAssignment = ExpressionComma </production>
-		</item>
-		<item>
-			<production> ExpressionAssignment -> ExpressionComma </production>
-		</item>
-		<item>
-			<production> ExpressionComma -> ExpressionOr CommaExpressionComma </production>
+			<production> ExpressionComma -> ExpressionAssignment CommaExpressionComma </production>
 		</item>
 		<item>
 			<production> CommaExpressionComma -> null </production>
 		</item>
 		<item>
 			<production> CommaExpressionComma -> , ExpressionComma </production>
+		</item>
+		<item>
+			<production> ExpressionAssignment -> var = ExpressionOr </production>
+		</item>
+		<item>
+			<production> ExpressionAssignment -> ExpressionOr </production>
 		</item>
 		<item>
 			<production> ExpressionOr -> ExpressionOr || ExpressionAnd </production>
@@ -227,6 +221,28 @@
 		</item>
 		<item>
 			<production> Num -> num </production>
+		</item>
+
+		<item>
+			<production> ExpressionPara -> FunctionCall </production>
+		</item>
+		<item>
+			<production> FunctionCall -> FunctionName ( CallingVars ) </production>
+		</item>
+		<item>
+			<production> CallingVars -> null </production>
+		</item>
+		<item>
+			<production> CallingVars -> CallingInnerVars </production>
+		</item>
+		<item>
+			<production> CallingInnerVars -> ExpressionAssignment CallingCommaVars </production>
+		</item>
+		<item>
+			<production> CallingCommaVars -> , CallingInnerVars </production>
+		</item>
+		<item>
+			<production> CallingCommaVars -> null </production>
 		</item>
     </cfgproductions>
     <terminators>
