@@ -138,14 +138,17 @@ public class DFA {
 			Map.Entry<DFANode, DFANode> pair = willProceed.pop();
         	if (map.get(pair).getState() == DFALinkState.STATE_DIFF) {
         		for (Map.Entry<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
-        			map.get(signalPair).setState(DFALinkState.STATE_DIFF);
-        			willProceed.add(signalPair);
+        			if (map.get(signalPair).getState() == DFALinkState.STATE_UNDEFINED) {
+						map.get(signalPair).setState(DFALinkState.STATE_DIFF);
+						willProceed.add(signalPair);
+					}
         		}
         	}
         	else if (map.get(pair).getState() == DFALinkState.STATE_SAME) {
         		for (Map.Entry<DFANode, DFANode> signalPair: map.get(pair).getSignal()) {
         			map.get(signalPair).removeSlot(pair);
-        			if (map.get(signalPair).getSlot().size() <= 0) {
+        			if (map.get(signalPair).getState() == DFALinkState.STATE_UNDEFINED &&
+							map.get(signalPair).getSlot().size() <= 0) {
         				map.get(signalPair).setState(DFALinkState.STATE_SAME);
         				willProceed.add(signalPair);
         			}

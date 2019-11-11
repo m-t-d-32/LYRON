@@ -12,6 +12,7 @@ int max(int x,int y)
     else{
     t=y; //This is a comment.
     } /*
+
     I don't know what I am doing......
     *****************/
     return t;  /*hello world */ //This is a comment.
