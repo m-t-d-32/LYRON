@@ -1,5 +1,6 @@
 import lexer.Lexer;
 import parser.AnalysisTree;
+import parser.CFG;
 import parser.TransformTable;
 import symbol.Symbol;
 import util.Graphics;
@@ -32,7 +33,8 @@ public class Solution {
         emptyChars.add('\n');
         emptyChars.add('\r');
         emptyChars.add('\f');
-        TransformTable table = preparse.getCFG().getTable();
+        CFG cfg = preparse.getCFG();
+        TransformTable table = cfg.getTable();
         System.out.println(table.getTableMap().size());
 
         FileInputStream in = new FileInputStream("test.c");
@@ -43,6 +45,9 @@ public class Solution {
         String s = new String(buffer, StandardCharsets.UTF_8);
         List<Symbol> symbols = lexer.analysis(s, emptyChars);
         System.out.println(symbols.size());
+        symbols = cfg.revertToStdAbstractSymbols(symbols);
+        symbols = cfg.eraseComments(symbols);
+        System.out.println(symbols);
         AnalysisTree tree = table.getAnalysisTree(symbols);
         System.out.println(tree);
         //Scanner in = new Scanner(System.in);

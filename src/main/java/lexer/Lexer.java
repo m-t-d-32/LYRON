@@ -1,8 +1,6 @@
 package lexer;
 
 import exception.PLDLAnalysisException;
-import exception.PLDLParsingException;
-import lexer.DFA;
 import symbol.AbstractTerminator;
 import symbol.Symbol;
 import symbol.Terminator;
@@ -15,11 +13,11 @@ public class Lexer {
 
 	private DFA dfa = null;
 
-	public Lexer(DFA dfa){
+	public Lexer(DFA dfa) {
 		this.dfa = dfa;
 	}
 
-	public Lexer(List<Map.Entry<String, NFA>> regexes, Map<String, String> bannedStrs) throws IOException {
+	public Lexer(List<Map.Entry<String, NFA>> regexes, Map<String, String> bannedStrs) {
 		Map<String, NFA> regexesNFAs = new HashMap<>();
 		Map<String, Integer> regexesOrders = new HashMap<>();
 		Map<String, Set<String>> regexesBannedOrders = new HashMap<>();

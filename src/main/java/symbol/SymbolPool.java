@@ -72,6 +72,14 @@ public class SymbolPool {
         }
     }
 
+    public void addCommentStr(String comment) {
+        if (!terminators.containsKey(comment)){
+            AbstractTerminator terminator = new AbstractTerminator(comment);
+            terminator.setIsComment(true);
+            terminators.put(comment, terminator);
+        }
+    }
+
     public AbstractUnterminator getUnterminator(String name) throws PLDLParsingException {
         if (unterminators.containsKey(name)) {
             return unterminators.get(name);
@@ -94,4 +102,5 @@ public class SymbolPool {
         }
         throw new PLDLParsingException("符号 " + name + " 既不能识别为终结符，也不能识别为非终结符。", null);
     }
+
 }

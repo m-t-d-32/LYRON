@@ -7,9 +7,12 @@ int main()
 int max(int x,int y)
 {
     int t;
-    if (x > y){
-    t=x;}
+    if (x > y){ //This is a comment.
+    t=x;;}
     else{
-    t=y;}
-    return t;
+    t=y; //This is a comment.
+    } /*
+    I don't know what I am doing......
+    *****************/
+    return t;  /*hello world */ //This is a comment.
 }

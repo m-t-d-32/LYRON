@@ -57,7 +57,7 @@ public class AnalysisNode {
 		for (int i = 0; i < tabCount; ++i) {
 			result.append("-");
 		}
-		result.append(value.getAbstractSymbol().getName() + "\'");
+		result.append(value.getAbstractSymbol().getName());
 		result.append("\n");
 		if (children != null) {
 			for (AnalysisNode node: children) {

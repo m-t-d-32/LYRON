@@ -23,9 +23,7 @@ public class DFA {
 	private String name = null;
 	
 	private Set<DFANode> finalNodes = null;
-	
-	private Set<String> bannedLookingForwardStrs = null;
-	
+
 	public Set<DFANode> getFinalNodes() {
 		return finalNodes;
 	}
@@ -39,7 +37,6 @@ public class DFA {
 		root.setFinal(true);
 		finalNodes = new HashSet<>();
 		finalNodes.add(root);
-		bannedLookingForwardStrs = new HashSet<>();
 	}
 	
 	DFA(DFANode root){
@@ -48,7 +45,6 @@ public class DFA {
 		if (root.isFinal()) {
 			finalNodes.add(root);
 		}
-		bannedLookingForwardStrs = new HashSet<>();
 	}
 	
 	public DFANode getRoot() {
@@ -227,31 +223,9 @@ public class DFA {
 		return new DFA(root);
 	}
 
-	public Set<String> getBannedLookingForwardStrs() {
-		return bannedLookingForwardStrs;
-	}
-
-	public void setBannedLookingForwardStrs(Set<String> bannedLookingForwardStrs) {
-		this.bannedLookingForwardStrs = bannedLookingForwardStrs;
-	}
-	
-	public void setAllowedLookingForwardStrs(Set<String> allowedLookingForwardStrs) {
-		bannedLookingForwardStrs.clear();
-		for (char c = 1; c < 127; ++c) {
-			if (!allowedLookingForwardStrs.contains(String.valueOf(c))) {
-				bannedLookingForwardStrs.add(String.valueOf(c));
-			}
-		}
-	}
-	
-	public void addBannedLookingForwardStrs(String str) {
-		bannedLookingForwardStrs.add(str);
-	}
-
 	public Map.Entry<String, Integer> analysis(String substring) {
 		DFANode node = getRoot();
 		Stack<Map.Entry<DFANode, Integer>> finalNodes = new Stack<>();
-		DFANode finalNode = null;
 		int pointer = 0;
 		while (pointer < substring.length()) {
 			String next = String.valueOf(substring.charAt(pointer));
@@ -273,10 +247,9 @@ public class DFA {
 		while (!finalNodes.empty()){
 			Map.Entry<DFANode, Integer> analyzeFinal = finalNodes.pop();
 			for (String str: analyzeFinal.getKey().getFinalNames()){
-				if (analyzeFinal.getValue() + 1 >= substring.length() ||
-					!analyzeFinal.getKey().getFinalNamesToBannedStrs().containsKey(str) ||
-					!analyzeFinal.getKey().getFinalNamesToBannedStrs().get(str).contains(String.valueOf(substring.charAt(analyzeFinal.getValue() + 1)))){
-					return new AbstractMap.SimpleEntry<>(str, pointer);
+				if (!analyzeFinal.getKey().getFinalNamesToBannedStrs().containsKey(str) ||
+					!analyzeFinal.getKey().getFinalNamesToBannedStrs().get(str).contains(String.valueOf(substring.charAt(analyzeFinal.getValue())))){
+					return new AbstractMap.SimpleEntry<>(str, analyzeFinal.getValue());
 				}
 			}
 		}

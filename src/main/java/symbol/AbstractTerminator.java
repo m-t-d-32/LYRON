@@ -24,4 +24,14 @@ public class AbstractTerminator extends AbstractSymbol {
     public static AbstractTerminator getNullTerminator() {
         return new AbstractTerminator("null");
     }
+
+    private boolean isComment = false;
+
+    public boolean getIsComment() {
+        return isComment;
+    }
+
+    public void setIsComment(boolean comment) {
+        isComment = comment;
+    }
 }

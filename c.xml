@@ -255,4 +255,14 @@
 			<regex> [_a-zA-Z][_a-zA-Z0-9]* </regex>
 		</item>
     </terminators>
+	<comments>
+		<item>
+			<name> comment1 </name>
+			<regex>/\*([^\*]|(\*)*[^\*/])*(\*)*\*/</regex>
+		</item>
+		<item>
+			<name> comment2 </name>
+			<regex>//[^\r\n]*(\r\n|\r|\n)</regex>
+		</item>
+	</comments>
 </pldl>

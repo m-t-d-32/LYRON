@@ -290,4 +290,26 @@ public class CFG {
 	public SymbolPool getSymbolPool() {
 		return symbolPool;
 	}
+
+	public List<Symbol> revertToStdAbstractSymbols(List<Symbol> symbols) throws PLDLParsingException {
+        //Deprecated: case it was implemented in eraseSymbols
+        List<Symbol> result = new ArrayList<>();
+        for (Symbol symbol: symbols){
+            AbstractTerminator realAbstractTerminator = symbolPool.getTerminator(symbol.getAbstractSymbol().getName());
+            symbol.setAbstractSymbol(realAbstractTerminator);
+            result.add(symbol);
+        }
+        return result;
+    }
+
+	public List<Symbol> eraseComments(List<Symbol> symbols) throws PLDLParsingException {
+        List<Symbol> result = new ArrayList<>();
+        for (Symbol symbol: symbols){
+            AbstractTerminator realAbstractTerminator = symbolPool.getTerminator(symbol.getAbstractSymbol().getName());
+            if (!realAbstractTerminator.getIsComment()){
+                result.add(symbol);
+            }
+        }
+        return result;
+    }
 }
