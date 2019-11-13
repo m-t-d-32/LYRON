@@ -200,9 +200,17 @@
 		</item>
 		<item>
 			<production> ExpressionNot -> ! ExpressionNot </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(!, $1(val), _, tmp1(val))</item>
+				<item>$$(val) = tmp1</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionNot -> ExpressionPara </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionPara -> ( Expression ) </production>
@@ -212,6 +220,9 @@
 		</item>
 		<item>
 			<production> ExpressionPara -> Num </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> Num -> + Num </production>
@@ -221,6 +232,9 @@
 		</item>
 		<item>
 			<production> Num -> num </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionPara -> FunctionCall </production>
