@@ -202,7 +202,7 @@
 			<production> ExpressionNot -> ! ExpressionNot </production>
 			<movement>
 				<item>tmp1 = newTemp</item>
-				<item>gen(!, $1(val), _, tmp1(val))</item>
+				<item>gen(not, $1(val), _, tmp1(val))</item>
 				<item>$$(val) = tmp1</item>
 			</movement>
 		</item>

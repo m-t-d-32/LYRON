@@ -1,34 +1,40 @@
 package util;
 
+import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
 import exception.PLDLParsingWarning;
 import lexer.NFA;
 import lexer.SimpleREApply;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import parser.AnalysisTree;
 import parser.CFG;
 import parser.CFGProduction;
 import symbol.AbstractTerminator;
 import symbol.SymbolPool;
 import symbol.Terminator;
+import translator.Translator;
 
 import java.io.File;
 import java.util.*;
 
 public class PreParse {
 
-    Set<String> terminators = new HashSet<>();
-    Set<String> unterminators = new HashSet<>();
-    Set<String> comments = new HashSet<>();
     List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
-    Map<String, Set<String>> bannedStrMap = new HashMap<>();
-    List<String> prods = new ArrayList<>();
-    List<List<String> > movementsStrs = new ArrayList<>();
-    String markinStr = null;
-	
-    public PreParse(String filename, String markinStr) throws Exception {
-    	this.markinStr = markinStr;
+    Translator translator = null;
+    CFG cfg = null;
+
+    public PreParse(String filename, String markinStr) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
+        translator = new Translator();
+        Set<String> terminators = new HashSet<>();
+        Set<String> unterminators = new HashSet<>();
+        Set<String> comments = new HashSet<>();
+        Map<String, Set<String>> bannedStrMap = new HashMap<>();
+        List<String> prods = new ArrayList<>();
+        List<List<AnalysisTree> > movementsTrees = new ArrayList<>();
+
         SAXReader reader = new SAXReader();
         Document document = reader.read(new File(filename));
         Element root = document.getRootElement();
@@ -53,12 +59,23 @@ public class PreParse {
                     String production = e.element("production").getText().trim();
                     prods.add(production);
                     unterminators.add(production.split("->")[0].trim());
-//                List<Element> movements = e.element("movement").elements("item");
-//                List<String> movementsStr = new ArrayList<>();
-//                for (Element movement: movements){
-//                    movementsStr.add(movement.getText().trim());
-//                }
-//                movementsStrs.add(movementsStr);
+                    Element movementRoot = e.element("movement");
+                    if (movementRoot != null) {
+                        List<Element> movements = movementRoot.elements("item");
+                        List<AnalysisTree> movementsTree = new ArrayList<>();
+                        for (Element movement : movements) {
+                            try {
+                                movementsTree.add(translator.getMovementTree(movement.getText().trim()));
+                            }
+                            catch (PLDLAnalysisException pe){
+                                throw new PLDLAnalysisException(movement.getText().trim(), pe);
+                            }
+                        }
+                        movementsTrees.add(movementsTree);
+                    }
+                    else {
+                        movementsTrees.add(new ArrayList<>());
+                    }
                 }
             }
             if (terminatorsEl != null){
@@ -123,25 +140,32 @@ public class PreParse {
                 }
             }
         }
-    }
-    
-    public CFG getCFG() throws PLDLParsingException {
-    	SymbolPool pool = new SymbolPool();
-    	pool.initTerminatorString(terminators);
-    	pool.initUnterminatorString(unterminators);
-    	for (String comment : comments){
-    	    pool.addCommentStr(comment);
+
+
+        SymbolPool pool = new SymbolPool();
+        pool.initTerminatorString(terminators);
+        pool.initUnterminatorString(unterminators);
+        for (String comment : comments){
+            pool.addCommentStr(comment);
         }
-    	Set<CFGProduction> productions = new HashSet<>();
-    	for (int i = 0; i < prods.size(); ++i){
-    	    String s = prods.get(i);
-//          List<String> movementsStr = movementsStrs.get(i);
-//    	    productions.add(new MovementProduction(CFGProduction.getCFGProductionFromCFGString(s, pool), movementsStr));
+        Set<CFGProduction> productions = new HashSet<>();
+        for (int i = 0; i < prods.size(); ++i){
+            String s = prods.get(i);
             CFGProduction production = CFGProduction.getCFGProductionFromCFGString(s, pool);
             production.setSerialNumber(i + 1);
             productions.add(production);
+
+            translator.addToMovementsMap(production, movementsTrees.get(i));
         }
-    	return new CFG(pool, productions, markinStr);
+        cfg = new CFG(pool, productions, markinStr);
+    }
+    
+    public CFG getCFG() throws PLDLParsingException {
+    	return cfg;
+    }
+
+    public Translator getTranslator(){
+        return translator;
     }
 
     public List<Map.Entry<String, NFA>> getTerminatorRegexes() {

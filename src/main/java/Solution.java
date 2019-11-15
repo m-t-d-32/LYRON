@@ -3,6 +3,8 @@ import parser.AnalysisTree;
 import parser.CFG;
 import parser.TransformTable;
 import symbol.Symbol;
+import translator.ResultTuple4;
+import translator.Translator;
 import util.Graphics;
 import util.PreParse;
 
@@ -49,7 +51,12 @@ public class Solution {
         symbols = cfg.eraseComments(symbols);
         System.out.println(symbols);
         AnalysisTree tree = table.getAnalysisTree(symbols);
-        System.out.println(tree);
+        //System.out.println(tree);
+
+        ResultTuple4 rt4 = new ResultTuple4();
+        Translator translator = preparse.getTranslator();
+        translator.doMovements(tree, rt4);
+        System.out.println(rt4);
         //Scanner in = new Scanner(System.in);
         //AnalysisTree tree = table.getAnalysisTree(lexer.analysis(in.nextLine(), emptyChars));
         //Translator translator = new Translator(tree);

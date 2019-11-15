@@ -1,11 +1,8 @@
 package translator;
 
 import exception.PLDLParsingException;
-import parser.AnalysisTree;
+import parser.AnalysisNode;
 import parser.CFGProduction;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class MovementProduction extends CFGProduction {
 
@@ -13,5 +10,5 @@ public abstract class MovementProduction extends CFGProduction {
         super(production);
     }
 
-    public abstract void doMovement(AnalysisTree movementTree, AnalysisTree parsingTree, ResultTuple4 results) throws PLDLParsingException;
+    public abstract void doMovement(AnalysisNode movementRoot, AnalysisNode parsingTreeRoot, ResultTuple4 results) throws PLDLParsingException;
 }
