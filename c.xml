@@ -134,76 +134,169 @@
 		</item>
 		<item>
 			<production> ExpressionAssignment -> var = ExpressionOr </production>
+			<movement>
+				<item>gen(assign, $3(val), _, $1(val))</item>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionAssignment -> ExpressionOr </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionOr -> ExpressionOr || ExpressionAnd </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(or, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionOr -> ExpressionAnd </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionAnd -> ExpressionAnd &amp;&amp; ExpressionEqual </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(and, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionAnd -> ExpressionEqual </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionEqual -> ExpressionEqual == ExpressionCompare </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(equal, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionEqual -> ExpressionCompare </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionEqual -> ExpressionEqual != ExpressionCompare </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(ne, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionCompare -> ExpressionCompare &gt; ExpressionAdd </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(greater, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionCompare -> ExpressionCompare &lt; ExpressionAdd </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(less, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionCompare -> ExpressionCompare &lt;= ExpressionAdd </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(le, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionCompare -> ExpressionCompare &gt;= ExpressionAdd </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(ge, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionCompare -> ExpressionAdd </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionAdd -> ExpressionAdd + ExpressionMulti </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(add, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionAdd -> ExpressionAdd - ExpressionMulti </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(sub, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionAdd -> ExpressionMulti </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionMulti -> ExpressionMulti * ExpressionPow </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(multi, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionMulti -> ExpressionMulti / ExpressionPow </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(div, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionMulti -> ExpressionPow </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionPow -> ExpressionPow ^ ExpressionNot </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(pow, $1(val), $3(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionPow -> ExpressionNot </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionNot -> ! ExpressionNot </production>
 			<movement>
 				<item>tmp1 = newTemp</item>
-				<item>gen(not, $1(val), _, tmp1(val))</item>
-				<item>$$(val) = tmp1</item>
+				<item>gen(not, $2(val), _, tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
 			</movement>
 		</item>
 		<item>
@@ -214,9 +307,15 @@
 		</item>
 		<item>
 			<production> ExpressionPara -> ( Expression ) </production>
+			<movement>
+				<item>$$(val) = $2(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionPara -> var </production>
+			<movement>
+				<item>$$(val) = $1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> ExpressionPara -> Num </production>
@@ -226,9 +325,19 @@
 		</item>
 		<item>
 			<production> Num -> + Num </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(add, $2(val), 0, tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> Num -> - Num </production>
+			<movement>
+				<item>tmp1 = newTemp</item>
+				<item>gen(sub, 0, $2(val), tmp1(val))</item>
+				<item>$$(val) = tmp1(val)</item>
+			</movement>
 		</item>
 		<item>
 			<production> Num -> num </production>

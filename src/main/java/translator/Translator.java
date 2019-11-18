@@ -64,21 +64,20 @@ public class Translator {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
-                            movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
+                            movementTree.getValue().setProperties(new HashMap<>());
+                            for (String str: movementTree.getChildren().get(0).getValue().getProperties().keySet()){
+                                movementTree.getValue().getProperties().put(str, movementTree.getChildren().get(0).getValue().getProperties().get(str));
+                            }
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("H -> Var ( val )", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
-                            String valVal = (String) movementTree.getChildren().get(2).getValue().getProperties().get("val");
-                            //以左树节点中的变量为索引，取出左树节点中的右树节点中的值
-                            Symbol varSymbol = (Symbol) movementTree.getChildren().get(0).getValue().getProperties().get("val");//右树节点
-                            String varVal = (String) varSymbol.getProperties().get(valVal);
-                            //左树节点中放入右树节点的值(node[name] -> val)
-                            movementTree.getValue().addProperty("node", varSymbol);   //右树节点
-                            movementTree.getValue().addProperty("name", valVal);  //索引名
-                            movementTree.getValue().addProperty("val", varVal);   //值
+                            String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("val");
+                            Symbol RightTreeVal = (Symbol) movementTree.getChildren().get(0).getValue().getProperties().get("RightTreeVal");
+                            movementTree.getValue().addProperty("RightTreeVal", RightTreeVal);   //右树节点
+                            movementTree.getValue().addProperty("name", name);  //索引名
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> newTemp", pool)) {
@@ -86,9 +85,9 @@ public class Translator {
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             String tempName = resultCOMM.addTempVar();
-                            Symbol leftVal = new Terminator(null);
-                            leftVal.addProperty("val", tempName);
-                            movementTree.getValue().addProperty("val", leftVal);
+                            Symbol virtualRightTreeVal = new Terminator(null);
+                            virtualRightTreeVal.addProperty("val", tempName);
+                            movementTree.getValue().addProperty("RightTreeVal", virtualRightTreeVal);
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $$", pool)) {
@@ -96,40 +95,49 @@ public class Translator {
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             //Var这个左树节点中存储的是右树节点
-                            Symbol leftVal = analysisTree.getValue();
-                            movementTree.getValue().addProperty("val", leftVal);
+                            Symbol RightTreeVal = analysisTree.getValue();
+                            movementTree.getValue().addProperty("RightTreeVal", RightTreeVal);
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $ num", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) throws PLDLParsingException {
-                            Integer num = Integer.valueOf((String) movementTree.getChildren().get(1).getValue().getProperties().get("val"));
+                            int num = Integer.parseInt((String) movementTree.getChildren().get(1).getValue().getProperties().get("val"));
                             --num;
                             if (num < 0 || num >= analysisTree.getChildren().size()) {
                                 throw new PLDLParsingException("$后面的数字超出这条产生式右部元素的范围", null);
                             }
-                            Symbol leftVal = analysisTree.getChildren().get(num).getValue();
-                            movementTree.getValue().addProperty("val", leftVal);
+                            Symbol RightTreeVal = analysisTree.getChildren().get(num).getValue();
+                            movementTree.getValue().addProperty("RightTreeVal", RightTreeVal);
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> val", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
-                            movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
+                            String varname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("val");
+                            Symbol RightTreeVal = null;
+                            if (!analysisTree.getValue().getProperties().containsKey("var_" + varname)){
+                                RightTreeVal = new Terminator(null);
+                                RightTreeVal.addProperty("val", "var_" + varname);
+                                analysisTree.getValue().getProperties().put("var_" + varname, RightTreeVal);
+                            }
+                            else {
+                                RightTreeVal = (Symbol) analysisTree.getValue().getProperties().get("var_" + varname);
+                            }
+                            movementTree.getValue().addProperty("RightTreeVal", RightTreeVal);
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> G = G", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
-                            //为了安全，我们复制
-                            Symbol afterVarSymbol = movementTree.getChildren().get(2).getValue();
-                            Symbol newSymbol = (Symbol) movementTree.getChildren().get(0).getValue().getProperties().get("val");
-                            newSymbol.setProperties(new HashMap<>());
-                            for (String str : afterVarSymbol.getProperties().keySet()) {
-                                newSymbol.addProperty(str, afterVarSymbol.getProperties().get(str));
+                            Symbol RightValue1 = (Symbol) movementTree.getChildren().get(0).getValue().getProperties().get("RightTreeVal");
+                            Symbol RightValue2 = (Symbol) movementTree.getChildren().get(2).getValue().getProperties().get("RightTreeVal");
+                            RightValue1.setProperties(new HashMap<>());
+                            for (String str: RightValue2.getProperties().keySet()){
+                                RightValue1.addProperty(str, RightValue2.getProperties().get(str));
                             }
                         }
                     },
@@ -138,10 +146,10 @@ public class Translator {
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             //键值对
-                            Symbol varSymbol = (Symbol) movementTree.getValue().getProperties().get("node");   //右树节点
-                            String valVal = (String) movementTree.getValue().getProperties().get("name");   //索引名
-                            Symbol afterVarSymbol = movementTree.getChildren().get(0).getValue();
-                            varSymbol.getProperties().put(valVal, afterVarSymbol);
+                            Symbol HRightTreeVal = (Symbol) movementTree.getChildren().get(0).getValue().getProperties().get("RightTreeVal");   //右树节点
+                            String Hname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
+                            Symbol GRightTreeVal = (Symbol) movementTree.getChildren().get(2).getValue().getProperties().get("RightTreeVal");
+                            HRightTreeVal.getProperties().put(Hname, GRightTreeVal);
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> H = H", pool)) {
@@ -149,17 +157,21 @@ public class Translator {
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             //键值对
-                            Symbol varSymbol = (Symbol) movementTree.getValue().getProperties().get("node");   //右树节点
-                            String valVal = (String) movementTree.getValue().getProperties().get("name");   //索引名
-                            String afterVarVal = (String) movementTree.getChildren().get(0).getValue().getProperties().get("val");
-                            varSymbol.getProperties().put(valVal, afterVarVal);
+                            Symbol H1RightTreeVal = (Symbol) movementTree.getChildren().get(0).getValue().getProperties().get("RightTreeVal");   //右树节点
+                            String H1name = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
+                            Symbol H2RightTreeVal = (Symbol) movementTree.getChildren().get(2).getValue().getProperties().get("RightTreeVal");
+                            String H2name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
+                            H1RightTreeVal.getProperties().put(H1name, H2RightTreeVal.getProperties().get(H2name));
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L -> H", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
-                            movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
+                            movementTree.getValue().setProperties(new HashMap<>());
+                            for (String str: movementTree.getChildren().get(0).getValue().getProperties().keySet()){
+                                movementTree.getValue().getProperties().put(str, movementTree.getChildren().get(0).getValue().getProperties().get(str));
+                            }
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( val , L_ , L_ , L_ )", pool)) {
@@ -189,10 +201,21 @@ public class Translator {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
-                            movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
+                            movementTree.getValue().setProperties(new HashMap<>());
+                            Symbol trulySymbol = (Symbol) movementTree.getChildren().get(0).getValue().getProperties().get("RightTreeVal");
+                            for (String str: trulySymbol.getProperties().keySet()){
+                                movementTree.getValue().getProperties().put(str, trulySymbol.getProperties().get(str));
+                            }
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> _", pool)) {
+
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                            movementTree.getValue().addProperty("val", "_");
+                        }
+                    },
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> num", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {

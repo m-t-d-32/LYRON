@@ -37,7 +37,7 @@ public class Solution {
         emptyChars.add('\f');
         CFG cfg = preparse.getCFG();
         TransformTable table = cfg.getTable();
-        System.out.println(table.getTableMap().size());
+        //System.out.println(table.getTableMap().size());
 
         FileInputStream in = new FileInputStream("test.c");
         int size = in.available();
@@ -46,10 +46,10 @@ public class Solution {
         in.close();
         String s = new String(buffer, StandardCharsets.UTF_8);
         List<Symbol> symbols = lexer.analysis(s, emptyChars);
-        System.out.println(symbols.size());
+        //System.out.println(symbols.size());
         symbols = cfg.revertToStdAbstractSymbols(symbols);
         symbols = cfg.eraseComments(symbols);
-        System.out.println(symbols);
+        //System.out.println(symbols);
         AnalysisTree tree = table.getAnalysisTree(symbols);
         //System.out.println(tree);
 
