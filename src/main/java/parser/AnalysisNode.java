@@ -5,7 +5,7 @@ import symbol.Symbol;
 import java.util.List;
 
 public class AnalysisNode {
-	Symbol value;
+	private Symbol value;
 	
 	public Symbol getValue() {
 		return value;
@@ -15,7 +15,7 @@ public class AnalysisNode {
 		this.value = value;
 	}
 
-	List<AnalysisNode> children;
+	private List<AnalysisNode> children;
 
 	public CFGProduction getProduction() {
 		return production;
@@ -25,9 +25,13 @@ public class AnalysisNode {
 		this.production = production;
 	}
 
-	CFGProduction production;
+	private CFGProduction production;
 
-	AnalysisNode parent;
+	public void setParent(AnalysisNode parent) {
+		this.parent = parent;
+	}
+
+	private AnalysisNode parent;
 	
 	public AnalysisNode(Symbol value) {
 		this.value = value;

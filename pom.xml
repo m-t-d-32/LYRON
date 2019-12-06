@@ -14,13 +14,6 @@
             <artifactId>dom4j</artifactId>
             <version>1.6</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/guru.nidi/graphviz-java -->
-        <dependency>
-            <groupId>guru.nidi</groupId>
-            <artifactId>graphviz-java</artifactId>
-            <version>0.11.0</version>
-        </dependency>
     </dependencies>
 
     <build>

@@ -15,6 +15,8 @@ import parser.CFGProduction;
 import symbol.AbstractTerminator;
 import symbol.SymbolPool;
 import symbol.Terminator;
+import translator.Generator;
+import translator.MovementCreator;
 import translator.Translator;
 
 import java.io.File;
@@ -24,16 +26,38 @@ public class PreParse {
 
     List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
     Translator translator = null;
+    Generator generator = null;
     CFG cfg = null;
+
+    private List<AnalysisTree> getAnalysisTreeList(Element rootEl, String str, MovementCreator creator) throws PLDLAnalysisException {
+        Element movementRoot = rootEl.element(str);
+        if (movementRoot != null) {
+            List<Element> movements = movementRoot.elements("item");
+            List<AnalysisTree> movementsTree = new ArrayList<>();
+            for (Element movement : movements) {
+                try {
+                    movementsTree.add(creator.getMovementTree(movement.getText().trim()));
+                } catch (PLDLAnalysisException | PLDLParsingException pe) {
+                    throw new PLDLAnalysisException(movement.getText().trim(), pe);
+                }
+            }
+            return movementsTree;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
     public PreParse(String filename, String markinStr) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
         translator = new Translator();
+        generator = new Generator();
         Set<String> terminators = new HashSet<>();
         Set<String> unterminators = new HashSet<>();
         Set<String> comments = new HashSet<>();
         Map<String, Set<String>> bannedStrMap = new HashMap<>();
         List<String> prods = new ArrayList<>();
         List<List<AnalysisTree> > movementsTrees = new ArrayList<>();
+        List<List<AnalysisTree>> beforeGenerationsTrees = new ArrayList<>();
+        List<List<AnalysisTree>> afterGenerationsTrees = new ArrayList<>();
 
         SAXReader reader = new SAXReader();
         Document document = reader.read(new File(filename));
@@ -59,23 +83,10 @@ public class PreParse {
                     String production = e.element("production").getText().trim();
                     prods.add(production);
                     unterminators.add(production.split("->")[0].trim());
-                    Element movementRoot = e.element("movement");
-                    if (movementRoot != null) {
-                        List<Element> movements = movementRoot.elements("item");
-                        List<AnalysisTree> movementsTree = new ArrayList<>();
-                        for (Element movement : movements) {
-                            try {
-                                movementsTree.add(translator.getMovementTree(movement.getText().trim()));
-                            }
-                            catch (PLDLAnalysisException pe){
-                                throw new PLDLAnalysisException(movement.getText().trim(), pe);
-                            }
-                        }
-                        movementsTrees.add(movementsTree);
-                    }
-                    else {
-                        movementsTrees.add(new ArrayList<>());
-                    }
+
+                    movementsTrees.add(getAnalysisTreeList(e, "movements", translator));
+                    beforeGenerationsTrees.add(getAnalysisTreeList(e, "before-generations", generator));
+                    afterGenerationsTrees.add(getAnalysisTreeList(e, "after-generations", generator));
                 }
             }
             if (terminatorsEl != null){
@@ -154,18 +165,22 @@ public class PreParse {
             CFGProduction production = CFGProduction.getCFGProductionFromCFGString(s, pool);
             production.setSerialNumber(i + 1);
             productions.add(production);
-
             translator.addToMovementsMap(production, movementsTrees.get(i));
+            generator.addToMovementsMap(production, beforeGenerationsTrees.get(i), afterGenerationsTrees.get(i));
         }
         cfg = new CFG(pool, productions, markinStr);
     }
-    
-    public CFG getCFG() throws PLDLParsingException {
+
+    public CFG getCFG() {
     	return cfg;
     }
 
-    public Translator getTranslator(){
+    public Translator getTranslator() {
         return translator;
+    }
+
+    public Generator getGenerator() {
+        return generator;
     }
 
     public List<Map.Entry<String, NFA>> getTerminatorRegexes() {

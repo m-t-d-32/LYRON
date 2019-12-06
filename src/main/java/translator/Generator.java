@@ -13,17 +13,18 @@ import symbol.*;
 
 import java.util.*;
 
-public class Translator implements MovementCreator {
+public class Generator implements MovementCreator {
 
     private CFG cfg = null;
 
     private Set<Character> emptyChars = new HashSet<>();
 
-    private Map<CFGProduction, List<AnalysisTree> > movementsMap = new HashMap<>();
+    private Map<CFGProduction, List<AnalysisTree>> beforeMovementsMap = new HashMap<>();
+    private Map<CFGProduction, List<AnalysisTree>> afterMovementsMap = new HashMap<>();
 
     private Lexer lexer = null;
 
-    public Translator() throws PLDLParsingException, PLDLAnalysisException {
+    public Generator() throws PLDLParsingException, PLDLAnalysisException {
         List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$$", NFA.fastNFA("$$")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$", NFA.fastNFA("$")));
@@ -33,7 +34,6 @@ public class Translator implements MovementCreator {
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>(",", NFA.fastNFA(",")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("newTemp", NFA.fastNFA("newTemp")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("go", NFA.fastNFA("go")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("gen", NFA.fastNFA("gen")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("_", NFA.fastNFA("_")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
@@ -55,7 +55,7 @@ public class Translator implements MovementCreator {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", ",", "newTemp", "val", "num", "_", "print", "go", "gen"));
+        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", ",", "newTemp", "val", "num", "_", "print", "gen"));
         Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("F", "G", "H", "Var", "E", "L", "L_"));
         SymbolPool pool = new SymbolPool();
         try {
@@ -81,16 +81,6 @@ public class Translator implements MovementCreator {
                             Symbol rightTreeNodeValue = rightTreeNode.getValue();
                             String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
                             System.out.println(rightTreeNodeValue.getProperties().get(name));
-                        }
-                    },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> go ( G )", pool)) {
-                        @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) throws PLDLParsingException {
-                            AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");
-                            List<AnalysisTree> trees = movementsMap.get(rightTreeNode.getProduction());
-                            if (trees != null) {
-                                doTreeMovement(movementsMap.get(rightTreeNode.getProduction()), rightTreeNode, resultCOMM);
-                            }
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( val , L_ , L_ , L_ )", pool)) {
@@ -163,12 +153,11 @@ public class Translator implements MovementCreator {
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             String varname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("val");
                             AnalysisNode rightTreeNode = null;
-                            if (!analysisTree.getValue().getProperties().containsKey("var_" + varname)){
+                            if (!analysisTree.getValue().getProperties().containsKey("var_" + varname)) {
                                 rightTreeNode = new AnalysisNode(new Terminator(null));
                                 rightTreeNode.getValue().addProperty("val", "var_" + varname);
                                 analysisTree.getValue().getProperties().put("var_" + varname, rightTreeNode);
-                            }
-                            else {
+                            } else {
                                 rightTreeNode = (AnalysisNode) analysisTree.getValue().getProperties().get("var_" + varname);
                             }
                             movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);
@@ -248,23 +237,32 @@ public class Translator implements MovementCreator {
 
     }
 
-    public void doTreesMovements(AnalysisTree rootTree, ResultTuple4 resultCOMM) throws PLDLParsingException {
-        List<AnalysisTree> trees = movementsMap.get(rootTree.getRoot().getProduction());
-        if (trees != null) {
-            doTreeMovement(trees, rootTree.getRoot(), resultCOMM);
+    public void doTreesMovements(AnalysisTree analysisTree, ResultTuple4 resultCOMM) throws PLDLParsingException {
+        rr_doTreesMovements(analysisTree.getRoot(), resultCOMM);
+    }
+
+    private void rr_doTreesMovements(AnalysisNode analysisNode, ResultTuple4 resultCOMM) throws PLDLParsingException {
+        doTreeMovement(beforeMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
+        if (analysisNode.getChildren() != null) {
+            for (AnalysisNode childNode : analysisNode.getChildren()) {
+                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                    rr_doTreesMovements(childNode, resultCOMM);
+                }
+            }
         }
+        doTreeMovement(afterMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
     }
 
     private void doTreeMovement(List<AnalysisTree> movementTrees, AnalysisNode analysisNode, ResultTuple4 resultCOMM) throws PLDLParsingException {
-        for (AnalysisTree movementTree: movementTrees) {
+        for (AnalysisTree movementTree : movementTrees) {
             rr_doTreeMovement(movementTree.getRoot(), analysisNode, resultCOMM);
         }
     }
 
     private void rr_doTreeMovement(AnalysisNode movementNode, AnalysisNode analysisNode, ResultTuple4 resultCOMM) throws PLDLParsingException {
-        if (movementNode.getChildren() != null){
-            for (AnalysisNode childNode: movementNode.getChildren()){
-                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR){
+        if (movementNode.getChildren() != null) {
+            for (AnalysisNode childNode : movementNode.getChildren()) {
+                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
                     rr_doTreeMovement(childNode, analysisNode, resultCOMM);
                 }
             }
@@ -273,7 +271,10 @@ public class Translator implements MovementCreator {
         movementProduction.doMovement(movementNode, analysisNode, resultCOMM);
     }
 
-    public void addToMovementsMap(CFGProduction production, List<AnalysisTree> trees){
-        movementsMap.put(production, trees);
+    public void addToMovementsMap(CFGProduction production,
+                                  List<AnalysisTree> beforeTrees,
+                                  List<AnalysisTree> afterTrees) {
+        beforeMovementsMap.put(production, beforeTrees);
+        afterMovementsMap.put(production, afterTrees);
     }
 }

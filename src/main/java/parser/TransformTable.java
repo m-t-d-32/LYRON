@@ -136,7 +136,9 @@ public class TransformTable implements Serializable{
 		    			}
 		    			for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
 		    				if (symbol != nullTerminator) {
-								node.getChildren().add(tempStack.pop());
+                                AnalysisNode childNode = tempStack.pop();
+                                childNode.setParent(node);
+                                node.getChildren().add(childNode);
 							}
 		    			}
 		    			nodeStack.push(node);
