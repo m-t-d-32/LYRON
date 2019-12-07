@@ -60,8 +60,8 @@ public class Translator implements MovementCreator {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "newLabel", "val", "num", "print", "go", "setvar"));
-        Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("G", "H", "Var", "E"));
+        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "newLabel", "val", "num", "print", "go", "setvar", "+"));
+        Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("G", "H", "Var", "E", "U"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminatorString(terminatorStrs);

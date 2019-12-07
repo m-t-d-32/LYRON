@@ -1,8 +1,6 @@
-package transformer;
+package translator;
 
 import exception.PLDLAnalysisException;
-import translator.ResultTuple4;
-import translator.Tuple4;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +20,7 @@ public class Transformer {
     public ResultTuple4 transformResultTuples(ResultTuple4 srcResultTuples) throws PLDLAnalysisException {
         ResultTuple4 result = new ResultTuple4();
         List<Tuple4> tuple4s = srcResultTuples.getTuple4s();
-        VariableTable table = new VariableTable();
+        VariableTable table = result.getVariableTable();
         for (Tuple4 tuple4 : tuple4s) {
             switch (tuple4.get(0)) {
                 case "define":
@@ -45,7 +43,7 @@ public class Transformer {
                     break;
             }
         }
-
+        table.setTempVarCount(srcResultTuples.getVariableTable().getTempVarCount());
         return result;
     }
 }

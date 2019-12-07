@@ -1,23 +1,23 @@
 <pldl>
     <cfgproductions>
-        <item>
-            <production> Program -> Functions </production>
+		<item>
+			<production>Program -> Functions</production>
 			<movements>
 				<item>go($1)</item>
 			</movements>
-        </item>
+		</item>
 		<item>
-			<production> Functions -> Function Functions </production>
+			<production>Functions -> Function Functions</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($2)</item>
 			</movements>
 		</item>
 		<item>
-			<production> Functions -> null </production>
+			<production>Functions -> null</production>
 		</item>
 		<item>
-			<production> Function -> ReturnType FunctionName ( Variables ) InnerBlock </production>
+			<production>Function -> ReturnType FunctionName ( Variables ) InnerBlock</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($2)</item>
@@ -35,35 +35,35 @@
 			</after-generations>
 		</item>
 		<item>
-			<production> ReturnType -> Type </production>
+			<production>ReturnType -> Type</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> Type -> int </production>
+			<production>Type -> int</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> Type -> void </production>
+			<production>Type -> void</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> Type -> float </production>
+			<production>Type -> float</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> FunctionName -> var </production>
+			<production>FunctionName -> var</production>
 			<movements>
 				<item>setvar($1(val))</item>
 				<item>go($1)</item>
@@ -71,17 +71,17 @@
 			</movements>
 		</item>
 		<item>
-			<production> Variables -> null </production>
+			<production>Variables -> null</production>
 		</item>
 		<item>
-			<production> Variables -> InnerVariables</production>
+			<production>Variables -> InnerVariables</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> InnerVariables -> TypedVar CommaVariables </production>
+			<production>InnerVariables -> TypedVar CommaVariables</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($2)</item>
@@ -92,10 +92,10 @@
 			</after-generations>
 		</item>
 		<item>
-			<production> CommaVariables -> null </production>
+			<production>CommaVariables -> null</production>
 		</item>
 		<item>
-			<production> CommaVariables -> , InnerVariables </production>
+			<production>CommaVariables -> , InnerVariables</production>
 			<movements>
 				<item>go($2)</item>
 				<item>$$(val) = $2(val)</item>
@@ -128,7 +128,7 @@
 			</after-generations>
 		</item>
 		<item>
-			<production> Blocks -> Block Blocks </production>
+			<production>Blocks -> Block Blocks</production>
 			<movements>
 				<item>$1(loopstart) = $$(loopstart)</item>
 				<item>$1(loopend) = $$(loopend)</item>
@@ -147,15 +147,15 @@
 			</movements>
 		</item>
 		<item>
-			<production> Block -> Statement </production>
+			<production>Block -> Statement</production>
 			<movements>
 				<item>$1(loopstart) = $$(loopstart)</item>
 				<item>$1(loopend) = $$(loopend)</item>
 				<item>go($1)</item>
 			</movements>
 		</item>
-        <item>
-			<production> InnerBlock -> { Blocks } </production>
+		<item>
+			<production>InnerBlock -> { Blocks }</production>
 			<movements>
 				<item>go($2)</item>
 			</movements>
@@ -198,15 +198,22 @@
 			<movements>
 				<item>setvar($1(val))</item>
 			</movements>
-			<after-generations>
+			<before-generations>
 				<item>gen(define, _, $$(type), $1(val))</item>
-			</after-generations>
+			</before-generations>
 		</item>
 		<item>
 			<production>VarDefinition -> var = ExpressionAssignment</production>
 			<movements>
 				<item>setvar($1(val))</item>
+				<item>go($3)</item>
 			</movements>
+			<before-generations>
+				<item>gen(define, _, $$(type), $1(val))</item>
+			</before-generations>
+			<after-generations>
+				<item>gen(assign, $3(val), _, $1(val))</item>
+			</after-generations>
 		</item>
 		<item>
 			<production>Statement -> ForStatement</production>
@@ -496,17 +503,17 @@
 			</movements>
 		</item>
 		<item>
-			<production> CommaExpressionComma -> null </production>
+			<production>CommaExpressionComma -> null</production>
 		</item>
 		<item>
-			<production> CommaExpressionComma -> , ExpressionComma </production>
+			<production>CommaExpressionComma -> , ExpressionComma</production>
 			<movements>
 				<item>go($2)</item>
 				<item>$$(val) = $2(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionAssignment -> var = ExpressionOr </production>
+			<production>ExpressionAssignment -> var = ExpressionOr</production>
 			<movements>
 				<item>setvar($1(val))</item>
 				<item>go($3)</item>
@@ -517,14 +524,14 @@
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionAssignment -> ExpressionOr </production>
+			<production>ExpressionAssignment -> ExpressionOr</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionOr -> ExpressionOr || ExpressionAnd </production>
+			<production>ExpressionOr -> ExpressionOr || ExpressionAnd</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -532,18 +539,18 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(or, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(or, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionOr -> ExpressionAnd </production>
+			<production>ExpressionOr -> ExpressionAnd</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionAnd -> ExpressionAnd &amp;&amp; ExpressionEqual </production>
+			<production>ExpressionAnd -> ExpressionAnd &amp;&amp; ExpressionEqual</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -551,18 +558,18 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(and, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(and, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionAnd -> ExpressionEqual </production>
+			<production>ExpressionAnd -> ExpressionEqual</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionEqual -> ExpressionEqual == ExpressionCompare </production>
+			<production>ExpressionEqual -> ExpressionEqual == ExpressionCompare</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -570,18 +577,18 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(equ, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(equ, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionEqual -> ExpressionCompare </production>
+			<production>ExpressionEqual -> ExpressionCompare</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionEqual -> ExpressionEqual != ExpressionCompare </production>
+			<production>ExpressionEqual -> ExpressionEqual != ExpressionCompare</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -589,11 +596,11 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(ne, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(ne, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionCompare -> ExpressionCompare &gt; ExpressionAdd </production>
+			<production>ExpressionCompare -> ExpressionCompare &gt; ExpressionAdd</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -601,11 +608,11 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(greater, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(greater, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionCompare -> ExpressionCompare &lt; ExpressionAdd </production>
+			<production>ExpressionCompare -> ExpressionCompare &lt; ExpressionAdd</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -613,11 +620,11 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(less, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(less, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionCompare -> ExpressionCompare &lt;= ExpressionAdd </production>
+			<production>ExpressionCompare -> ExpressionCompare &lt;= ExpressionAdd</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -625,11 +632,11 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(le, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(le, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionCompare -> ExpressionCompare &gt;= ExpressionAdd </production>
+			<production>ExpressionCompare -> ExpressionCompare &gt;= ExpressionAdd</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -637,18 +644,18 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(ge, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(ge, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionCompare -> ExpressionAdd </production>
+			<production>ExpressionCompare -> ExpressionAdd</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionAdd -> ExpressionAdd + ExpressionMulti </production>
+			<production>ExpressionAdd -> ExpressionAdd + ExpressionMulti</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -656,11 +663,11 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(add, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(add, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionAdd -> ExpressionAdd - ExpressionMulti </production>
+			<production>ExpressionAdd -> ExpressionAdd - ExpressionMulti</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -668,18 +675,18 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(sub, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(sub, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionAdd -> ExpressionMulti </production>
+			<production>ExpressionAdd -> ExpressionMulti</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionMulti -> ExpressionMulti * ExpressionPow </production>
+			<production>ExpressionMulti -> ExpressionMulti * ExpressionPow</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -687,11 +694,11 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(mul, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(mul, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionMulti -> ExpressionMulti / ExpressionPow </production>
+			<production>ExpressionMulti -> ExpressionMulti / ExpressionPow</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -699,18 +706,18 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(div, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(div, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionMulti -> ExpressionPow </production>
+			<production>ExpressionMulti -> ExpressionPow</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionPow -> ExpressionPow ^ ExpressionNot </production>
+			<production>ExpressionPow -> ExpressionPow ^ ExpressionNot</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
@@ -718,111 +725,113 @@
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(pow, $1(val), $3(val), tmp1(val))</item>
+				<item>gen(pow, $1(val), $3(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionPow -> ExpressionNot </production>
+			<production>ExpressionPow -> ExpressionNot</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionNot -> ! ExpressionNot </production>
+			<production>ExpressionNot -> ! ExpressionNot</production>
 			<movements>
 				<item>go($2)</item>
 				<item>tmp1 = newTemp</item>
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(not, $2(val), _, tmp1(val))</item>
+				<item>gen(not, $2(val), _, $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> ExpressionNot -> ExpressionPara </production>
+			<production>ExpressionNot -> ExpressionPara</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionPara -> ( Expression ) </production>
+			<production>ExpressionPara -> ( Expression )</production>
 			<movements>
 				<item>go($2)</item>
 				<item>$$(val) = $2(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionPara -> var </production>
+			<production>ExpressionPara -> var</production>
 			<movements>
 				<item>setvar($1(val))</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionPara -> Num </production>
+			<production>ExpressionPara -> Num</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> Num -> + Num </production>
+			<production>Num -> + Num</production>
 			<movements>
 				<item>go($2)</item>
 				<item>tmp1 = newTemp</item>
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(add, $2(val), 0, tmp1(val))</item>
+				<item>gen(add, $2(val), 0, $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> Num -> - Num </production>
+			<production>Num -> - Num</production>
 			<movements>
 				<item>go($2)</item>
 				<item>tmp1 = newTemp</item>
 				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(sub, 0, $2(val), tmp1(val))</item>
+				<item>gen(sub, 0, $2(val), $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> Num -> num </production>
+			<production>Num -> num</production>
 			<movements>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> ExpressionPara -> FunctionCall </production>
+			<production>ExpressionPara -> FunctionCall</production>
 			<movements>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>
 		<item>
-			<production> FunctionCall -> FunctionName ( CallingVars ) </production>
+			<production>FunctionCall -> FunctionName ( CallingVars )</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($3)</item>
+				<item>tmp1 = newTemp</item>
+				<item>$$(val) = tmp1(val)</item>
 			</movements>
 			<after-generations>
-				<item>gen(call, _, _, $1(val))</item>
+				<item>gen(call, $1(val), _, $$(val))</item>
 			</after-generations>
 		</item>
 		<item>
-			<production> CallingVars -> null </production>
+			<production>CallingVars -> null</production>
 		</item>
 		<item>
-			<production> CallingVars -> CallingInnerVars </production>
+			<production>CallingVars -> CallingInnerVars</production>
 			<movements>
 				<item>go($1)</item>
 			</movements>
 		</item>
 		<item>
-			<production> CallingInnerVars -> ExpressionAssignment CallingCommaVars </production>
+			<production>CallingInnerVars -> ExpressionAssignment CallingCommaVars</production>
 			<movements>
 				<item>go($1)</item>
 				<item>go($2)</item>
@@ -832,32 +841,32 @@
 			</after-generations>
 		</item>
 		<item>
-			<production> CallingCommaVars -> , CallingInnerVars </production>
+			<production>CallingCommaVars -> , CallingInnerVars</production>
 			<movements>
 				<item>go($2)</item>
 			</movements>
 		</item>
 		<item>
-			<production> CallingCommaVars -> null </production>
+			<production>CallingCommaVars -> null</production>
 		</item>
-    </cfgproductions>
-    <terminators>
-        <item>
-            <name> num </name>
-            <regex> [1-9][0-9]*|0 </regex>
-        </item>
+	</cfgproductions>
+	<terminators>
 		<item>
-			<name> var </name>
-			<regex> [_a-zA-Z][_a-zA-Z0-9]* </regex>
+			<name>num</name>
+			<regex>[1-9][0-9]*|0</regex>
 		</item>
-    </terminators>
+		<item>
+			<name>var</name>
+			<regex>[_a-zA-Z][_a-zA-Z0-9]*</regex>
+		</item>
+	</terminators>
 	<comments>
 		<item>
-			<name> comment1 </name>
+			<name>comment1</name>
 			<regex>/\*([^\*]|(\*)*[^\*/])*(\*)*\*/</regex>
 		</item>
 		<item>
-			<name> comment2 </name>
+			<name>comment2</name>
 			<regex>//[^\r\n]*(\r\n|\r|\n)</regex>
 		</item>
 	</comments>

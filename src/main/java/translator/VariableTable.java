@@ -1,16 +1,29 @@
-package transformer;
+package translator;
 
 import exception.PLDLAnalysisException;
-
 import java.util.*;
 
 public class VariableTable {
+
+    public int getTempVarCount() {
+        return tempVarCount;
+    }
+
+    public void setTempVarCount(int tempVarCount) {
+        this.tempVarCount = tempVarCount;
+    }
 
     private int tempVarCount = 0;
 
     private int varfieldCount = 0;
 
     private List<Map<String, VariableProperty>> nowVars = new ArrayList<>();
+
+    public Map<String, VariableProperty> getDefinedVars() {
+        return definedVars;
+    }
+
+    private Map<String, VariableProperty> definedVars = new HashMap<>();
 
     public VariableTable() {
         nowVars.add(new HashMap<>());
@@ -31,6 +44,7 @@ public class VariableTable {
         variableProperty.setInnerName(newName);
         variableProperty.setType(type);
         nowVars.get(nowVars.size() - 1).put(name, variableProperty);
+        definedVars.put(name, variableProperty);
         return newName;
     }
 
