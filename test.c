@@ -1,19 +1,28 @@
-void add(int a, int b){
-    float t;
-    t = a + b;
-}
 int main(int k, int h)
 {
     int a;
-    {
-        int b;
-        b = 4 + k;
+    if (a == 5){
+        break;
     }
-    a=a;
-    {
-        int b;
-        b = 2 + b;
+    else {
+        continue;
     }
-    a=4 + 5;
-    add(2+a, a);
+    do{
+        a = a + 2005;
+        if (a == 5){
+            break;
+        }
+        else {
+            continue;
+        }
+        a = a + 6;
+    }while (a < 10);
+
+    while(1){
+        while(2){
+            break;
+        }
+        a = a + 5555;
+    }
+    return 0;
 }

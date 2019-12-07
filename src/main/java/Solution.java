@@ -39,7 +39,7 @@ public class Solution {
         emptyChars.add('\f');
         CFG cfg = preparse.getCFG();
         TransformTable table = cfg.getTable();
-        //System.out.println(table.getTableMap().size());
+        System.out.println(table.getTableMap().size());
 
         FileInputStream in = new FileInputStream("test.c");
         int size = in.available();
@@ -60,10 +60,10 @@ public class Solution {
         translator.doTreesMovements(tree, rt4);
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
-        //System.out.println(rt4);
+        System.out.println(rt4);
         Transformer transformer = new Transformer(translator.getIsVars());
         rt4 = transformer.transformResultTuples(rt4);
-        System.out.println(rt4);
+        //System.out.println(rt4);
         //Scanner in = new Scanner(System.in);
         //AnalysisTree tree = table.getAnalysisTree(lexer.analysis(in.nextLine(), emptyChars));
         //Translator translator = new Translator(tree);

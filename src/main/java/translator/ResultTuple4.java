@@ -1,5 +1,6 @@
 package translator;
 
+import transformer.LabelTable;
 import transformer.VariableTable;
 
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ public class ResultTuple4 {
 
     private VariableTable variableTable = new VariableTable();
 
+    private LabelTable labelTable = new LabelTable();
+
     public void append(String s1, String s2, String s3, String s4) {
         tuple4s.add(new Tuple4(s1, s2, s3, s4));
     }
@@ -25,6 +28,10 @@ public class ResultTuple4 {
 
     public String addTempVar() {
         return variableTable.addTempVar();
+    }
+
+    public String addLabel() {
+        return labelTable.addLabel();
     }
 
     @Override

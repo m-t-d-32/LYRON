@@ -37,6 +37,7 @@ public class Translator implements MovementCreator {
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>(")", NFA.fastNFA(")")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("=", NFA.fastNFA("=")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("newTemp", NFA.fastNFA("newTemp")));
+        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("newLabel", NFA.fastNFA("newLabel")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("go", NFA.fastNFA("go")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("setvar", NFA.fastNFA("setvar")));
@@ -59,7 +60,7 @@ public class Translator implements MovementCreator {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "setvar"));
+        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "newLabel", "val", "num", "print", "go", "setvar"));
         Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("G", "H", "Var", "E"));
         SymbolPool pool = new SymbolPool();
         try {
@@ -123,6 +124,16 @@ public class Translator implements MovementCreator {
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             String tempName = resultCOMM.addTempVar();
+                            AnalysisNode virtualrightTreeNode = new AnalysisNode(new Terminator(null));
+                            virtualrightTreeNode.getValue().addProperty("val", tempName);
+                            movementTree.getValue().addProperty("rightTreeNode", virtualrightTreeNode);
+                        }
+                    },
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> newLabel", pool)) {
+
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                            String tempName = resultCOMM.addLabel();
                             AnalysisNode virtualrightTreeNode = new AnalysisNode(new Terminator(null));
                             virtualrightTreeNode.getValue().addProperty("val", tempName);
                             movementTree.getValue().addProperty("rightTreeNode", virtualrightTreeNode);
