@@ -25,6 +25,12 @@ public class VariableTable {
 
     private Map<String, VariableProperty> definedVars = new HashMap<>();
 
+    public Set<String> getIsVarsTable() {
+        return isVarsTable;
+    }
+
+    private Set<String> isVarsTable = new HashSet<>();
+
     public VariableTable() {
         nowVars.add(new HashMap<>());
     }
@@ -39,6 +45,7 @@ public class VariableTable {
         if (nowVars.get(nowVars.size() - 1).containsKey(name)) {
             throw new PLDLAnalysisException("变量" + name + "重复定义！", null);
         }
+        isVarsTable.add(name);
         String newName = "_" + String.valueOf(nowVars.size()) + "_" + String.valueOf(varfieldCount) + "_" + name;
         VariableProperty variableProperty = new VariableProperty();
         variableProperty.setInnerName(newName);

@@ -65,7 +65,6 @@
 		<item>
 			<production>FunctionName -> var</production>
 			<movements>
-				<item>setvar($1(val))</item>
 				<item>go($1)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
@@ -104,7 +103,6 @@
 		<item>
 			<production>TypedVar -> Type var</production>
 			<movements>
-				<item>setvar($2(val))</item>
 				<item>go($1)</item>
 				<item>$$(type) = $1(val)</item>
 				<item>$$(val) = $2(val)</item>
@@ -195,9 +193,6 @@
 		</item>
 		<item>
 			<production>VarDefinition -> var</production>
-			<movements>
-				<item>setvar($1(val))</item>
-			</movements>
 			<before-generations>
 				<item>gen(define, _, $$(type), $1(val))</item>
 			</before-generations>
@@ -205,7 +200,6 @@
 		<item>
 			<production>VarDefinition -> var = ExpressionAssignment</production>
 			<movements>
-				<item>setvar($1(val))</item>
 				<item>go($3)</item>
 			</movements>
 			<before-generations>
@@ -515,7 +509,6 @@
 		<item>
 			<production>ExpressionAssignment -> var = ExpressionOr</production>
 			<movements>
-				<item>setvar($1(val))</item>
 				<item>go($3)</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
@@ -763,7 +756,6 @@
 		<item>
 			<production>ExpressionPara -> var</production>
 			<movements>
-				<item>setvar($1(val))</item>
 				<item>$$(val) = $1(val)</item>
 			</movements>
 		</item>

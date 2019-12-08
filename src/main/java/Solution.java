@@ -61,7 +61,7 @@ public class Solution {
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
         //System.out.println(rt4);
-        Transformer transformer = new Transformer(translator.getIsVars());
+        Transformer transformer = new Transformer();
         rt4 = transformer.transformResultTuples(rt4);
         System.out.println(rt4);
         //Scanner in = new Scanner(System.in);

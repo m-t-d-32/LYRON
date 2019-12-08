@@ -7,15 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 public class Transformer {
-    private Set<String> isVars;
-
-    public Transformer() {
-        this.isVars = new HashSet<>();
-    }
-
-    public Transformer(Set<String> isVars) {
-        this.isVars = isVars;
-    }
 
     public ResultTuple4 transformResultTuples(ResultTuple4 srcResultTuples) throws PLDLAnalysisException {
         ResultTuple4 result = new ResultTuple4();
@@ -35,7 +26,7 @@ public class Transformer {
                 default:
                     Tuple4 newTuple = new Tuple4(tuple4);
                     for (int i = 1; i < 4; ++i) {
-                        if (isVars.contains(newTuple.get(i))) {
+                        if (table.getIsVarsTable().contains(newTuple.get(i))) {
                             newTuple.set(i, table.getVar(newTuple.get(i)));
                         }
                     }
