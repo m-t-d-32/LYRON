@@ -12,13 +12,10 @@ import org.dom4j.io.SAXReader;
 import parser.AnalysisTree;
 import parser.CFG;
 import parser.CFGProduction;
-import symbol.AbstractTerminator;
 import symbol.SymbolPool;
-import symbol.Terminator;
-import translator.Generator;
+import generator.Generator;
 import translator.MovementCreator;
 import translator.Translator;
-
 import java.io.File;
 import java.util.*;
 

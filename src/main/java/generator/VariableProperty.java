@@ -1,4 +1,4 @@
-package translator;
+package generator;
 
 public class VariableProperty {
 

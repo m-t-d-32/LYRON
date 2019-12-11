@@ -1,4 +1,4 @@
-package translator;
+package generator;
 
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
@@ -10,6 +10,10 @@ import parser.AnalysisTree;
 import parser.CFG;
 import parser.CFGProduction;
 import symbol.*;
+import translator.MovementCreator;
+import translator.MovementProduction;
+import translator.ResultTuple4;
+import translator.Tuple4;
 
 import java.util.*;
 
@@ -22,6 +26,12 @@ public class Generator implements MovementCreator {
     private Map<CFGProduction, List<AnalysisTree>> beforeMovementsMap = new HashMap<>();
     private Map<CFGProduction, List<AnalysisTree>> afterMovementsMap = new HashMap<>();
 
+    public Set<String> getIsVars() {
+        return isVars;
+    }
+
+    private Set<String> isVars = new HashSet<>();
+
     private Lexer lexer = null;
 
     public Generator() throws PLDLParsingException, PLDLAnalysisException {
@@ -33,6 +43,7 @@ public class Generator implements MovementCreator {
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>(",", NFA.fastNFA(",")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("gen", NFA.fastNFA("gen")));
+        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("checkvar", NFA.fastNFA("checkvar")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("_", NFA.fastNFA("_")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
@@ -53,7 +64,7 @@ public class Generator implements MovementCreator {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "_", "print", "gen"));
+        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "_", "print", "gen", "checkvar"));
         Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("F", "G", "H", "Var", "E", "L", "L_"));
         SymbolPool pool = new SymbolPool();
         try {
@@ -79,6 +90,17 @@ public class Generator implements MovementCreator {
                             Symbol rightTreeNodeValue = rightTreeNode.getValue();
                             String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
                             System.out.println(rightTreeNodeValue.getProperties().get(name));
+                        }
+                    },
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> checkvar ( H )", pool)) {
+
+                        /* For Debug */
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                            AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");
+                            Symbol rightTreeNodeValue = rightTreeNode.getValue();
+                            String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
+                            isVars.add((String) rightTreeNodeValue.getProperties().get(name));
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( val , L_ , L_ , L_ )", pool)) {
@@ -236,5 +258,35 @@ public class Generator implements MovementCreator {
                                   List<AnalysisTree> afterTrees) {
         beforeMovementsMap.put(production, beforeTrees);
         afterMovementsMap.put(production, afterTrees);
+    }
+
+    public ResultTuple4 transformResultTuples(ResultTuple4 srcResultTuples) throws PLDLAnalysisException {
+        ResultTuple4 result = new ResultTuple4();
+        List<Tuple4> tuple4s = srcResultTuples.getTuple4s();
+        VariableTable table = result.getVariableTable();
+        for (Tuple4 tuple4 : tuple4s) {
+            switch (tuple4.get(0)) {
+                case "define":
+                    table.addVar(tuple4.get(2), tuple4.get(3));
+                    break;
+                case "in":
+                    table.deepIn();
+                    break;
+                case "out":
+                    table.shallowOut();
+                    break;
+                default:
+                    Tuple4 newTuple = new Tuple4(tuple4);
+                    for (int i = 1; i < 4; ++i) {
+                        if (isVars.contains(newTuple.get(i))) {
+                            newTuple.set(i, table.getVar(newTuple.get(i)));
+                        }
+                    }
+                    result.append(newTuple);
+                    break;
+            }
+        }
+        table.setTempVarCount(srcResultTuples.getVariableTable().getTempVarCount());
+        return result;
     }
 }

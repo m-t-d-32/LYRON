@@ -1,6 +1,8 @@
-package translator;
+package generator;
 
 import exception.PLDLAnalysisException;
+import generator.VariableProperty;
+
 import java.util.*;
 
 public class VariableTable {
