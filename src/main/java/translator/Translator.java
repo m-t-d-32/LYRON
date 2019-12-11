@@ -55,8 +55,8 @@ public class Translator implements MovementCreator {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go"));
-        Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("H", "Var", "E"));
+        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "+"));
+        Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("H", "Var", "E", "G"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminatorString(terminatorStrs);
@@ -103,6 +103,33 @@ public class Translator implements MovementCreator {
                             movementTree.getValue().addProperty("name", name);  //索引名
                         }
                     },
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("G -> G + H", pool)) {
+
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) {
+                            AnalysisNode G2rightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");   //右树节点
+                            String G2name = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
+                            String G2Value = (String) G2rightTreeNode.getValue().getProperties().get(G2name);
+                            AnalysisNode HrightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");   //右树节点
+                            String Hname = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");   //索引名
+                            String HValue = (String) HrightTreeNode.getValue().getProperties().get(Hname);
+
+                            AnalysisNode node = new AnalysisNode(new Terminator(null));
+                            node.getValue().addProperty("val", G2Value + HValue);
+                            movementTree.getValue().addProperty("rightTreeNode", node);   //右树节点
+                            movementTree.getValue().addProperty("name", "val");  //索引名
+                        }
+                    },
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("G -> H", pool)) {
+
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) {
+                            AnalysisNode HrightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");   //右树节点
+                            String Hname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
+                            movementTree.getValue().addProperty("rightTreeNode", HrightTreeNode);   //右树节点
+                            movementTree.getValue().addProperty("name", Hname);  //索引名
+                        }
+                    },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> H = newTemp ( val )", pool)) {
 
                         @Override
@@ -142,7 +169,7 @@ public class Translator implements MovementCreator {
                             movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> H = H", pool)) {
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> H = G", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) throws PLDLAnalysisException {

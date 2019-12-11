@@ -243,13 +243,50 @@ public class Generator implements MovementCreator {
         ResultTuple4 result = new ResultTuple4();
         List<Tuple4> tuple4s = srcResultTuples.getTuple4s();
         VariableTable table = result.getVariableTable();
+        TypePool pool = result.getTypePool();
+
+        pool.initType("int", BaseType.TYPE_INT, 4);
+        pool.initType("float", BaseType.TYPE_FLOAT, 4);
+
         for (Tuple4 tuple4 : tuple4s) {
             switch (tuple4.get(0).toLowerCase()) {
                 case "check":
                     table.checkVar(tuple4.get(1));
                     break;
+                case "checktype":
+                    if (!pool.checkType(tuple4.get(1))){
+                        throw new PLDLAnalysisException("类型" + tuple4.get(1) + "没有定义", null);
+                    }
+                    break;
+                case "addtype":
+                    pool.addDefinedType(tuple4.get(1), tuple4.get(2));
+                    break;
+                case "arrayjoin":
+                    String newTypename = pool.linkArrayType(tuple4.get(1), tuple4.get(2));
+                    pool.addDefinedType(tuple4.get(3), newTypename);
+                    break;
                 case "define":
-                    table.addVar(tuple4.get(2), tuple4.get(3));
+                    String typestr = null;
+                    if (!tuple4.get(1).equals("_")){
+                        ArrayType arrayType;
+                        if (pool.checkType(tuple4.get(1))) {
+                            arrayType = (ArrayType) pool.getType(tuple4.get(1));
+                        }
+                        else {
+                            arrayType = new ArrayType(pool);
+                            arrayType.getDimensionFactors().add(Integer.valueOf(tuple4.get(1)));
+                        }
+                        arrayType.setPointToType(pool.getType(tuple4.get(2)));
+                        typestr = arrayType.toString();
+                        if (!pool.checkType(typestr)){
+                            pool.addToTypeMap(typestr, arrayType);
+                            pool.addToTransformMap(arrayType, typestr);
+                        }
+                    }
+                    else {
+                        typestr = tuple4.get(2);
+                    }
+                    table.addVar(typestr, tuple4.get(3));
                     break;
                 case "in":
                     table.deepIn();

@@ -48,6 +48,13 @@
 			</movements>
 		</item>
 		<item>
+			<production>Type -> float</production>
+			<movements>
+				<item>go($1)</item>
+				<item>$$(val) = $1(val)</item>
+			</movements>
+		</item>
+		<item>
 			<production>Type -> void</production>
 			<movements>
 				<item>go($1)</item>
@@ -65,14 +72,13 @@
 			</before-generations>
 		</item>
 		<item>
-			<production>Statement -> typedef Type Type ;</production>
+			<production>Type -> Type *</production>
 			<movements>
-				<item>go($2)</item>
-				<item>go($3)</item>
+				<item>go($1)</item>
+				<item>$$(val) = $1(val)</item>
 			</movements>
 			<before-generations>
-				<item>gen(checktype, $2(val), _, _)</item>
-				<item>gen(addtype, $3(val), _, _)</item>
+				<item>gen(checktype, $1(val), _, _)</item>
 			</before-generations>
 		</item>
 		<item>
@@ -100,8 +106,19 @@
 				<item>$$(val) = $1(val)</item>
 			</movements>
 			<after-generations>
+				<item>gen(define, _, $1(type), $1(val))</item>
 				<item>gen(popvar, $1(type), _, $1(val))</item>
 			</after-generations>
+		</item>
+		<item>
+			<production>Statement -> typedef Type Type ;</production>
+			<movements>
+				<item>go($2)</item>
+				<item>go($3)</item>
+			</movements>
+			<before-generations>
+				<item>gen(addtype, $3(val), $2(val), _)</item>
+			</before-generations>
 		</item>
 		<item>
 			<production>CommaVariables -> null</production>
@@ -120,9 +137,6 @@
 				<item>$$(type) = $1(val)</item>
 				<item>$$(val) = $2(val)</item>
 			</movements>
-			<after-generations>
-				<item>gen(define, _, $$(type), $$(val))</item>
-			</after-generations>
 		</item>
 		<item>
 			<production>Block -> { Blocks }</production>
@@ -206,6 +220,39 @@
 			<before-generations>
 				<item>gen(define, _, $$(type), $1(val))</item>
 			</before-generations>
+		</item>
+		<item>
+			<production>VarDefinition -> var Brackets</production>
+			<movements>
+				<item>go($2)</item>
+			</movements>
+			<after-generations>
+				<item>gen(define, $2(arraylen), $$(type), $1(val))</item>
+			</after-generations>
+		</item>
+		<item>
+			<production>Brackets -> Bracket Brackets</production>
+			<movements>
+				<item>go($1)</item>
+				<item>go($2)</item>
+				<item>$$(arraylen) = newTemp(array)</item>
+			</movements>
+			<after-generations>
+				<item>gen(arrayjoin, $1(arraylen), $2(arraylen), $$(arraylen))</item>
+			</after-generations>
+		</item>
+		<item>
+			<production>Brackets -> Bracket</production>
+			<movements>
+				<item>go($1)</item>
+				<item>$$(arraylen) = $1(arraylen)</item>
+			</movements>
+		</item>
+		<item>
+			<production>Bracket -> [ num ]</production>
+			<movements>
+				<item>$$(arraylen) = $2(val)</item>
+			</movements>
 		</item>
 		<item>
 			<production>VarDefinition -> var = ExpressionAssignment</production>

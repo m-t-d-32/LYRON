@@ -2,14 +2,13 @@ package app;
 
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
+import generator.*;
 import lexer.Lexer;
 import org.dom4j.DocumentException;
 import parser.AnalysisTree;
 import parser.CFG;
 import parser.TransformTable;
 import symbol.Symbol;
-import generator.Generator;
-import generator.ResultTuple4;
 import translator.Translator;
 import util.PreParse;
 
@@ -22,6 +21,13 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class ConsoleApplication {
+
+    private static void printVariables(VariableTable table, TypePool pool) throws PLDLAnalysisException {
+        for (String varName: table.getDefinedVars().keySet()){
+            String typeName = table.getDefinedVars().get(varName).getTypeName();
+            System.out.println(varName + ":" + pool.getTransformMap().get(pool.getType(typeName)));
+        }
+    }
 
     private static void consoleCalling(String pldlFileName, String codeFilename)
             throws DocumentException, PLDLAnalysisException, PLDLParsingException, IOException {
@@ -71,12 +77,13 @@ public class ConsoleApplication {
         System.out.println("正在根据注释分析树生成四元式...");
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
-
         System.out.println("正在进行四元式符号表构建和变量声明检查...");
-        //rt4 = generator.transformResultTuples(rt4);
+        rt4 = generator.transformResultTuples(rt4);
 
         System.out.println("生成四元式成功，以下打印生成的所有四元式和标号：");
         System.out.println(rt4);
+
+        printVariables(rt4.getVariableTable(), rt4.getTypePool());
     }
 
     public static void main(String[] args){

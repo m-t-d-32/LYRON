@@ -5,27 +5,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class VariableType {
+public abstract class VariableType {
+
+    public static final int BASE_TYPE = 0x01;
+    public static final int OBJECT_TYPE = 0xff;
+    public static final int POINTER_TYPE = 0x05;
+    public static final int ARRAY_TYPE = 0xfe;
+
+    public abstract int getType();
+
+    public TypePool getPool() {
+        return pool;
+    }
 
     private TypePool pool;
 
-    public List<Map.Entry<String, String>> getFields() {
-        return fields;
-    }
-
-    public void setFields(List<Map.Entry<String, String>> fields) {
-        this.fields = fields;
-    }
-
-    List<Map.Entry<String, String>> fields;
-
     public VariableType(TypePool pool){
         this.pool = pool;
-        fields = new ArrayList<>();
     }
 
-    public void addField(String fieldName, String typename){
-        fields.add(new AbstractMap.SimpleEntry<>(fieldName, typename));
-    }
+    @Override
+    public abstract boolean equals(Object o);
 
+    @Override
+    public abstract int hashCode();
 }

@@ -19,20 +19,18 @@ public class ResultTuple4 {
 
     private VariableTable variableTable = new VariableTable();
 
+    public TypePool getTypePool() {
+        return typePool;
+    }
+
+    private TypePool typePool = new TypePool();
+
     public void append(String s1, String s2, String s3, String s4) {
         tuple4s.add(new Tuple4(s1, s2, s3, s4));
     }
 
     public void append(Tuple4 tuple4) {
         tuple4s.add(tuple4);
-    }
-
-    public String addTempVar() {
-        return variableTable.addTempVar();
-    }
-
-    public String addLabel() {
-        return StringGenerator.getNextCode();
     }
 
     @Override
