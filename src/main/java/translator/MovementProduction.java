@@ -11,5 +11,5 @@ public abstract class MovementProduction extends CFGProduction {
         super(production);
     }
 
-    public abstract void doMovement(AnalysisNode movementRoot, AnalysisNode parsingTreeRoot, ResultTuple4 results) throws PLDLParsingException, PLDLAnalysisException;
+    public abstract void doMovement(AnalysisNode movementRoot, AnalysisNode parsingTreeRoot) throws PLDLParsingException, PLDLAnalysisException;
 }

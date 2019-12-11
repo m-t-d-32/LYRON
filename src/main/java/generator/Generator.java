@@ -11,9 +11,6 @@ import parser.CFG;
 import parser.CFGProduction;
 import symbol.*;
 import translator.MovementCreator;
-import translator.MovementProduction;
-import translator.ResultTuple4;
-import translator.Tuple4;
 
 import java.util.*;
 
@@ -26,12 +23,6 @@ public class Generator implements MovementCreator {
     private Map<CFGProduction, List<AnalysisTree>> beforeMovementsMap = new HashMap<>();
     private Map<CFGProduction, List<AnalysisTree>> afterMovementsMap = new HashMap<>();
 
-    public Set<String> getIsVars() {
-        return isVars;
-    }
-
-    private Set<String> isVars = new HashSet<>();
-
     private Lexer lexer = null;
 
     public Generator() throws PLDLParsingException, PLDLAnalysisException {
@@ -43,7 +34,6 @@ public class Generator implements MovementCreator {
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>(",", NFA.fastNFA(",")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("gen", NFA.fastNFA("gen")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("checkvar", NFA.fastNFA("checkvar")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("_", NFA.fastNFA("_")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
@@ -71,7 +61,7 @@ public class Generator implements MovementCreator {
             pool.initTerminatorString(terminatorStrs);
             pool.initUnterminatorString(unterminatorStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("G -> Var", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("G -> Var", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
@@ -81,7 +71,7 @@ public class Generator implements MovementCreator {
                             }
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> print ( H )", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("E -> print ( H )", pool)) {
 
                         /* For Debug */
                         @Override
@@ -92,18 +82,7 @@ public class Generator implements MovementCreator {
                             System.out.println(rightTreeNodeValue.getProperties().get(name));
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> checkvar ( H )", pool)) {
-
-                        /* For Debug */
-                        @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
-                            AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");
-                            Symbol rightTreeNodeValue = rightTreeNode.getValue();
-                            String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
-                            isVars.add((String) rightTreeNodeValue.getProperties().get(name));
-                        }
-                    },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( val , L_ , L_ , L_ )", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( val , L_ , L_ , L_ )", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
@@ -126,7 +105,7 @@ public class Generator implements MovementCreator {
                             resultCOMM.append(val1, val2, val3, val4);
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("H -> Var ( val )", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("H -> Var ( val )", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
@@ -136,7 +115,7 @@ public class Generator implements MovementCreator {
                             movementTree.getValue().addProperty("name", name);  //索引名
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $$", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $$", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
@@ -144,7 +123,7 @@ public class Generator implements MovementCreator {
                             movementTree.getValue().addProperty("rightTreeNode", analysisTree);
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $ num", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $ num", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) throws PLDLParsingException {
@@ -157,7 +136,7 @@ public class Generator implements MovementCreator {
                             movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> val", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> val", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
@@ -173,7 +152,7 @@ public class Generator implements MovementCreator {
                             movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L -> H", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L -> H", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
@@ -183,28 +162,28 @@ public class Generator implements MovementCreator {
                             movementTree.getValue().getProperties().put("val", HrightTreeNode.getValue().getProperties().get(Hname));
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> L", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> L", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> _", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> _", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             movementTree.getValue().addProperty("val", "_");
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> num", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> num", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> val", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> val", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
@@ -249,8 +228,8 @@ public class Generator implements MovementCreator {
                 }
             }
         }
-        MovementProduction movementProduction = (MovementProduction) movementNode.getProduction();
-        movementProduction.doMovement(movementNode, analysisNode, resultCOMM);
+        GenerateProduction GenerateProduction = (GenerateProduction) movementNode.getProduction();
+        GenerateProduction.doMovement(movementNode, analysisNode, resultCOMM);
     }
 
     public void addToMovementsMap(CFGProduction production,
@@ -265,7 +244,10 @@ public class Generator implements MovementCreator {
         List<Tuple4> tuple4s = srcResultTuples.getTuple4s();
         VariableTable table = result.getVariableTable();
         for (Tuple4 tuple4 : tuple4s) {
-            switch (tuple4.get(0)) {
+            switch (tuple4.get(0).toLowerCase()) {
+                case "check":
+                    table.checkVar(tuple4.get(1));
+                    break;
                 case "define":
                     table.addVar(tuple4.get(2), tuple4.get(3));
                     break;
@@ -278,9 +260,7 @@ public class Generator implements MovementCreator {
                 default:
                     Tuple4 newTuple = new Tuple4(tuple4);
                     for (int i = 1; i < 4; ++i) {
-                        if (isVars.contains(newTuple.get(i))) {
-                            newTuple.set(i, table.getVar(newTuple.get(i)));
-                        }
+                        newTuple.set(i, table.conditionalGetVar(newTuple.get(i)));
                     }
                     result.append(newTuple);
                     break;

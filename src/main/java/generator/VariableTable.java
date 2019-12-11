@@ -1,7 +1,6 @@
 package generator;
 
 import exception.PLDLAnalysisException;
-import generator.VariableProperty;
 
 import java.util.*;
 
@@ -44,7 +43,7 @@ public class VariableTable {
         String newName = "_" + String.valueOf(nowVars.size()) + "_" + String.valueOf(varfieldCount) + "_" + name;
         VariableProperty variableProperty = new VariableProperty();
         variableProperty.setInnerName(newName);
-        variableProperty.setType(type);
+        variableProperty.setTypeName(type);
         nowVars.get(nowVars.size() - 1).put(name, variableProperty);
         definedVars.put(name, variableProperty);
         return newName;
@@ -77,4 +76,12 @@ public class VariableTable {
         throw new PLDLAnalysisException("变量" + name + "未定义！", null);
     }
 
+    public String conditionalGetVar(String name) {
+        for (Map<String, VariableProperty> fieldLVars : nowVars) {
+            if (fieldLVars.containsKey(name)) {
+                return fieldLVars.get(name).getInnerName();
+            }
+        }
+        return name;
+    }
 }

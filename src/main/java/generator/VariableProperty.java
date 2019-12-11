@@ -10,15 +10,15 @@ public class VariableProperty {
         this.innerName = innerName;
     }
 
-    public String getType() {
-        return type;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     private String innerName;
 
-    private String type;
+    private String typeName;
 }

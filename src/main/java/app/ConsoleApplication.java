@@ -9,7 +9,7 @@ import parser.CFG;
 import parser.TransformTable;
 import symbol.Symbol;
 import generator.Generator;
-import translator.ResultTuple4;
+import generator.ResultTuple4;
 import translator.Translator;
 import util.PreParse;
 
@@ -65,14 +65,14 @@ public class ConsoleApplication {
 
         System.out.println("正在对分析树进行语义赋值生成注释分析树...");
         Translator translator = preparse.getTranslator();
-        translator.doTreesMovements(tree, rt4);
+        translator.doTreesMovements(tree);
 
         System.out.println("正在根据注释分析树生成四元式...");
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
 
         System.out.println("正在进行四元式符号表构建和变量声明检查...");
-        rt4 = generator.transformResultTuples(rt4);
+        //rt4 = generator.transformResultTuples(rt4);
 
         System.out.println("生成四元式成功，以下打印生成的所有四元式和标号：");
         System.out.println(rt4);
@@ -106,7 +106,7 @@ public class ConsoleApplication {
             System.err.println("代码文件可能存在问题，请检查代码文件，如果你认为代码没有问题，请检查程序语言定义与代码是否匹配。");
             e.printStackTrace();
         } catch (DocumentException e) {
-            System.err.println("程序语言定义存在问题，这不是一个正确的xml文件，请检查格式。");
+            System.err.println("程序语言定义存在问题，这不是一个正确的XML文件，请检查格式。注意XML中的转义字符。");
             e.printStackTrace();
         }
 

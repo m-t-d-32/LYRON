@@ -1,4 +1,4 @@
-package translator;
+package generator;
 
 public class Tuple4 {
     private String[] elements = new String[5];

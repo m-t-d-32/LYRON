@@ -1,6 +1,5 @@
-package translator;
+package generator;
 
-import generator.VariableTable;
 import util.StringGenerator;
 
 import java.util.ArrayList;

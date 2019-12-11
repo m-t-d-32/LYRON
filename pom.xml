@@ -6,7 +6,7 @@
 
     <groupId>org.llyronx</groupId>
     <artifactId>pldlparser</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/dom4j/dom4j -->
         <dependency>
