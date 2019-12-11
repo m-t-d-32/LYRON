@@ -146,7 +146,6 @@
 				<item>$2(loopstart) = $$(loopstart)</item>
 				<item>$2(loopend) = $$(loopend)</item>
 				<item>go($1)</item>
-				<item>$$(start) = $1(start)</item>
 				<item>go($2)</item>
 			</movements>
 		</item>
@@ -164,6 +163,8 @@
 		<item>
 			<production>InnerBlock -> { Blocks }</production>
 			<movements>
+				<item>$2(loopstart) = newTemp(label)</item>
+				<item>$2(loopend) = newTemp(label)</item>
 				<item>go($2)</item>
 			</movements>
 		</item>

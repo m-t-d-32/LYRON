@@ -2,6 +2,7 @@ package translator;
 
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
+import exception.PLDLParsingWarning;
 import lexer.Lexer;
 import lexer.NFA;
 import lexer.SimpleREApply;
@@ -65,17 +66,27 @@ public class Translator implements MovementCreator {
 
                         /* For Debug */
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) throws PLDLAnalysisException {
                             AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");
                             Symbol rightTreeNodeValue = rightTreeNode.getValue();
                             String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
-                            System.out.println(rightTreeNodeValue.getProperties().get(name));
+                            if (rightTreeNodeValue.getProperties().containsKey(name)) {
+                                System.out.println(rightTreeNodeValue.getProperties().get(name));
+                            }
+                            else {
+                                throw new PLDLAnalysisException("节点属性不存在。节点" + rightTreeNodeValue + "不具有属性" + name, null);
+                            }
                         }
                     },
-                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> go ( Var )", pool)) {
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> go ( $ num )", pool)) {
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) throws PLDLParsingException, PLDLAnalysisException {
-                            AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");
+                            int num = Integer.parseInt((String) movementTree.getChildren().get(3).getValue().getProperties().get("val"));
+                            --num;
+                            if (num < 0 || num >= analysisTree.getChildren().size()) {
+                                throw new PLDLParsingException("$后面的数字超出这条产生式右部元素的范围", null);
+                            }
+                            AnalysisNode rightTreeNode = analysisTree.getChildren().get(num);
                             List<AnalysisTree> trees = movementsMap.get(rightTreeNode.getProduction());
                             if (trees != null) {
                                 doTreeMovement(movementsMap.get(rightTreeNode.getProduction()), rightTreeNode);
@@ -134,13 +145,19 @@ public class Translator implements MovementCreator {
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> H = H", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) throws PLDLAnalysisException {
                             //键值对
                             AnalysisNode H1rightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");   //右树节点
                             String H1name = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
                             AnalysisNode H2rightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");
                             String H2name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
-                            H1rightTreeNode.getValue().getProperties().put(H1name, H2rightTreeNode.getValue().getProperties().get(H2name));
+                            if (H2rightTreeNode.getValue().getProperties().containsKey(H2name)) {
+                                H1rightTreeNode.getValue().getProperties().put(H1name, H2rightTreeNode.getValue().getProperties().get(H2name));
+                            }
+                            else {
+                                throw new PLDLAnalysisException("节点属性不存在。节点" + H2rightTreeNode.getValue() + "不具有属性" + H2name + "," +
+                                        " 不能赋值给节点" + H1rightTreeNode.getValue() + "的属性" + H1name, null);
+                            }
                         }
                     }
             ));
@@ -172,8 +189,49 @@ public class Translator implements MovementCreator {
                 }
             }
         }
-        MovementProduction movementProduction = (MovementProduction) movementNode.getProduction();
-        movementProduction.doMovement(movementNode, analysisNode);
+        try {
+            MovementProduction movementProduction = (MovementProduction) movementNode.getProduction();
+            movementProduction.doMovement(movementNode, analysisNode);
+        }
+        catch (PLDLAnalysisException e){
+            throw new PLDLAnalysisException("在" + analysisNode.getProduction(), e);
+        }
+    }
+
+    public Map<CFGProduction, List<AnalysisTree>> getMovementsMap() {
+        return movementsMap;
+    }
+
+    public void checkMovementsMap(){
+        for (CFGProduction production: movementsMap.keySet()){
+            List<AnalysisTree> movementTrees = movementsMap.get(production);
+            Set<Integer> unterminatorIndices = new HashSet<>();
+            Set<Integer> trulyWentIndices = new HashSet<>();
+            for (int i = 0; i < production.getAfterAbstractSymbols().size(); ++i){
+                if (production.getAfterAbstractSymbols().get(i).getType() == AbstractSymbol.UNTERMINATOR){
+                    unterminatorIndices.add(i);
+                }
+            }
+            for (int i = 0; i < movementTrees.size(); ++i){
+                AnalysisTree movementTree = movementTrees.get(i);
+                try {
+                    if (movementTree.getRoot().getProduction().getAfterAbstractSymbols().get(0).equals(cfg.getSymbolPool().getTerminator("go"))){
+                        String numVal = (String) movementTree.getRoot().getChildren().get(3).getValue().getProperties().get("val");
+                        trulyWentIndices.add(Integer.valueOf(numVal) - 1);
+                    }
+                } catch (PLDLParsingException e) {
+                    e.printStackTrace();
+                }
+            }
+            unterminatorIndices.removeAll(trulyWentIndices);
+            if (unterminatorIndices.size() > 0){
+                for (int i: unterminatorIndices){
+                    PLDLParsingWarning.setLog("在" + production + "中，非终结符节点" + String.valueOf(i + 1) + "("
+                        + production.getAfterAbstractSymbols().get(i) + ")不会被遍历，如果你忘记使用go语句，请考虑使用。" +
+                        "否则将无法获得该非终结符的综合属性。");
+                }
+            }
+        }
     }
 
     public void addToMovementsMap(CFGProduction production, List<AnalysisTree> trees){

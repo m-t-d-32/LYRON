@@ -65,6 +65,7 @@ public class ConsoleApplication {
 
         System.out.println("正在对分析树进行语义赋值生成注释分析树...");
         Translator translator = preparse.getTranslator();
+        translator.checkMovementsMap();
         translator.doTreesMovements(tree);
 
         System.out.println("正在根据注释分析树生成四元式...");
