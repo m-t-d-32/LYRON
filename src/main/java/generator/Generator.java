@@ -9,7 +9,10 @@ import parser.AnalysisNode;
 import parser.AnalysisTree;
 import parser.CFG;
 import parser.CFGProduction;
-import symbol.*;
+import symbol.AbstractSymbol;
+import symbol.Symbol;
+import symbol.SymbolPool;
+import symbol.Terminator;
 import translator.MovementCreator;
 
 import java.util.*;
@@ -23,7 +26,7 @@ public class Generator implements MovementCreator {
     private Map<CFGProduction, List<AnalysisTree>> beforeMovementsMap = new HashMap<>();
     private Map<CFGProduction, List<AnalysisTree>> afterMovementsMap = new HashMap<>();
 
-    private Lexer lexer = null;
+    private Lexer lexer;
 
     public Generator() throws PLDLParsingException, PLDLAnalysisException {
         List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
@@ -141,7 +144,7 @@ public class Generator implements MovementCreator {
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
                             String varname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("val");
-                            AnalysisNode rightTreeNode = null;
+                            AnalysisNode rightTreeNode;
                             if (!analysisTree.getValue().getProperties().containsKey("var_" + varname)) {
                                 rightTreeNode = new AnalysisNode(new Terminator(null));
                                 rightTreeNode.getValue().addProperty("val", "var_" + varname);
@@ -237,73 +240,5 @@ public class Generator implements MovementCreator {
                                   List<AnalysisTree> afterTrees) {
         beforeMovementsMap.put(production, beforeTrees);
         afterMovementsMap.put(production, afterTrees);
-    }
-
-    public ResultTuple4 transformResultTuples(ResultTuple4 srcResultTuples) throws PLDLAnalysisException {
-        ResultTuple4 result = new ResultTuple4();
-        List<Tuple4> tuple4s = srcResultTuples.getTuple4s();
-        VariableTable table = result.getVariableTable();
-        TypePool pool = result.getTypePool();
-
-        pool.initType("int", BaseType.TYPE_INT, 4);
-        pool.initType("float", BaseType.TYPE_FLOAT, 4);
-
-        for (Tuple4 tuple4 : tuple4s) {
-            switch (tuple4.get(0).toLowerCase()) {
-                case "check":
-                    table.checkVar(tuple4.get(1));
-                    break;
-                case "checktype":
-                    if (!pool.checkType(tuple4.get(1))){
-                        throw new PLDLAnalysisException("类型" + tuple4.get(1) + "没有定义", null);
-                    }
-                    break;
-                case "addtype":
-                    pool.addDefinedType(tuple4.get(1), tuple4.get(2));
-                    break;
-                case "arrayjoin":
-                    String newTypename = pool.linkArrayType(tuple4.get(1), tuple4.get(2));
-                    pool.addDefinedType(tuple4.get(3), newTypename);
-                    break;
-                case "define":
-                    String typestr = null;
-                    if (!tuple4.get(1).equals("_")){
-                        ArrayType arrayType;
-                        if (pool.checkType(tuple4.get(1))) {
-                            arrayType = (ArrayType) pool.getType(tuple4.get(1));
-                        }
-                        else {
-                            arrayType = new ArrayType(pool);
-                            arrayType.getDimensionFactors().add(Integer.valueOf(tuple4.get(1)));
-                        }
-                        arrayType.setPointToType(pool.getType(tuple4.get(2)));
-                        typestr = arrayType.toString();
-                        if (!pool.checkType(typestr)){
-                            pool.addToTypeMap(typestr, arrayType);
-                            pool.addToTransformMap(arrayType, typestr);
-                        }
-                    }
-                    else {
-                        typestr = tuple4.get(2);
-                    }
-                    table.addVar(typestr, tuple4.get(3));
-                    break;
-                case "in":
-                    table.deepIn();
-                    break;
-                case "out":
-                    table.shallowOut();
-                    break;
-                default:
-                    Tuple4 newTuple = new Tuple4(tuple4);
-                    for (int i = 1; i < 4; ++i) {
-                        newTuple.set(i, table.conditionalGetVar(newTuple.get(i)));
-                    }
-                    result.append(newTuple);
-                    break;
-            }
-        }
-        table.setTempVarCount(srcResultTuples.getVariableTable().getTempVarCount());
-        return result;
     }
 }

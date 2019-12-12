@@ -2,7 +2,8 @@ package app;
 
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
-import generator.*;
+import generator.Generator;
+import generator.ResultTuple4;
 import lexer.Lexer;
 import org.dom4j.DocumentException;
 import parser.AnalysisTree;
@@ -13,6 +14,7 @@ import translator.Translator;
 import util.PreParse;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -21,14 +23,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class ConsoleApplication {
-
-    private static void printVariables(VariableTable table, TypePool pool) throws PLDLAnalysisException {
-        for (String varName: table.getDefinedVars().keySet()){
-            String typeName = table.getDefinedVars().get(varName).getTypeName();
-            System.out.println(varName + ":" + pool.getTransformMap().get(pool.getType(typeName)));
-        }
-    }
-
     private static void consoleCalling(String pldlFileName, String codeFilename)
             throws DocumentException, PLDLAnalysisException, PLDLParsingException, IOException {
         System.out.println("XML文件解析中...");
@@ -56,7 +50,10 @@ public class ConsoleApplication {
         FileInputStream in = new FileInputStream(codeFilename);
         int size = in.available();
         byte[] buffer = new byte[size];
-        in.read(buffer);
+        int readin = in.read(buffer);
+        if (readin != size){
+            throw new IOException("代码文件读取大小与文件大小不一致。");
+        }
         in.close();
         String codestr = new String(buffer, StandardCharsets.UTF_8);
 
@@ -77,17 +74,12 @@ public class ConsoleApplication {
         System.out.println("正在根据注释分析树生成四元式...");
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
-        System.out.println("正在进行四元式符号表构建和变量声明检查...");
-        rt4 = generator.transformResultTuples(rt4);
-
-        System.out.println("生成四元式成功，以下打印生成的所有四元式和标号：");
+        System.out.println("生成四元式成功，以下打印生成的所有四元式");
         System.out.println(rt4);
-
-        printVariables(rt4.getVariableTable(), rt4.getTypePool());
     }
 
     public static void main(String[] args){
-        String pldlFileName = null, codeFileName = null;
+        String pldlFileName, codeFileName;
         try {
             if (args.length == 2) {
                 pldlFileName = args[0];
@@ -114,9 +106,13 @@ public class ConsoleApplication {
             System.err.println("代码文件可能存在问题，请检查代码文件，如果你认为代码没有问题，请检查程序语言定义与代码是否匹配。");
             e.printStackTrace();
         } catch (DocumentException e) {
-            System.err.println("程序语言定义存在问题，这不是一个正确的XML文件，请检查格式。注意XML中的转义字符。");
+            if (e.getNestedException().getClass().equals(FileNotFoundException.class)){
+                System.err.println("文件无法打开或读取，请检查输入的路径。");
+            }
+            else {
+                System.err.println("程序语言定义存在问题，这不是一个正确的XML文件，请检查格式。注意XML中的转义字符。");
+            }
             e.printStackTrace();
         }
-
     }
 }

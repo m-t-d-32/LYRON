@@ -558,7 +558,7 @@
 				<item>$$(val) = $1(val)</item>
 			</movements>
 			<before-generations>
-				<item>gen(check, $1(val), _, _)</item>
+				<item>gen(checkvar, $1(val), _, _)</item>
 			</before-generations>
 			<after-generations>
 				<item>gen(assign, $3(val), _, $1(val))</item>
@@ -793,7 +793,7 @@
 				<item>$$(val) = $1(val)</item>
 			</movements>
 			<before-generations>
-				<item>gen(check, $1(val), _, _)</item>
+				<item>gen(checkvar, $1(val), _, _)</item>
 			</before-generations>
 		</item>
 		<item>

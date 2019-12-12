@@ -1,7 +1,7 @@
 package generator;
 
 public class Tuple4 {
-    private String[] elements = new String[5];
+    private String[] elements = new String[4];
 
     public Tuple4(String s1, String s2, String s3, String s4) {
         elements[0] = s1;
@@ -19,7 +19,7 @@ public class Tuple4 {
 
     @Override
     public String toString() {
-        return "(" + elements[0] + "," + elements[1] + "," + elements[2] + "," + elements[3] + ")";
+        return elements[0] + "," + elements[1] + "," + elements[2] + "," + elements[3];
     }
 
     public String get(int index) {
