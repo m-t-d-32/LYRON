@@ -13,21 +13,21 @@ public class CFG {
     private List<CFGProduction> CFGProductions;
 
     public void setCFGProductions(List<? extends CFGProduction> prods) {
-    	CFGProductions = new ArrayList<>();
+        CFGProductions = new ArrayList<>();
         CFGProductions.addAll(prods);
-	}
+    }
 
-	private AbstractUnterminator CFGmarkin;
+    private AbstractUnterminator CFGmarkin;
     
     private SymbolPool symbolPool;
     
     public CFG(SymbolPool pool,
                Collection<? extends CFGProduction> productions,
                String markinStr) throws PLDLParsingException {
-    	symbolPool = pool;
-    	CFGProductions = new ArrayList<>();
+        symbolPool = pool;
+        CFGProductions = new ArrayList<>();
         CFGProductions.addAll(productions);
-    	if (markinStr == null) {
+        if (markinStr == null) {
             CFGmarkin = (AbstractUnterminator) CFGProductions.get(0).getBeforeAbstractSymbol();
             PLDLParsingWarning.setLog("警告：您没有传递任何参数作为开始符号，因而自动将第一个产生式的左部符号 " + CFGmarkin.getName() + " 作为开始符号。");
         } else {
@@ -38,7 +38,7 @@ public class CFG {
                 throw new PLDLParsingException("解析失败：开始符号不是非终结符。", null);
             }
         }
-    	
+
     }
 
     public CFG(SymbolPool pool,
@@ -100,7 +100,7 @@ public class CFG {
         if (getCFGUnterminators().contains(newMarkinStr)) {
             PLDLParsingWarning.setLog("该文法已经进行过增广，不能再次增广。");
         } else {
-        	symbolPool.addUnterminatorStr(newMarkinStr);
+            symbolPool.addUnterminatorStr(newMarkinStr);
             CFGProduction augmentCFGProduction = new CFGProduction();
             AbstractUnterminator beforeSymbol = new AbstractUnterminator(newMarkinStr);
             augmentCFGProduction.setBeforeAbstractSymbol(beforeSymbol);
@@ -265,8 +265,8 @@ public class CFG {
                     for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
                         result.add(i, pointedProduction.getOutlookAbstractTerminator(), pointedProduction.getProduction());
                         if (pointedProduction.getOutlookAbstractTerminator().equals(symbolPool.getTerminator("eof"))
-                        		&& pointedProduction.getProduction().getBeforeAbstractSymbol().equals(CFGmarkin)){
-                        	result.addEndStatement(i);
+                                && pointedProduction.getProduction().getBeforeAbstractSymbol().equals(CFGmarkin)){
+                            result.addEndStatement(i);
                         }
                     }
                 } else {
@@ -287,11 +287,11 @@ public class CFG {
         return result;
     }
 
-	public SymbolPool getSymbolPool() {
-		return symbolPool;
-	}
+    public SymbolPool getSymbolPool() {
+        return symbolPool;
+    }
 
-	public List<Symbol> revertToStdAbstractSymbols(List<Symbol> symbols) throws PLDLParsingException {
+    public List<Symbol> revertToStdAbstractSymbols(List<Symbol> symbols) throws PLDLParsingException {
         //Deprecated: case it was implemented in eraseSymbols
         List<Symbol> result = new ArrayList<>();
         for (Symbol symbol: symbols){
@@ -302,7 +302,7 @@ public class CFG {
         return result;
     }
 
-	public List<Symbol> eraseComments(List<Symbol> symbols) throws PLDLParsingException {
+    public List<Symbol> eraseComments(List<Symbol> symbols) throws PLDLParsingException {
         List<Symbol> result = new ArrayList<>();
         for (Symbol symbol: symbols){
             AbstractTerminator realAbstractTerminator = symbolPool.getTerminator(symbol.getAbstractSymbol().getName());

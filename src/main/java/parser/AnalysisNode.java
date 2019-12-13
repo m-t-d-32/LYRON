@@ -5,69 +5,69 @@ import symbol.Symbol;
 import java.util.List;
 
 public class AnalysisNode {
-	private Symbol value;
-	
-	public Symbol getValue() {
-		return value;
-	}
+    private Symbol value;
 
-	public void setValue(Symbol value) {
-		this.value = value;
-	}
+    public Symbol getValue() {
+        return value;
+    }
 
-	private List<AnalysisNode> children;
+    public void setValue(Symbol value) {
+        this.value = value;
+    }
 
-	public CFGProduction getProduction() {
-		return production;
-	}
+    private List<AnalysisNode> children;
 
-	public void setProduction(CFGProduction production) {
-		this.production = production;
-	}
+    public CFGProduction getProduction() {
+        return production;
+    }
 
-	private CFGProduction production;
+    public void setProduction(CFGProduction production) {
+        this.production = production;
+    }
 
-	public void setParent(AnalysisNode parent) {
-		this.parent = parent;
-	}
+    private CFGProduction production;
 
-	private AnalysisNode parent;
-	
-	public AnalysisNode(Symbol value) {
-		this.value = value;
-		this.parent = null;
-		this.children = null;
-	}
-	
-	public boolean getIsLeaf() {
-		return children == null;
-	}
-	
-	public void setChildren(List<AnalysisNode> symbols) {
-		children = symbols;
-	}
-	
-	public List<AnalysisNode> getChildren(){
-		return children;
-	}
-	
-	public AnalysisNode getParent() {
-		return parent;
-	}
+    public void setParent(AnalysisNode parent) {
+        this.parent = parent;
+    }
 
-	public String toString(int tabCount) {
-		StringBuilder result = new StringBuilder();
-		result.append("|");
-		for (int i = 0; i < tabCount; ++i) {
-			result.append("-");
-		}
-		result.append(value.getAbstractSymbol().getName());
-		result.append("\n");
-		if (children != null) {
-			for (AnalysisNode node: children) {
-				result.append(node.toString(tabCount + 1));
-			}
-		}
-		return result.toString();
-	}	
+    private AnalysisNode parent;
+
+    public AnalysisNode(Symbol value) {
+        this.value = value;
+        this.parent = null;
+        this.children = null;
+    }
+
+    public boolean getIsLeaf() {
+        return children == null;
+    }
+
+    public void setChildren(List<AnalysisNode> symbols) {
+        children = symbols;
+    }
+
+    public List<AnalysisNode> getChildren(){
+        return children;
+    }
+
+    public AnalysisNode getParent() {
+        return parent;
+    }
+
+    public String toString(int tabCount) {
+        StringBuilder result = new StringBuilder();
+        result.append("|");
+        for (int i = 0; i < tabCount; ++i) {
+            result.append("-");
+        }
+        result.append(value.getAbstractSymbol().getName());
+        result.append("\n");
+        if (children != null) {
+            for (AnalysisNode node: children) {
+                result.append(node.toString(tabCount + 1));
+            }
+        }
+        return result.toString();
+    }
 }

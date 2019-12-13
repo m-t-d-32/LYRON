@@ -16,7 +16,7 @@ public class CFGProduction{
     private List<AbstractSymbol> afterAbstractSymbols = null;
     
     public CFGProduction() {
-    	
+
     }
     
     public CFGProduction(CFGProduction another) {

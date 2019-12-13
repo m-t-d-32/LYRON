@@ -52,85 +52,85 @@ PLDL语言语法：
     <!--文法声明部分-->
     <cfgproductions>
         <item>
-        	<!--开始符号是Program-->
-        	<production>Program -> E</production>
-        	<movements>
-        		<!--必须先通过遍历其孩子节点获得属性-->
-        		<item>go($1)</item>
-        	</movements>
-        	<!--不生成任何四元式，所以不需要写generations-->
+            <!--开始符号是Program-->
+            <production>Program -> E</production>
+            <movements>
+                <!--必须先通过遍历其孩子节点获得属性-->
+                <item>go($1)</item>
+            </movements>
+            <!--不生成任何四元式，所以不需要写generations-->
         </item>
         <item>
-        	<production>E -> E + T</production>
-        	<movements>
-        		<!--必须先通过遍历其两个孩子节点E和T获得属性-->
-        		<item>go($1)</item>
-        		<item>go($3)</item>
-        		<!--节点本身需要一个属性，值是一个新生成的临时变量-->
-        		<item>$$(val) = newTemp(val)</item>
-        	</movements>
-        	<!--所有子节点的四元式都生成完毕，再追加下面的四元式，所以用after-generations而不是before-generations-->
-        	<after-generations>
-            	<!--节点本身的val属性是之前的newTemp出的值-->
-        		<item>gen(add, $1(val), $3(val), $$(val))</item>
-        	</after-generations>
+            <production>E -> E + T</production>
+            <movements>
+                <!--必须先通过遍历其两个孩子节点E和T获得属性-->
+                <item>go($1)</item>
+                <item>go($3)</item>
+                <!--节点本身需要一个属性，值是一个新生成的临时变量-->
+                <item>$$(val) = newTemp(val)</item>
+            </movements>
+            <!--所有子节点的四元式都生成完毕，再追加下面的四元式，所以用after-generations而不是before-generations-->
+            <after-generations>
+                <!--节点本身的val属性是之前的newTemp出的值-->
+                <item>gen(add, $1(val), $3(val), $$(val))</item>
+            </after-generations>
         </item>
         <item>
-        	<production>E -> T</production>
-        	<movements>
-        		<!--必须先通过遍历其孩子节点获得属性-->
-        		<item>go($1)</item>
-        		<!--将第一个子节点的val属性传递给节点本身-->
-        		<item>$$(val) = $1(val)</item>
-        	</movements>
+            <production>E -> T</production>
+            <movements>
+                <!--必须先通过遍历其孩子节点获得属性-->
+                <item>go($1)</item>
+                <!--将第一个子节点的val属性传递给节点本身-->
+                <item>$$(val) = $1(val)</item>
+            </movements>
         </item>
         <item>
-        	<production>T -> T * F</production>
-        	<movements>
-        		<!--必须先通过遍历其两个孩子节点获得属性-->
-        		<item>go($1)</item>
-        		<item>go($3)</item>
-        		<!--生成另一个临时变量，与上面不同-->
-        		<item>$$(val) = newTemp(val)</item>
-        	</movements>
-        	<!--所有子节点的四元式都生成完毕，再追加下面的四元式，所以用after-generations而不是before-generations-->
-        	<after-generations>
-            	<!--节点本身的val属性是之前的newTemp出的值-->
-        		<item>gen(multi, $1(val), $3(val), $$(val))</item>
-        	</after-generations>
+            <production>T -> T * F</production>
+            <movements>
+                <!--必须先通过遍历其两个孩子节点获得属性-->
+                <item>go($1)</item>
+                <item>go($3)</item>
+                <!--生成另一个临时变量，与上面不同-->
+                <item>$$(val) = newTemp(val)</item>
+            </movements>
+            <!--所有子节点的四元式都生成完毕，再追加下面的四元式，所以用after-generations而不是before-generations-->
+            <after-generations>
+                <!--节点本身的val属性是之前的newTemp出的值-->
+                <item>gen(multi, $1(val), $3(val), $$(val))</item>
+            </after-generations>
         </item>
         <item>
-        	<production>T -> F</production>
-        	<movements>
-        		<item>go($1)</item>
-        		<item>$$(val) = $1(val)</item>
-        	</movements>
+            <production>T -> F</production>
+            <movements>
+                <item>go($1)</item>
+                <item>$$(val) = $1(val)</item>
+            </movements>
         </item>
         <item>
-        	<production>F -> num</production>
-        	<movements>
-        		<!--由于产生式右部没有非终结符，不需要写go语句-->
-        		<!--将第一个节点（终结符num）的词法值赋给节点本身-->
-        		<item>$$(val) = $1(val)</item>
-        	</movements>
+            <production>F -> num</production>
+            <movements>
+                <!--由于产生式右部没有非终结符，不需要写go语句-->
+                <!--将第一个节点（终结符num）的词法值赋给节点本身-->
+                <item>$$(val) = $1(val)</item>
+            </movements>
         </item>
-	</cfgproductions>
+    </cfgproductions>
     <!--终结符词法部分-->
-	<terminators>
-		<!--除了num以外所有的终结符（*、+等）都是平凡的，因此只需要写num的正则表达式-->
-		<item>
-			<name>num</name>
-			<!--终结符num的正则表达式-->
-			<regex>[1-9][0-9]*|0</regex>
-		</item>
-	</terminators>
+    <terminators>
+        <!--除了num以外所有的终结符（*、+等）都是平凡的，因此只需要写num的正则表达式-->
+        <item>
+            <name>num</name>
+            <!--终结符num的正则表达式-->
+            <regex>[1-9][0-9]*|0</regex>
+        </item>
+    </terminators>
     <!--注释部分-->
-	<comments>
-		<item>
-			<name>comment</name>
-			<regex>/\*([^\*]|(\*)*[^\*/])*(\*)*\*/</regex>
-		</item>
-	</comments>
+    <comments>
+        <item>
+            <name>comment</name>
+            <regex>/\*([^\*]|(\*)*[^\*/])*(\*)*\*/</regex>
+        </item>
+    </comments>
 </pldl>
 ```
 

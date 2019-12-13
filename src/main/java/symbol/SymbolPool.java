@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SymbolPool {
-	
+
     private Map<String, AbstractUnterminator> unterminators = null;
     
     private Map<String, AbstractTerminator> terminators = null;

@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class AbstractUnterminator extends AbstractSymbol {
 
-	private String name = null;
+    private String name = null;
 
     private Set<AbstractTerminator> firstSet = null;
 

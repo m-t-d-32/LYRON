@@ -169,7 +169,7 @@ public class PreParse {
     }
 
     public CFG getCFG() {
-    	return cfg;
+        return cfg;
     }
 
     public Translator getTranslator() {

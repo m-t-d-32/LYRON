@@ -1,7 +1,7 @@
 package symbol;
 
 public abstract class AbstractSymbol {
-	
+
     public static final int TERMINATOR = 0x01, UNTERMINATOR = 0xff;
 
     @Override

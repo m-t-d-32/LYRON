@@ -28,17 +28,17 @@ public class Movement {
     }
     
     public int getMovement() {
-    	return movement;
+        return movement;
     }
 
-	public Integer getShiftTo() {
-		if (movement == SHIFT || movement == GOTO) {
-			return shiftToStatement;
-		}
-		return null;
-	}
-	
-	public CFGProduction getRegressionProduction() {
-		return regressionProduction;
-	}
+    public Integer getShiftTo() {
+        if (movement == SHIFT || movement == GOTO) {
+            return shiftToStatement;
+        }
+        return null;
+    }
+
+    public CFGProduction getRegressionProduction() {
+        return regressionProduction;
+    }
 }

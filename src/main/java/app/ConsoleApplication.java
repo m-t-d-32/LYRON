@@ -13,9 +13,7 @@ import symbol.Symbol;
 import translator.Translator;
 import util.PreParse;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +73,7 @@ public class ConsoleApplication {
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
         System.out.println("生成四元式成功，以下打印生成的所有四元式");
+        System.setOut(new PrintStream(new FileOutputStream(new File("sample-c-backend/L.cc.xhtml"))));
         System.out.println(rt4);
     }
 

@@ -17,7 +17,7 @@ public class CFGStatement {
     private CFG cfg;
 
     CFGStatement(CFG cfg) {
-    	this.cfg = cfg;
+        this.cfg = cfg;
         pointedProductions = new HashSet<>();
     }
 
