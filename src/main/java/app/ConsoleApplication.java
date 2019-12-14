@@ -15,10 +15,7 @@ import util.PreParse;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class ConsoleApplication {
     private static void consoleCalling(String pldlFileName, String codeFilename)
@@ -72,8 +69,13 @@ public class ConsoleApplication {
         System.out.println("正在根据注释分析树生成四元式...");
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
-        System.out.println("生成四元式成功，以下打印生成的所有四元式");
+        System.out.println("生成四元式成功");
         System.setOut(new PrintStream(new FileOutputStream(new File("sample-c-backend/L.cc.xhtml"))));
+//        for (String key: translator.getTempStorages().keySet()){
+//            System.out.println(key + ":");
+//            List<String> vals = new ArrayList<>(translator.getTempStorages().get(key));
+//            System.out.println(String.join(",", vals));
+//        }
         System.out.println(rt4);
     }
 

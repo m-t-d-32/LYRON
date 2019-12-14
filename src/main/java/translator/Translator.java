@@ -22,9 +22,20 @@ public class Translator implements MovementCreator {
 
     private Map<CFGProduction, List<AnalysisTree>> movementsMap = new HashMap<>();
 
+    public Map<String, Set<String>> getTempStorages() {
+        Map<String, Set<String> > results = new HashMap<>();
+        for(String key: tempStorages.keySet()){
+            results.put(key, new HashSet<>());
+            for (int i = 0; i < tempStorages.get(key); ++i){
+                results.get(key).add("t_" + key + String.valueOf(i));
+            }
+        }
+        return results;
+    }
+
     private Map<String, Integer> tempStorages = new HashMap<>();
 
-    private Lexer lexer = null;
+    private Lexer lexer;
 
     public Translator() throws PLDLParsingException, PLDLAnalysisException {
         List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
@@ -239,10 +250,9 @@ public class Translator implements MovementCreator {
                     unterminatorIndices.add(i);
                 }
             }
-            for (int i = 0; i < movementTrees.size(); ++i){
-                AnalysisTree movementTree = movementTrees.get(i);
+            for (AnalysisTree movementTree : movementTrees) {
                 try {
-                    if (movementTree.getRoot().getProduction().getAfterAbstractSymbols().get(0).equals(cfg.getSymbolPool().getTerminator("go"))){
+                    if (movementTree.getRoot().getProduction().getAfterAbstractSymbols().get(0).equals(cfg.getSymbolPool().getTerminator("go"))) {
                         String numVal = (String) movementTree.getRoot().getChildren().get(3).getValue().getProperties().get("val");
                         trulyWentIndices.add(Integer.valueOf(numVal) - 1);
                     }

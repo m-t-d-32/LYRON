@@ -224,6 +224,22 @@
             </after-generations>
         </item>
         <item>
+            <production>Var -> var</production>
+            <movements>
+                <item>$$(val) = $1(val)</item>
+            </movements>
+        </item>
+        <item>
+            <production>Var -> var Brackets</production>
+            <movements>
+                <item>go($2)</item>
+                <item>$$(val) = newTemp(link)</item>
+            </movements>
+            <after-generations>
+                <item>gen(link, $2(arraylen), $1(val), $$(val))</item>
+            </after-generations>
+        </item>
+        <item>
             <production>Brackets -> Bracket Brackets</production>
             <movements>
                 <item>go($1)</item>
@@ -545,14 +561,12 @@
             </movements>
         </item>
         <item>
-            <production>ExpressionAssignment -> var = ExpressionOr</production>
+            <production>ExpressionAssignment -> Var = ExpressionOr</production>
             <movements>
+                <item>go($1)</item>
                 <item>go($3)</item>
                 <item>$$(val) = $1(val)</item>
             </movements>
-            <before-generations>
-                <item>gen(checkvar, $1(val), _, _)</item>
-            </before-generations>
             <after-generations>
                 <item>gen(assign, $3(val), _, $1(val))</item>
             </after-generations>
@@ -781,13 +795,11 @@
             </movements>
         </item>
         <item>
-            <production>ExpressionPara -> var</production>
+            <production>ExpressionPara -> Var</production>
             <movements>
+                <item>go($1)</item>
                 <item>$$(val) = $1(val)</item>
             </movements>
-            <before-generations>
-                <item>gen(checkvar, $1(val), _, _)</item>
-            </before-generations>
         </item>
         <item>
             <production>ExpressionPara -> Num</production>
