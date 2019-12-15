@@ -70,7 +70,7 @@ public class ConsoleApplication {
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
         System.out.println("生成四元式成功");
-        System.setOut(new PrintStream(new FileOutputStream(new File("sample-c-backend/L.cc.xhtml"))));
+        System.setOut(new PrintStream(new FileOutputStream(new File("sample-c-backend/L.txt"))));
 //        for (String key: translator.getTempStorages().keySet()){
 //            System.out.println(key + ":");
 //            List<String> vals = new ArrayList<>(translator.getTempStorages().get(key));

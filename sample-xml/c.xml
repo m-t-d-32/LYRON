@@ -31,6 +31,7 @@
             </before-generations>
             <after-generations>
                 <item>gen(out, _, _, _)</item>
+                <item>gen(ret, _, _, _)</item>
             </after-generations>
         </item>
         <item>
@@ -98,10 +99,9 @@
                 <item>go($2)</item>
                 <item>$$(val) = $1(val)</item>
             </movements>
-            <after-generations>
-                <item>gen(define, _, $1(type), $1(val))</item>
-                <item>gen(popvar, $1(type), _, $1(val))</item>
-            </after-generations>
+            <before-generations>
+                <item>gen(popvar, _, $1(type), $1(val))</item>
+            </before-generations>
         </item>
         <item>
             <production>Statement -> typedef Type Type ;</production>
@@ -114,17 +114,7 @@
             </before-generations>
         </item>
         <item>
-            <production>Statement -> print ( Var )</production>
-            <movements>
-                <item>go($3)</item>
-                <item>$$(val) = $3(val)</item>
-            </movements>
-            <after-generations>
-                <item>gen(output, $$(val), _, _)</item>
-            </after-generations>
-        </item>
-        <item>
-            <production>Statement -> print ( Num )</production>
+            <production>Statement -> print ( ExpressionAssignment )</production>
             <movements>
                 <item>go($3)</item>
                 <item>$$(val) = $3(val)</item>
@@ -569,6 +559,12 @@
             </after-generations>
         </item>
         <item>
+            <production>Statement -> return ;</production>
+            <after-generations>
+                <item>gen(ret, _, _, _)</item>
+            </after-generations>
+        </item>
+        <item>
             <production>Statement -> Expression ;</production>
             <movements>
                 <item>go($1)</item>
@@ -901,6 +897,7 @@
             </movements>
             <after-generations>
                 <item>gen(call, $1(val), _, $$(val))</item>
+                <item>gen(cleanpush, $1(val), _, _)</item>
             </after-generations>
         </item>
         <item>
