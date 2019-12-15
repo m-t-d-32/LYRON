@@ -114,6 +114,36 @@
             </before-generations>
         </item>
         <item>
+            <production>Statement -> print ( Var )</production>
+            <movements>
+                <item>go($3)</item>
+                <item>$$(val) = $3(val)</item>
+            </movements>
+            <after-generations>
+                <item>gen(output, $$(val), _, _)</item>
+            </after-generations>
+        </item>
+        <item>
+            <production>Statement -> print ( Num )</production>
+            <movements>
+                <item>go($3)</item>
+                <item>$$(val) = $3(val)</item>
+            </movements>
+            <after-generations>
+                <item>gen(output, $$(val), _, _)</item>
+            </after-generations>
+        </item>
+        <item>
+            <production>Statement -> input ( Var )</production>
+            <movements>
+                <item>go($3)</item>
+                <item>$$(val) = $3(val)</item>
+            </movements>
+            <after-generations>
+                <item>gen(input, $$(val), _, _)</item>
+            </after-generations>
+        </item>
+        <item>
             <production>CommaVariables -> null</production>
         </item>
         <item>
@@ -224,13 +254,16 @@
             </after-generations>
         </item>
         <item>
-            <production>Var -> var</production>
+            <production>AtomVar -> var</production>
             <movements>
-                <item>$$(val) = $1(val)</item>
+                <item>$$(val) = newTemp(link)</item>
             </movements>
+            <after-generations>
+                <item>gen(link, _, $1(val), $$(val))</item>
+            </after-generations>
         </item>
         <item>
-            <production>Var -> var Brackets</production>
+            <production>AtomVar -> var Brackets</production>
             <movements>
                 <item>go($2)</item>
                 <item>$$(val) = newTemp(link)</item>
@@ -238,6 +271,24 @@
             <after-generations>
                 <item>gen(link, $2(arraylen), $1(val), $$(val))</item>
             </after-generations>
+        </item>
+        <item>
+            <production>Var -> AtomVar . Var</production>
+            <movements>
+                <item>go($1)</item>
+                <item>go($3)</item>
+                <item>$$(val) = newTemp(link)</item>
+            </movements>
+            <after-generations>
+                <item>gen(link, $3(val), $1(val), $$(val))</item>
+            </after-generations>
+        </item>
+        <item>
+            <production>Var -> AtomVar</production>
+            <movements>
+                <item>go($1)</item>
+                <item>$$(val) = $1(val)</item>
+            </movements>
         </item>
         <item>
             <production>Brackets -> Bracket Brackets</production>
@@ -879,6 +930,99 @@
         </item>
         <item>
             <production>CallingCommaVars -> null</production>
+        </item>
+        <item>
+            <production>Statement -> typedef struct { InStructDefinations } OutStructTypes ;</production>
+            <movements>
+                <item>go($4)</item>
+                <item>go($6)</item>
+            </movements>
+            <before-generations>
+                <item>gen(instruct, _, _, _)</item>
+            </before-generations>
+            <after-generations>
+                <item>gen(outstruct, _, _, _)</item>
+            </after-generations>
+        </item>
+        <item>
+            <production>InStructDefinations -> null</production>
+        </item>
+        <item>
+            <production>InStructDefinations -> InStructDefination InStructDefinations</production>
+            <movements>
+                <item>go($1)</item>
+                <item>go($2)</item>
+            </movements>
+        </item>
+        <item>
+            <production>InStructDefination -> Type InStructVarDefinations ;</production>
+            <movements>
+                <item>go($1)</item>
+                <item>$2(type) = $1(val)</item>
+                <item>go($2)</item>
+            </movements>
+        </item>
+        <item>
+            <production>InStructVarDefinations -> InStructVarDefination InStructCommaVarDefinitions</production>
+            <movements>
+                <item>$2(type) = $$(type)</item>
+                <item>$1(type) = $$(type)</item>
+                <item>go($1)</item>
+                <item>go($2)</item>
+            </movements>
+        </item>
+        <item>
+            <production>InStructCommaVarDefinitions -> , InStructVarDefination InStructCommaVarDefinitions</production>
+            <movements>
+                <item>$3(type) = $$(type)</item>
+                <item>$2(type) = $$(type)</item>
+                <item>go($2)</item>
+                <item>go($3)</item>
+            </movements>
+        </item>
+        <item>
+            <production>InStructCommaVarDefinitions -> null</production>
+        </item>
+        <item>
+            <production>InStructVarDefination -> var</production>
+            <before-generations>
+                <item>gen(define, _, $$(type), $1(val))</item>
+            </before-generations>
+        </item>
+        <item>
+            <production>InStructVarDefination -> var Brackets</production>
+            <movements>
+                <item>go($2)</item>
+            </movements>
+            <after-generations>
+                <item>gen(define, $2(arraylen), $$(type), $1(val))</item>
+            </after-generations>
+        </item>
+        <item>
+            <production>OutStructTypes -> null</production>
+        </item>
+        <item>
+            <production>OutStructTypes -> var CommaOutStructTypes</production>
+            <movements>
+                <item>$2(val) = $1(val)</item>
+                <item>go($2)</item>
+            </movements>
+            <before-generations>
+                <item>gen(addtype, $1(val), _, _)</item>
+            </before-generations>
+        </item>
+        <item>
+            <production>CommaOutStructTypes -> , var CommaOutStructTypes</production>
+            <movements>
+                <item>$3(val) = $$(val)</item>
+                <item>go($3)</item>
+            </movements>
+            <before-generations>
+                <item>gen(addtype, $2(val), $$(val), _)</item>
+            </before-generations>
+        </item>
+        <item>
+            <production>CommaOutStructTypes -> null</production>
         </item>
     </cfgproductions>
     <terminators>
