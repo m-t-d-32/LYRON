@@ -897,7 +897,6 @@
             </movements>
             <after-generations>
                 <item>gen(call, $1(val), _, $$(val))</item>
-                <item>gen(cleanpush, $1(val), _, _)</item>
             </after-generations>
         </item>
         <item>

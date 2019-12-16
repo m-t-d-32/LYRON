@@ -1,6 +1,6 @@
-# Lyron
+# LYRON
 
-Lyron是一个编译器框架程序，它能够允许用户定义编程语言，并且根据这种定义来解析对应的程序代码。
+LYRON是一个编译器框架程序，它能够允许用户定义编程语言，并且根据这种定义来解析对应的程序代码。
 
 
 
@@ -138,7 +138,7 @@ PLDL语言语法：
 
 1. 安装JRE，最低版本是JRE8，并将Java的可执行程序添加到环境变量。
 
-2. 在[Releases](https://github.com/LLyronx/PLDLParser/releases)中下载最新版本的包含可执行jar包的zip文件，解压文件。
+2. 在[Releases](https://github.com/LLyronx/LYRON/releases)中下载最新版本的包含可执行jar包的zip文件，解压文件。
 
 3. 编写自己定义的语言的程序代码。
 
