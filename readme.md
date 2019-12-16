@@ -153,12 +153,12 @@ PLDL语言语法：
 ```
 User@User-PC MINGW64 ~/Documents/bin_v0.3
 $ ls
-calc.xml  code.txt  lib/  pldlparser-0.3.jar
+calc.xml  code.txt  lib/  LYRON-0.4.jar
 User@User-PC MINGW64 ~/Documents/bin_v0.3
 $ cat code.txt
 3 + 4 * 5 + 6
-User@User-PC MINGW64 ~/Documents/bin_v0.3
-$ java -jar pldlparser-0.3.jar
+User@User-PC MINGW64 ~/Documents/bin_v0.4
+$ java -jar LYRON-0.4.jar
 请输入程序语言定义文件的路径：
 calc.xml
 请输入要解析的代码文件的路径：
