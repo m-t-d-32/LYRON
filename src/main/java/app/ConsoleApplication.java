@@ -70,13 +70,18 @@ public class ConsoleApplication {
         Generator generator = preparse.getGenerator();
         generator.doTreesMovements(tree, rt4);
         System.out.println("生成四元式成功");
-        System.setOut(new PrintStream(new FileOutputStream(new File("sample-c-backend/L.txt"))));
+
+        System.out.println("请输入四元式生成位置：");
+        Scanner sc = new Scanner(System.in);
+
+        System.setOut(new PrintStream(new FileOutputStream(new File(sc.nextLine()))));
 //        for (String key: translator.getTempStorages().keySet()){
 //            System.out.println(key + ":");
 //            List<String> vals = new ArrayList<>(translator.getTempStorages().get(key));
 //            System.out.println(String.join(",", vals));
 //        }
         System.out.println(rt4);
+        System.out.println("生成完毕。");
     }
 
     public static void main(String[] args){
