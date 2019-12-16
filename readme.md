@@ -150,14 +150,16 @@ PLDL语言语法：
 
 以下是本程序根据上述示例中定义的语言解析代码 `3 + 4 * 5 + 6` 的运行过程和结果：
 
-```
-User@User-PC MINGW64 ~/Documents/bin_v0.3
+```shell
+User@User-PC MINGW64 ~/bin_v0.4
 $ ls
-calc.xml  code.txt  lib/  LYRON-0.4.jar
-User@User-PC MINGW64 ~/Documents/bin_v0.3
+LYRON-0.4.jar  calc.xml  code.txt  lib/
+
+User@User-PC MINGW64 ~/bin_v0.4
 $ cat code.txt
 3 + 4 * 5 + 6
-User@User-PC MINGW64 ~/Documents/bin_v0.4
+
+User@User-PC MINGW64 ~/bin_v0.4
 $ java -jar LYRON-0.4.jar
 请输入程序语言定义文件的路径：
 calc.xml
@@ -175,10 +177,17 @@ XML文件解析成功。
 正在对代码进行语法分析构建分析树...
 正在对分析树进行语义赋值生成注释分析树...
 正在根据注释分析树生成四元式...
-生成四元式成功，以下打印生成的所有四元式
+生成四元式成功
+请输入四元式生成位置：
+result.txt
+生成完毕。
+
+User@User-PC MINGW64 ~/bin_v0.4
+$ cat result.txt
 multi,4,5,t_val0
 add,3,t_val0,t_val1
 add,t_val1,6,t_val2
+
 ```
 
 

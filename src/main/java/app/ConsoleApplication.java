@@ -74,6 +74,7 @@ public class ConsoleApplication {
         System.out.println("请输入四元式生成位置：");
         Scanner sc = new Scanner(System.in);
 
+        PrintStream backupStream = System.out;
         System.setOut(new PrintStream(new FileOutputStream(new File(sc.nextLine()))));
 //        for (String key: translator.getTempStorages().keySet()){
 //            System.out.println(key + ":");
@@ -81,6 +82,7 @@ public class ConsoleApplication {
 //            System.out.println(String.join(",", vals));
 //        }
         System.out.println(rt4);
+        System.setOut(backupStream);
         System.out.println("生成完毕。");
     }
 
