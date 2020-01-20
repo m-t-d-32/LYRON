@@ -17,6 +17,7 @@ import generator.Generator;
 import translator.MovementCreator;
 import translator.Translator;
 import java.io.File;
+import java.io.InputStream;
 import java.util.*;
 
 public class PreParse {
@@ -44,7 +45,7 @@ public class PreParse {
         }
     }
 
-    public PreParse(String filename, String markinStr) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
+    public PreParse(InputStream inputStream, String markinStr) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
         translator = new Translator();
         generator = new Generator();
         Set<String> terminators = new HashSet<>();
@@ -57,7 +58,7 @@ public class PreParse {
         List<List<AnalysisTree>> afterGenerationsTrees = new ArrayList<>();
 
         SAXReader reader = new SAXReader();
-        Document document = reader.read(new File(filename));
+        Document document = reader.read(inputStream);
         Element root = document.getRootElement();
         if (root.getName().equals("pldl")) {
             Element el = root.element("terminators");

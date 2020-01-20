@@ -18,15 +18,27 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ConsoleApplication {
-    private static void consoleCalling(String pldlFileName, String codeFilename)
-            throws DocumentException, PLDLAnalysisException, PLDLParsingException, IOException {
+
+    private PreParse preParse = null;
+    private Lexer lexer = null;
+    private CFG cfg = null;
+    private TransformTable table = null;
+    private Set<Character> emptyChars = null;
+
+    public ResultTuple4 getResults() {
+        return rt4;
+    }
+
+    private ResultTuple4 rt4 = null;
+
+    public void LLBegin(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
         System.out.println("XML文件解析中...");
-        PreParse preparse = new PreParse(pldlFileName, "Program");
+        preParse = new PreParse(xmlStream, "Program");
         System.out.println("XML文件解析成功。");
 
         System.out.println("正在构建词法分析器...");
-        Lexer lexer = new Lexer(preparse.getTerminatorRegexes(), preparse.getBannedStrs());
-        Set<Character> emptyChars = new HashSet<>();
+        lexer = new Lexer(preParse.getTerminatorRegexes(), preParse.getBannedStrs());
+        emptyChars = new HashSet<>();
         emptyChars.add(' ');
         emptyChars.add('\t');
         emptyChars.add('\n');
@@ -35,21 +47,24 @@ public class ConsoleApplication {
         System.out.println("词法分析器构建成功。");
 
         System.out.println("正在构建语法分析器...");
-        CFG cfg = preparse.getCFG();
-        TransformTable table = cfg.getTable();
+        cfg = preParse.getCFG();
+        table = cfg.getTable();
         System.out.println("基于LR（1）分析的语法分析器构建成功。");
 
         System.out.println("特定语言类型的内部编译器架构形成。");
+    }
+
+    public void LLParse(InputStream codeStream)
+            throws PLDLAnalysisException, PLDLParsingException, IOException {
 
         System.out.println("正在读取代码文件...");
-        FileInputStream in = new FileInputStream(codeFilename);
-        int size = in.available();
+        int size = codeStream.available();
         byte[] buffer = new byte[size];
-        int readin = in.read(buffer);
+        int readin = codeStream.read(buffer);
         if (readin != size){
             throw new IOException("代码文件读取大小与文件大小不一致。");
         }
-        in.close();
+        codeStream.close();
         String codestr = new String(buffer, StandardCharsets.UTF_8);
 
         System.out.println("正在对代码进行词法分析...");
@@ -59,49 +74,51 @@ public class ConsoleApplication {
 
         System.out.println("正在对代码进行语法分析构建分析树...");
         AnalysisTree tree = table.getAnalysisTree(symbols);
-        ResultTuple4 rt4 = new ResultTuple4();
+        rt4 = new ResultTuple4();
 
         System.out.println("正在对分析树进行语义赋值生成注释分析树...");
-        Translator translator = preparse.getTranslator();
+        Translator translator = preParse.getTranslator();
         translator.checkMovementsMap();
         translator.doTreesMovements(tree);
 
         System.out.println("正在根据注释分析树生成四元式...");
-        Generator generator = preparse.getGenerator();
+        Generator generator = preParse.getGenerator();
         generator.doTreesMovements(tree, rt4);
         System.out.println("生成四元式成功");
+    }
 
-        System.out.println("请输入四元式生成位置：");
-        Scanner sc = new Scanner(System.in);
-
+    public void LLEnd(OutputStream outputStream){
         PrintStream backupStream = System.out;
-        System.setOut(new PrintStream(new FileOutputStream(new File(sc.nextLine()))));
-//        for (String key: translator.getTempStorages().keySet()){
-//            System.out.println(key + ":");
-//            List<String> vals = new ArrayList<>(translator.getTempStorages().get(key));
-//            System.out.println(String.join(",", vals));
-//        }
+        System.setOut(new PrintStream(outputStream));
+
         System.out.println(rt4);
         System.setOut(backupStream);
         System.out.println("生成完毕。");
     }
 
-    public static void main(String[] args){
-        String pldlFileName, codeFileName;
+    public void LLMain(String[] args){
+        String pldlFileName, codeFileName, outFileName;
         try {
-            if (args.length == 2) {
+            if (args.length == 3) {
                 pldlFileName = args[0];
                 codeFileName = args[1];
-                consoleCalling(pldlFileName, codeFileName);
+                outFileName = args[2];
+                LLBegin(new FileInputStream(pldlFileName));
+                LLParse(new FileInputStream(codeFileName));
+                LLEnd(new FileOutputStream(outFileName));
             } else if (args.length == 0) {
                 System.out.println("请输入程序语言定义文件的路径：");
                 Scanner sc = new Scanner(System.in);
                 pldlFileName = sc.nextLine();
+                LLBegin(new FileInputStream(pldlFileName));
                 System.out.println("请输入要解析的代码文件的路径：");
                 codeFileName = sc.nextLine();
-                consoleCalling(pldlFileName, codeFileName);
+                LLParse(new FileInputStream(codeFileName));
+                System.out.println("请输入四元式生成位置：");
+                outFileName = sc.nextLine();
+                LLEnd(new FileOutputStream(outFileName));
             } else {
-                System.err.println("参数用法：第一个参数是程序语言定义文件，第二个参数是要解析的代码文件。");
+                System.err.println("参数用法：第一个参数是程序语言定义文件，第二个参数是要解析的代码文件，第三个参数是四元式保存位置。");
                 System.exit(-1);
             }
         } catch (IOException e) {
@@ -122,5 +139,9 @@ public class ConsoleApplication {
             }
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+         new ConsoleApplication().LLMain(args);
     }
 }

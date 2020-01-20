@@ -6,7 +6,7 @@
 
     <groupId>org.llyronx</groupId>
     <artifactId>LYRON</artifactId>
-    <version>0.4</version>
+    <version>0.5</version>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/dom4j/dom4j -->
         <dependency>
@@ -55,7 +55,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>app.ConsoleApplication</mainClass>
+                            <mainClass>app.GUIApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
