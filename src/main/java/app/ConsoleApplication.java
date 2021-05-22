@@ -49,6 +49,8 @@ public class ConsoleApplication {
         System.out.println("正在构建语法分析器...");
         cfg = preParse.getCFG();
         table = cfg.getTable();
+        System.out.println("表项共" + table.getTableMap().size() + "*" +
+                (cfg.getCFGUnterminators().size() + cfg.getCFGTerminators().size()) + "项");
         System.out.println("基于LR（1）分析的语法分析器构建成功。");
 
         System.out.println("特定语言类型的内部编译器架构形成。");
@@ -108,18 +110,20 @@ public class ConsoleApplication {
                 LLEnd(new FileOutputStream(outFileName));
             } else if (args.length == 0) {
                 System.out.println("请输入程序语言定义文件的路径：");
-                Scanner sc = new Scanner(System.in);
-                pldlFileName = sc.nextLine();
+//                Scanner sc = new Scanner(System.in);
+//                pldlFileName = sc.nextLine();
+                pldlFileName = "sample/LYRON-Yu-Backend/xml/yu2.xml";
                 LLBegin(new FileInputStream(pldlFileName));
-                System.out.println("请输入要解析的代码文件的路径：");
-                codeFileName = sc.nextLine();
+//                System.out.println("请输入要解析的代码文件的路径：");
+//                codeFileName = sc.nextLine();
+                codeFileName = "sample/LYRON-Yu-Backend/test/test2.yu";
                 LLParse(new FileInputStream(codeFileName));
-                System.out.println("请输入四元式生成位置：");
-                outFileName = sc.nextLine();
-                LLEnd(new FileOutputStream(outFileName));
+//                LLParse(new FileInputStream(codeFileName));
+//                System.out.println("请输入四元式生成位置：");
+//                outFileName = sc.nextLine();
+//                LLEnd(new FileOutputStream(outFileName));
             } else {
                 System.err.println("参数用法：第一个参数是程序语言定义文件，第二个参数是要解析的代码文件，第三个参数是四元式保存位置。");
-                System.exit(-1);
             }
         } catch (IOException e) {
             System.err.println("文件无法打开或读取，请检查输入的路径。");

@@ -68,19 +68,19 @@ public class TransformTable implements Serializable{
         Collections.sort(sortedStatementIndexes);
         List<AbstractSymbol> certainAllAbstractSymbols = new ArrayList<>(allAbstractSymbols);
         for (AbstractSymbol s : certainAllAbstractSymbols) {
-            result.append("\t");
+            result.append(",");
             result.append(s.getName());
         }
         result.append("\n");
         for (Integer i : sortedStatementIndexes) {
             result.append(i);
             for (AbstractSymbol s : certainAllAbstractSymbols) {
-                result.append("\t");
+                result.append(",");
                 
                 if (table.get(i).containsKey(s)) {
                     try {
                         if (endStatements.contains(i) && s.equals(cfg.getSymbolPool().getTerminator("eof"))) {
-                            result.append("acc");
+                            result.append("acc(").append(table.get(i).get(s).toString()).append(")");
                         }
                         else {
                             result.append(table.get(i).get(s).toString());
@@ -100,51 +100,63 @@ public class TransformTable implements Serializable{
         AnalysisTree tree = new AnalysisTree();
         Stack<Integer> statementStack = new Stack<>();
         Stack<AnalysisNode> nodeStack = new Stack<>();
+        Stack<Symbol> symbolStack = new Stack<>();
         statementStack.push(0);
-        int beginI = 0;
         if (endStatements.size() <= 0) {
             return null;
         }
-        AbstractSymbol beginAbstractSymbol = table.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminator("eof")).getRegressionProduction().getBeforeAbstractSymbol();
-        while(beginI != symbols.size() - 1 || !symbols.get(beginI).getAbstractSymbol().equals(beginAbstractSymbol)){
+        int i = 0;
+        while(true){
             int nowStatement = statementStack.peek();
-            Symbol nowSymbol = beginI < symbols.size() ? symbols.get(beginI) : new Terminator(cfg.getSymbolPool().getTerminator("eof"));
-            Movement movement =  table.get(nowStatement).get(nowSymbol.getAbstractSymbol());
+            Symbol nowSymbol = i < symbols.size() ? symbols.get(i) : new Terminator(cfg.getSymbolPool().getTerminator("eof"));
+            Movement movement = table.get(nowStatement).get(nowSymbol.getAbstractSymbol());
             if (movement == null) {
-                throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
-            }
-            else {
-                switch(movement.getMovement()) {
-                    case Movement.SHIFT:
-                        nodeStack.push(new AnalysisNode(nowSymbol));
-                    case Movement.GOTO:
-                        statementStack.push(movement.getShiftTo());
-                        ++beginI;
-                        break;
-                    case Movement.REGRESSION:
-                        CFGProduction production = movement.getRegressionProduction();
-                        AnalysisNode node = new AnalysisNode(new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol()));
-                        node.setProduction(production);
-                        node.setChildren(new ArrayList<>());
-                        AbstractTerminator nullTerminator = cfg.getSymbolPool().getTerminator("null");
-                        Stack<AnalysisNode> tempStack = new Stack<>();
-                        for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                            if (symbol != nullTerminator) {
-                                statementStack.pop();
-                                tempStack.push(nodeStack.pop());
-                            }
-                        }
-                        for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                            if (symbol != nullTerminator) {
-                                AnalysisNode childNode = tempStack.pop();
-                                childNode.setParent(node);
-                                node.getChildren().add(childNode);
-                            }
-                        }
-                        nodeStack.push(node);
-                        --beginI;
-                        symbols.set(beginI, node.getValue());
-                        break;
+                throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
+            } else if (movement.getMovement() == Movement.SHIFT) {
+                nodeStack.push(new AnalysisNode(nowSymbol));
+                symbolStack.push(nowSymbol);
+                statementStack.push(movement.getShiftTo());
+                if (i < symbols.size()){
+                    ++i;
+                }
+                else {
+                    throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时移进失败。", null);
+                }
+            } else if (movement.getMovement() == Movement.REGRESSION) {
+                CFGProduction production = movement.getRegressionProduction();
+                AnalysisNode node = new AnalysisNode(new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol()));
+                node.setProduction(production);
+                node.setChildren(new ArrayList<>());
+                AbstractTerminator nullTerminator = cfg.getSymbolPool().getTerminator("null");
+                Stack<AnalysisNode> tempStack = new Stack<>();
+                for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+                    if (symbol != nullTerminator) {
+                        symbolStack.pop();
+                        statementStack.pop();
+                        tempStack.push(nodeStack.pop());
+                    }
+                }
+                for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+                    if (symbol != nullTerminator) {
+                        AnalysisNode childNode = tempStack.pop();
+                        childNode.setParent(node);
+                        node.getChildren().add(childNode);
+                    }
+                }
+                nodeStack.push(node);
+                symbolStack.push(node.getValue());
+
+                if (endStatements.contains(nowStatement)){
+                    break;
+                }
+
+                movement = table.get(statementStack.peek()).get(node.getValue().getAbstractSymbol());
+
+                if (movement.getMovement() != Movement.GOTO){
+                    throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
+                }
+                else {
+                    statementStack.push(movement.getShiftTo());
                 }
             }
         }
@@ -154,6 +166,7 @@ public class TransformTable implements Serializable{
         else {
             tree.setRoot(nodeStack.pop());
         }
+        System.out.println(tree);
         return tree;
     }
 }

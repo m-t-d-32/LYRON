@@ -22,8 +22,10 @@ public class Movement {
     public String toString() {
         if (movement == REGRESSION) {
             return "r" + regressionProduction.getSerialNumber();
-        } else {
+        } else if (movement == SHIFT) {
             return "s" + shiftToStatement;
+        } else {
+            return "g" + shiftToStatement;
         }
     }
     
