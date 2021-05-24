@@ -2,7 +2,7 @@ package parser;
 
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
-import parser.*;
+import symbol.Terminator;
 import symbol.*;
 
 import java.io.Serializable;

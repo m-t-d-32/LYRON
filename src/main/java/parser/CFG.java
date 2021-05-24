@@ -228,7 +228,6 @@ public class CFG {
         setFirstSet();
         symbolPool.addTerminatorStr("eof");
         List<CFGStatement> iterStatements = new ArrayList<>();
-        //Set<parser.CFGStatement> checkStatements = new HashSet<>();
         Map<CFGStatement, Integer> checkStatements = new HashMap<>();
 
         CFGStatement beginStatement = new CFGStatement(this);
@@ -260,16 +259,17 @@ public class CFG {
                     classifiedPointedProductions.get(symbolPool.getTerminator("null")).add(pointedProduction);
                 }
             }
-            for (AbstractSymbol s : classifiedPointedProductions.keySet()) {
-                if (s.equals(symbolPool.getTerminator("null"))) {
-                    for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
-                        result.add(i, pointedProduction.getOutlookAbstractTerminator(), pointedProduction.getProduction());
-                        if (pointedProduction.getOutlookAbstractTerminator().equals(symbolPool.getTerminator("eof"))
-                                && pointedProduction.getProduction().getBeforeAbstractSymbol().equals(CFGmarkin)){
-                            result.addEndStatement(i);
-                        }
+            if (classifiedPointedProductions.containsKey(symbolPool.getTerminator("null"))) {
+                for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(symbolPool.getTerminator("null"))) {
+                    result.add(i, pointedProduction.getOutlookAbstractTerminator(), pointedProduction.getProduction());
+                    if (pointedProduction.getOutlookAbstractTerminator().equals(symbolPool.getTerminator("eof"))
+                            && pointedProduction.getProduction().getBeforeAbstractSymbol().equals(CFGmarkin)) {
+                        result.addEndStatement(i);
                     }
-                } else {
+                }
+            }
+            for (AbstractSymbol s : classifiedPointedProductions.keySet()) {
+                if (!s.equals(symbolPool.getTerminator("null"))) {
                     CFGStatement statement = new CFGStatement(this);
                     for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
                         statement.add(pointedProduction.next());
@@ -283,7 +283,6 @@ public class CFG {
                 }
             }
         }
-        //System.out.println(iterStatements.size());
         return result;
     }
 

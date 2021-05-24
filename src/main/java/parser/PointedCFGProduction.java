@@ -5,10 +5,8 @@ import symbol.AbstractTerminator;
 
 public class PointedCFGProduction {
 
-    private int pointer;
-
     private final CFGProduction cfgproduction;
-
+    private int pointer;
     private AbstractTerminator outlookAbstractTerminator;
 
     public PointedCFGProduction(CFGProduction cfgproduction, AbstractTerminator outlookAbstractTerminator) {
@@ -24,10 +22,7 @@ public class PointedCFGProduction {
     public boolean finished() {
         if (pointer >= cfgproduction.getAfterAbstractSymbols().size()) {
             return true;
-        } else if (cfgproduction.getAfterAbstractSymbols().get(0).getName().equals("null")) {
-            return true;
-        }
-        return false;
+        } else return cfgproduction.getAfterAbstractSymbols().get(0).getName().equals("null");
     }
 
     public PointedCFGProduction next() {

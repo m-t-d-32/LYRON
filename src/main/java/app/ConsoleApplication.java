@@ -112,11 +112,11 @@ public class ConsoleApplication {
                 System.out.println("请输入程序语言定义文件的路径：");
 //                Scanner sc = new Scanner(System.in);
 //                pldlFileName = sc.nextLine();
-                pldlFileName = "sample/LYRON-Yu-Backend/xml/yu2.xml";
+                pldlFileName = "sample/LYRON-Yu-Backend/xml/yu.xml";
                 LLBegin(new FileInputStream(pldlFileName));
 //                System.out.println("请输入要解析的代码文件的路径：");
 //                codeFileName = sc.nextLine();
-                codeFileName = "sample/LYRON-Yu-Backend/test/test2.yu";
+                codeFileName = "sample/LYRON-Yu-Backend/test/test.yu";
                 LLParse(new FileInputStream(codeFileName));
 //                LLParse(new FileInputStream(codeFileName));
 //                System.out.println("请输入四元式生成位置：");
