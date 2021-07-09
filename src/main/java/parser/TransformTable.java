@@ -46,6 +46,10 @@ public class TransformTable implements Serializable{
         if (!table.containsKey(statementIndex)) {
             table.put(statementIndex, new HashMap<>());
         }
+        if (table.get(statementIndex).containsKey(nextAbstractSymbol)){
+            System.err.println("移进/归约冲突发生");
+            System.err.println(table.get(statementIndex).get(nextAbstractSymbol).getRegressionProduction());
+        }
         table.get(statementIndex).put(nextAbstractSymbol, movement);
     }
 
@@ -53,6 +57,10 @@ public class TransformTable implements Serializable{
         Movement movement = new Movement(production);
         if (!table.containsKey(statementIndex)) {
             table.put(statementIndex, new HashMap<>());
+        }
+        if (table.get(statementIndex).containsKey(nextAbstractSymbol)){
+            System.err.println("归约/归约冲突发生");
+            System.err.println(table.get(statementIndex).get(nextAbstractSymbol).getRegressionProduction());
         }
         table.get(statementIndex).put(nextAbstractSymbol, movement);
     }
@@ -124,6 +132,7 @@ public class TransformTable implements Serializable{
                 }
             } else if (movement.getMovement() == Movement.REGRESSION) {
                 CFGProduction production = movement.getRegressionProduction();
+//                System.out.println("归约：" + production.toString());
                 AnalysisNode node = new AnalysisNode(new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol()));
                 node.setProduction(production);
                 node.setChildren(new ArrayList<>());
@@ -146,7 +155,7 @@ public class TransformTable implements Serializable{
                 nodeStack.push(node);
                 symbolStack.push(node.getValue());
 
-                if (endStatements.contains(nowStatement)){
+                if (endStatements.contains(nowStatement) && i == symbols.size()){
                     break;
                 }
 
@@ -166,7 +175,7 @@ public class TransformTable implements Serializable{
         else {
             tree.setRoot(nodeStack.pop());
         }
-        System.out.println(tree);
+//        System.out.println(tree);
         return tree;
     }
 }

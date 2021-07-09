@@ -14,7 +14,7 @@ public class PLDLParsingWarning extends Throwable {
     }
 
     public static void setLog(String warning) {
-        System.err.println("Warning: " + warning);
+//        System.err.println("Warning: " + warning);
         loggings.add(warning);
     }
 }

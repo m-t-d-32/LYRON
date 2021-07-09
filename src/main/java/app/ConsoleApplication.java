@@ -59,7 +59,7 @@ public class ConsoleApplication {
     public void LLParse(InputStream codeStream)
             throws PLDLAnalysisException, PLDLParsingException, IOException {
 
-        System.out.println("正在读取代码文件...");
+//        System.out.println("正在读取代码文件...");
         int size = codeStream.available();
         byte[] buffer = new byte[size];
         int readin = codeStream.read(buffer);
@@ -69,24 +69,24 @@ public class ConsoleApplication {
         codeStream.close();
         String codestr = new String(buffer, StandardCharsets.UTF_8);
 
-        System.out.println("正在对代码进行词法分析...");
+//        System.out.println("正在对代码进行词法分析...");
         List<Symbol> symbols = lexer.analysis(codestr, emptyChars);
         symbols = cfg.revertToStdAbstractSymbols(symbols);
         symbols = cfg.eraseComments(symbols);
 
-        System.out.println("正在对代码进行语法分析构建分析树...");
+//        System.out.println("正在对代码进行语法分析构建分析树...");
         AnalysisTree tree = table.getAnalysisTree(symbols);
         rt4 = new ResultTuple4();
 
-        System.out.println("正在对分析树进行语义赋值生成注释分析树...");
+//        System.out.println("正在对分析树进行语义赋值生成注释分析树...");
         Translator translator = preParse.getTranslator();
         translator.checkMovementsMap();
         translator.doTreesMovements(tree);
 
-        System.out.println("正在根据注释分析树生成四元式...");
+//        System.out.println("正在根据注释分析树生成四元式...");
         Generator generator = preParse.getGenerator();
         generator.doTreesMovements(tree, rt4);
-        System.out.println("生成四元式成功");
+//        System.out.println("生成四元式成功");
     }
 
     public void LLEnd(OutputStream outputStream){
@@ -109,19 +109,31 @@ public class ConsoleApplication {
                 LLParse(new FileInputStream(codeFileName));
                 LLEnd(new FileOutputStream(outFileName));
             } else if (args.length == 0) {
-                System.out.println("请输入程序语言定义文件的路径：");
-//                Scanner sc = new Scanner(System.in);
-//                pldlFileName = sc.nextLine();
-                pldlFileName = "sample/LYRON-Yu-Backend/xml/yu.xml";
+                pldlFileName = "sample/LYRON-SysY-Backend/xml/sysy.xml";
                 LLBegin(new FileInputStream(pldlFileName));
-//                System.out.println("请输入要解析的代码文件的路径：");
-//                codeFileName = sc.nextLine();
-                codeFileName = "sample/LYRON-Yu-Backend/test/test.yu";
-                LLParse(new FileInputStream(codeFileName));
-//                LLParse(new FileInputStream(codeFileName));
-//                System.out.println("请输入四元式生成位置：");
-//                outFileName = sc.nextLine();
-//                LLEnd(new FileOutputStream(outFileName));
+
+                File []testfolders = {
+                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2020"),
+                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2021"),
+                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/functional_test"),
+                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/performance_test2021_pre")
+                };
+
+                for (File folder: testfolders){
+                    File []testfiles = folder.listFiles();
+                    try{
+                        for (File f: testfiles){
+                            if (f.getName().endsWith("sy")){
+                                codeFileName = f.getAbsolutePath();
+                                System.out.println(codeFileName);
+                                LLParse(new FileInputStream(codeFileName));
+                            }
+                        }
+                    }
+                    catch (Exception e){
+                        System.out.println(e);
+                    }
+                }
             } else {
                 System.err.println("参数用法：第一个参数是程序语言定义文件，第二个参数是要解析的代码文件，第三个参数是四元式保存位置。");
             }

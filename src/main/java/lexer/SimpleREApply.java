@@ -149,7 +149,7 @@ public class SimpleREApply extends RE {
                         @Override
                         public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
                             NFANode beginNode = new NFANode();
-                            for (char c = 1; c < 127; ++c) {
+                            for (char c = 1; c < 65535; ++c) {
                                 beginNode.addToTransformTable(String.valueOf(c), nodes.get(0).getRoot());
                             }
                             nodes.get(0).getRoot().setFinal(true);
@@ -233,7 +233,7 @@ public class SimpleREApply extends RE {
 
                             NFANode beginNode = new NFANode();
                             Set<String> chars = new HashSet<>();
-                            for (char c = 1; c < 127; ++c) {
+                            for (char c = 1; c < 65535; ++c) {
                                 chars.add(String.valueOf(c));
                             }
                             chars.removeAll(nodes.get(2).getRoot().getStateTransformTable().keySet());
