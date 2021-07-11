@@ -15,6 +15,7 @@ import util.PreParse;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ConsoleApplication {
@@ -99,7 +100,9 @@ public class ConsoleApplication {
     }
 
     public void LLMain(String[] args){
-        String pldlFileName, codeFileName, outFileName;
+        System.out.println("开始：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+        String pldlFileName, codeFileName, outFileName, fourtupleFileName;
+        List<String> wrongTestFiles = new ArrayList<>();
         try {
             if (args.length == 3) {
                 pldlFileName = args[0];
@@ -111,11 +114,12 @@ public class ConsoleApplication {
             } else if (args.length == 0) {
                 pldlFileName = "sample/LYRON-SysY-Backend/xml/sysy.xml";
                 LLBegin(new FileInputStream(pldlFileName));
+                System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
                 File []testfolders = {
                         new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2020"),
                         new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2021"),
-                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/functional_test"),
+//                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/functional_test"),
                         new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/performance_test2021_pre")
                 };
 
@@ -125,8 +129,11 @@ public class ConsoleApplication {
                         for (File f: testfiles){
                             if (f.getName().endsWith("sy")){
                                 codeFileName = f.getAbsolutePath();
-                                System.out.println(codeFileName);
+                                wrongTestFiles.add(codeFileName);
                                 LLParse(new FileInputStream(codeFileName));
+                                wrongTestFiles.remove(codeFileName);
+                                fourtupleFileName = codeFileName + ".4tu";
+                                LLEnd(new FileOutputStream(fourtupleFileName));
                             }
                         }
                     }
@@ -155,6 +162,17 @@ public class ConsoleApplication {
             }
             e.printStackTrace();
         }
+
+        if (wrongTestFiles.isEmpty()){
+            System.out.println("所有文件执行成功");
+        }
+        else {
+            System.out.println("执行出错的测试文件：");
+            for (String wrongFilename : wrongTestFiles) {
+                System.out.println(wrongFilename);
+            }
+        }
+        System.out.println("执行完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
     }
 
     public static void main(String[] args) {
