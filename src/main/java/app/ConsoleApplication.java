@@ -1,5 +1,8 @@
 package app;
 
+import de.ruedigermoeller.serialization.FSTConfiguration;
+import de.ruedigermoeller.serialization.FSTObjectInput;
+import de.ruedigermoeller.serialization.FSTObjectOutput;
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
 import generator.Generator;
@@ -35,7 +38,7 @@ public class ConsoleApplication {
 
     private ResultTuple4 rt4 = null;
 
-    public void LLBegin(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
+    public void LLBeginFormXML(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException, IOException {
         System.out.println("XML文件解析中...");
         preParse = new PreParse(xmlStream, "Program");
         System.out.println("XML文件解析成功。");
@@ -58,6 +61,22 @@ public class ConsoleApplication {
         System.out.println("基于LR（1）分析的语法分析器构建成功。");
 
         System.out.println("特定语言类型的内部编译器架构形成。");
+    }
+
+    public void LLBeginFromModel(InputStream modelStream) throws Exception {
+        FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
+        FSTObjectInput in = conf.getObjectInput(modelStream);
+        preParse = (PreParse) in.readObject(PreParse.class);
+        lexer = (Lexer) in.readObject(Lexer.class);
+        cfg = (CFG) in.readObject(CFG.class);
+        table = (TransformTable) in.readObject(TransformTable.class);
+
+        emptyChars = new HashSet<>();
+        emptyChars.add(' ');
+        emptyChars.add('\t');
+        emptyChars.add('\n');
+        emptyChars.add('\r');
+        emptyChars.add('\f');
     }
 
     public void LLParse(InputStream codeStream)
@@ -104,65 +123,51 @@ public class ConsoleApplication {
 
     public void LLMain(String[] args){
         System.out.println("开始：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
-        String pldlFileName, codeFileName, outFileName, fourtupleFileName;
+        String codeFileName, fourtupleFileName;
         List<String> wrongTestFiles = new ArrayList<>();
         try {
-            if (args.length == 3) {
-                pldlFileName = args[0];
-                codeFileName = args[1];
-                outFileName = args[2];
-                LLBegin(new FileInputStream(pldlFileName));
-                LLParse(new FileInputStream(codeFileName));
-                LLEnd(new FileOutputStream(outFileName));
-            } else if (args.length == 0) {
-                pldlFileName = "sample/LYRON-SysY-Backend/xml/sysy.xml";
-                LLBegin(new FileInputStream(pldlFileName));
-                System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
-
-                File []testfolders = {
-                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2020"),
-                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2021"),
-//                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/functional_test"),
-                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/performance_test2021_pre")
-                };
-
-                for (File folder: testfolders){
-                    File []testfiles = folder.listFiles();
-                    try{
-                        for (File f: testfiles){
-                            if (f.getName().endsWith("sy")){
-                                codeFileName = f.getAbsolutePath();
-                                wrongTestFiles.add(codeFileName);
-                                LLParse(new FileInputStream(codeFileName));
-                                wrongTestFiles.remove(codeFileName);
-                                fourtupleFileName = codeFileName + ".4tu";
-                                LLEnd(new FileOutputStream(fourtupleFileName));
-                            }
-                        }
-                    }
-                    catch (Exception e){
-                        System.out.println(e);
-                    }
+            if (args[0].equals("xml")){
+                LLBeginFormXML(new FileInputStream(args[1]));
+                if (args.length >= 4 &&
+                    args[2].equals("save-model")){
+                    LLSaveModel(new FileOutputStream(args[3]));
                 }
-            } else {
-                System.err.println("参数用法：第一个参数是程序语言定义文件，第二个参数是要解析的代码文件，第三个参数是四元式保存位置。");
             }
-        } catch (IOException e) {
-            System.err.println("文件无法打开或读取，请检查输入的路径。");
-            e.printStackTrace();
-        } catch (PLDLParsingException e) {
-            System.err.println("程序语言定义存在问题，请检查文法定义。");
-            e.printStackTrace();
-        } catch (PLDLAnalysisException e) {
-            System.err.println("代码文件可能存在问题，请检查代码文件，如果你认为代码没有问题，请检查程序语言定义与代码是否匹配。");
-            e.printStackTrace();
-        } catch (DocumentException e) {
-            if (e.getNestedException().getClass().equals(FileNotFoundException.class)){
-                System.err.println("文件无法打开或读取，请检查输入的路径。");
+            else if (args[0].equals("model")){
+                LLBeginFromModel(new FileInputStream(args[1]));
             }
             else {
-                System.err.println("程序语言定义存在问题，这不是一个正确的XML文件，请检查格式。注意XML中的转义字符。");
+                throw new Exception("参数错误");
             }
+
+            System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+
+            File []testfolders = {
+                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2020"),
+                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2021"),
+//                        new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/functional_test"),
+                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/performance_test2021_pre")
+            };
+
+            for (File folder: testfolders){
+                File []testfiles = folder.listFiles();
+                try{
+                    for (File f: testfiles){
+                        if (f.getName().endsWith("sy")){
+                            codeFileName = f.getAbsolutePath();
+                            wrongTestFiles.add(codeFileName);
+                            LLParse(new FileInputStream(codeFileName));
+                            wrongTestFiles.remove(codeFileName);
+                            fourtupleFileName = codeFileName + ".4tu";
+                            LLEnd(new FileOutputStream(fourtupleFileName));
+                        }
+                    }
+                }
+                catch (Exception e){
+                    System.out.println(e);
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -176,6 +181,19 @@ public class ConsoleApplication {
             }
         }
         System.out.println("执行完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+    }
+
+    public void LLSaveModel(OutputStream fileOutputStream) throws IOException {
+        System.out.println("保存模型中……");
+        FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
+        FSTObjectOutput out = conf.getObjectOutput(fileOutputStream);
+        out.writeObject(preParse, PreParse.class);
+        out.writeObject(lexer, Lexer.class);
+        out.writeObject(cfg, CFG.class);
+        out.writeObject(table, TransformTable.class);
+        out.flush();
+        fileOutputStream.close();
+        System.out.println("保存模型成功");
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,8 @@
 package generator;
 
-public class Tuple4 {
+import java.io.Serializable;
+
+public class Tuple4 implements Serializable {
     private String[] elements = new String[4];
 
     public Tuple4(String s1, String s2, String s3, String s4) {

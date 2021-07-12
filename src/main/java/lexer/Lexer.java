@@ -5,9 +5,10 @@ import symbol.AbstractTerminator;
 import symbol.Symbol;
 import symbol.Terminator;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Lexer {
+public class Lexer implements Serializable {
 
     private DFA dfa = null;
 

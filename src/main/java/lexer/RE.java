@@ -9,9 +9,10 @@ import parser.TransformTable;
 import symbol.Terminator;
 import symbol.*;
 
+import java.io.Serializable;
 import java.util.*;
 
-public abstract class RE {
+public abstract class RE implements Serializable {
 
     private String reString = null;
 

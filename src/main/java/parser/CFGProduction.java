@@ -4,11 +4,12 @@ import exception.PLDLParsingException;
 import symbol.AbstractSymbol;
 import symbol.SymbolPool;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class CFGProduction{
+public class CFGProduction implements Serializable {
 
     private AbstractSymbol beforeAbstractSymbol = null;
 

@@ -1,8 +1,9 @@
 package lexer;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class NFA {
+public class NFA implements Serializable {
 
     private NFANode root = null;
 

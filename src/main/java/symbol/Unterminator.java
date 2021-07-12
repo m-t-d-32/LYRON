@@ -1,8 +1,9 @@
 package symbol;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class Unterminator extends Symbol {
+public class Unterminator extends Symbol implements Serializable {
 
     public Unterminator(AbstractUnterminator u) {
         setAbstractSymbol(u);

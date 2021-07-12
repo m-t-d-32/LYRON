@@ -1,6 +1,8 @@
 package parser;
 
-public class AnalysisTree {
+import java.io.Serializable;
+
+public class AnalysisTree implements Serializable {
     AnalysisNode root;
 
     public AnalysisTree(){

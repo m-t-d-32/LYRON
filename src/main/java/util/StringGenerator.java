@@ -1,6 +1,8 @@
 package util;
 
-public class StringGenerator {
+import java.io.Serializable;
+
+public class StringGenerator implements Serializable {
     private static final char BEGIN_CODE = 'A';
     private static final char END_CODE = 'Z';
 

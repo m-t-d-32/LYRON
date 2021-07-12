@@ -1,8 +1,9 @@
 package symbol;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public abstract class Symbol {
+public abstract class Symbol implements Serializable {
 
     public static final int TERMINATOR = 0x01, UNTERMINATOR = 0xff;
 

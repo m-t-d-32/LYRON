@@ -8,7 +8,7 @@ import symbol.*;
 import java.io.Serializable;
 import java.util.*;
 
-public class TransformTable implements Serializable{
+public class TransformTable implements Serializable {
 
     private static final long serialVersionUID = 8448616257039658718L;
 

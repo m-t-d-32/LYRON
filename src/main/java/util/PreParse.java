@@ -18,9 +18,10 @@ import translator.MovementCreator;
 import translator.Translator;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
 
-public class PreParse {
+public class PreParse implements Serializable {
 
     List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
     Translator translator = null;
@@ -129,7 +130,7 @@ public class PreParse {
                         PLDLParsingWarning.setLog("There is likely to be a significant performance cost in making these calls.");
                         String bannedStrs = e.element("ban").getText().trim();
                         Set<String> allStrsSet = new HashSet<>();
-                        for (char c = 0x0; c < 0xff; ++c){
+                        for (char c = 0x1; c < 0xffff; ++c){
                             allStrsSet.add(String.valueOf(c));
                         }
                         Set<String> bannedStrsSet = new HashSet<>();

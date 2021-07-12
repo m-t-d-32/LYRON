@@ -2,9 +2,10 @@ package parser;
 
 import symbol.Symbol;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class AnalysisNode {
+public class AnalysisNode implements Serializable {
     private Symbol value;
 
     public Symbol getValue() {

@@ -2,9 +2,10 @@ package lexer;
 
 import util.StringGenerator;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class DFANode {
+public class DFANode implements Serializable {
 
     private String serialCode = null;
 

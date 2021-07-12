@@ -1,6 +1,8 @@
 package symbol;
 
-public abstract class AbstractSymbol {
+import java.io.Serializable;
+
+public abstract class AbstractSymbol implements Serializable {
 
     public static final int TERMINATOR = 0x01, UNTERMINATOR = 0xff;
 

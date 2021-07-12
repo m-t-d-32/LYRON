@@ -1,10 +1,11 @@
 package lexer;
 
+import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class DFALinkState {
+public class DFALinkState implements Serializable {
 
     public static final int STATE_SAME = 1, STATE_DIFF = 0, STATE_UNDEFINED = -1;
 

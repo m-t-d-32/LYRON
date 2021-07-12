@@ -1,9 +1,10 @@
 package generator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResultTuple4 {
+public class ResultTuple4 implements Serializable {
 
     private List<Tuple4> tuple4s = new ArrayList<>();
 

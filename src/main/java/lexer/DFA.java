@@ -1,8 +1,9 @@
 package lexer;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class DFA {
+public class DFA implements Serializable {
 
     private DFANode root = null;
 

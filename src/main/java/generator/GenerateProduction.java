@@ -5,7 +5,9 @@ import exception.PLDLParsingException;
 import parser.AnalysisNode;
 import parser.CFGProduction;
 
-public abstract class GenerateProduction extends CFGProduction{
+import java.io.Serializable;
+
+public abstract class GenerateProduction extends CFGProduction implements Serializable {
 
     public GenerateProduction(CFGProduction production) {
         super(production);

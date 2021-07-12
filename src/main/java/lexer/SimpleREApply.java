@@ -10,9 +10,10 @@ import symbol.Symbol;
 import symbol.SymbolPool;
 import symbol.Terminator;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class SimpleREApply extends RE {
+public class SimpleREApply extends RE implements Serializable {
 
     public SimpleREApply(String str) throws PLDLParsingException, PLDLAnalysisException {
         super(str);
@@ -149,7 +150,7 @@ public class SimpleREApply extends RE {
                         @Override
                         public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
                             NFANode beginNode = new NFANode();
-                            for (char c = 1; c < 65535; ++c) {
+                            for (char c = 0x1; c < 0xffff; ++c) {
                                 beginNode.addToTransformTable(String.valueOf(c), nodes.get(0).getRoot());
                             }
                             nodes.get(0).getRoot().setFinal(true);
@@ -233,7 +234,7 @@ public class SimpleREApply extends RE {
 
                             NFANode beginNode = new NFANode();
                             Set<String> chars = new HashSet<>();
-                            for (char c = 1; c < 65535; ++c) {
+                            for (char c = 0x1; c < 0xffff; ++c) {
                                 chars.add(String.valueOf(c));
                             }
                             chars.removeAll(nodes.get(2).getRoot().getStateTransformTable().keySet());

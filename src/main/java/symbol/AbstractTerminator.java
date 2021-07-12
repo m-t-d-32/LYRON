@@ -1,6 +1,8 @@
 package symbol;
 
-public class AbstractTerminator extends AbstractSymbol {
+import java.io.Serializable;
+
+public class AbstractTerminator extends AbstractSymbol implements Serializable {
 
     private String name = null;
 

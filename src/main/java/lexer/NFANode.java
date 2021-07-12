@@ -2,12 +2,13 @@ package lexer;
 
 import util.StringGenerator;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class NFANode {
+public class NFANode implements Serializable {
 
     private String serialCode = null;
 

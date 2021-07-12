@@ -4,6 +4,8 @@ import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
 import parser.AnalysisTree;
 
-public interface MovementCreator {
+import java.io.Serializable;
+
+public interface MovementCreator extends Serializable {
     AnalysisTree getMovementTree(String trim) throws PLDLAnalysisException, PLDLParsingException;
 }

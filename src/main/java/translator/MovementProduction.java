@@ -5,7 +5,9 @@ import exception.PLDLParsingException;
 import parser.AnalysisNode;
 import parser.CFGProduction;
 
-public abstract class MovementProduction extends CFGProduction {
+import java.io.Serializable;
+
+public abstract class MovementProduction extends CFGProduction implements Serializable {
 
     public MovementProduction(CFGProduction production) {
         super(production);

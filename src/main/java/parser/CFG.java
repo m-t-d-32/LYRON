@@ -4,9 +4,10 @@ import exception.PLDLParsingException;
 import exception.PLDLParsingWarning;
 import symbol.*;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class CFG {
+public class CFG implements Serializable {
 
     private List<CFGProduction> CFGProductions;
 

@@ -1,8 +1,9 @@
 package symbol;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public class AbstractUnterminator extends AbstractSymbol {
+public class AbstractUnterminator extends AbstractSymbol implements Serializable {
 
     private String name = null;
 

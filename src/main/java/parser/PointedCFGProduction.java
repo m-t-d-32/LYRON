@@ -3,7 +3,9 @@ package parser;
 import symbol.AbstractSymbol;
 import symbol.AbstractTerminator;
 
-public class PointedCFGProduction {
+import java.io.Serializable;
+
+public class PointedCFGProduction implements Serializable {
 
     private final CFGProduction cfgproduction;
     private int pointer;

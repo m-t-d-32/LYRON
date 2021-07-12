@@ -15,9 +15,10 @@ import symbol.Symbol;
 import symbol.SymbolPool;
 import symbol.Terminator;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Translator implements MovementCreator {
+public class Translator implements MovementCreator, Serializable {
 
     private CFG cfg = null;
 

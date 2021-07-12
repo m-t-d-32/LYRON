@@ -1,8 +1,9 @@
 package symbol;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class Terminator extends Symbol {
+public class Terminator extends Symbol implements Serializable {
 
     public Terminator(AbstractTerminator t) {
         setAbstractSymbol(t);

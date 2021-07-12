@@ -1,6 +1,8 @@
 package parser;
 
-public class Movement {
+import java.io.Serializable;
+
+public class Movement implements Serializable {
     public static final int SHIFT = 0x01, GOTO = 0xff, REGRESSION = 0xbe;
     private int movement;
     private int shiftToStatement;
