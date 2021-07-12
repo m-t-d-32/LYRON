@@ -6,7 +6,6 @@ import de.ruedigermoeller.serialization.FSTObjectOutput;
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
 import generator.Generator;
-import generator.ResultTuple4;
 import lexer.Lexer;
 import org.dom4j.DocumentException;
 import parser.AnalysisTree;
@@ -32,11 +31,11 @@ public class ConsoleApplication {
     private TransformTable table = null;
     private Set<Character> emptyChars = null;
 
-    public ResultTuple4 getResults() {
+    public List<String> getResults() {
         return rt4;
     }
 
-    private ResultTuple4 rt4 = null;
+    private List<String> rt4 = null;
 
     public void LLBeginFormXML(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException, IOException {
         System.out.println("XML文件解析中...");
@@ -99,7 +98,7 @@ public class ConsoleApplication {
 
 //        System.out.println("正在对代码进行语法分析构建分析树...");
         AnalysisTree tree = table.getAnalysisTree(symbols);
-        rt4 = new ResultTuple4();
+        rt4 = new ArrayList<>();
 
 //        System.out.println("正在对分析树进行语义赋值生成注释分析树...");
         Translator translator = preParse.getTranslator();
@@ -116,7 +115,9 @@ public class ConsoleApplication {
         PrintStream backupStream = System.out;
         System.setOut(new PrintStream(outputStream));
 
-        System.out.println(rt4);
+        for (String s: rt4){
+            System.out.println(s);
+        }
         System.setOut(backupStream);
         System.out.println("生成完毕。");
     }

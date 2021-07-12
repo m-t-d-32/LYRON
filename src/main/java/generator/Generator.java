@@ -68,7 +68,7 @@ public class Generator implements MovementCreator, Serializable {
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("G -> Var", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             movementTree.getValue().setProperties(new HashMap<>());
                             for (String str : movementTree.getChildren().get(0).getValue().getProperties().keySet()) {
                                 movementTree.getValue().getProperties().put(str, movementTree.getChildren().get(0).getValue().getProperties().get(str));
@@ -79,7 +79,7 @@ public class Generator implements MovementCreator, Serializable {
 
                         /* For Debug */
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(2).getValue().getProperties().get("rightTreeNode");
                             Symbol rightTreeNodeValue = rightTreeNode.getValue();
                             String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");
@@ -89,7 +89,7 @@ public class Generator implements MovementCreator, Serializable {
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( val , L_ , L_ , L_ )", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             /*
                                 0： gen
                                 1: (
@@ -106,13 +106,13 @@ public class Generator implements MovementCreator, Serializable {
                             String val2 = (String) movementTree.getChildren().get(4).getValue().getProperties().get("val");
                             String val3 = (String) movementTree.getChildren().get(6).getValue().getProperties().get("val");
                             String val4 = (String) movementTree.getChildren().get(8).getValue().getProperties().get("val");
-                            resultCOMM.append(val1, val2, val3, val4);
+                            resultCOMM.add(val1 + ", " + val2 + ", " + val3 + ", " + val4);
                         }
                     },
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("H -> Var ( val )", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("val");
                             AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");
                             movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);   //右树节点
@@ -122,7 +122,7 @@ public class Generator implements MovementCreator, Serializable {
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $$", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             //Var这个左树节点中存储的是右树节点
                             movementTree.getValue().addProperty("rightTreeNode", analysisTree);
                         }
@@ -130,7 +130,7 @@ public class Generator implements MovementCreator, Serializable {
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $ num", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) throws PLDLParsingException {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) throws PLDLParsingException {
                             int num = Integer.parseInt((String) movementTree.getChildren().get(1).getValue().getProperties().get("val"));
                             --num;
                             if (num < 0 || num >= analysisTree.getChildren().size()) {
@@ -143,7 +143,7 @@ public class Generator implements MovementCreator, Serializable {
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> val", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             String varname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("val");
                             AnalysisNode rightTreeNode;
                             if (!analysisTree.getValue().getProperties().containsKey("var_" + varname)) {
@@ -159,7 +159,7 @@ public class Generator implements MovementCreator, Serializable {
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L -> H", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             movementTree.getValue().setProperties(new HashMap<>());
                             AnalysisNode HrightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");
                             String Hname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");
@@ -169,28 +169,28 @@ public class Generator implements MovementCreator, Serializable {
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> L", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
                         }
                     },
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> _", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             movementTree.getValue().addProperty("val", "_");
                         }
                     },
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> num", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
                         }
                     },
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> val", pool)) {
 
                         @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, ResultTuple4 resultCOMM) {
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
                         }
                     }
@@ -202,11 +202,11 @@ public class Generator implements MovementCreator, Serializable {
 
     }
 
-    public void doTreesMovements(AnalysisTree analysisTree, ResultTuple4 resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
+    public void doTreesMovements(AnalysisTree analysisTree, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
         rr_doTreesMovements(analysisTree.getRoot(), resultCOMM);
     }
 
-    private void rr_doTreesMovements(AnalysisNode analysisNode, ResultTuple4 resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
+    private void rr_doTreesMovements(AnalysisNode analysisNode, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
         doTreeMovement(beforeMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
         if (analysisNode.getChildren() != null) {
             for (AnalysisNode childNode : analysisNode.getChildren()) {
@@ -218,13 +218,13 @@ public class Generator implements MovementCreator, Serializable {
         doTreeMovement(afterMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
     }
 
-    private void doTreeMovement(List<AnalysisTree> movementTrees, AnalysisNode analysisNode, ResultTuple4 resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
+    private void doTreeMovement(List<AnalysisTree> movementTrees, AnalysisNode analysisNode, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
         for (AnalysisTree movementTree : movementTrees) {
             rr_doTreeMovement(movementTree.getRoot(), analysisNode, resultCOMM);
         }
     }
 
-    private void rr_doTreeMovement(AnalysisNode movementNode, AnalysisNode analysisNode, ResultTuple4 resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
+    private void rr_doTreeMovement(AnalysisNode movementNode, AnalysisNode analysisNode, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
         if (movementNode.getChildren() != null) {
             for (AnalysisNode childNode : movementNode.getChildren()) {
                 if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
