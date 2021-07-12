@@ -8,19 +8,18 @@ import java.util.*;
 
 public class CFG {
 
-    private static final String newMarkinStr = "S";
-
     private List<CFGProduction> CFGProductions;
 
-    public void setCFGProductions(List<? extends CFGProduction> prods) {
-        CFGProductions = new ArrayList<>();
-        CFGProductions.addAll(prods);
+    private AbstractUnterminator CFGmarkin;
+
+    private SymbolPool symbolPool;
+
+    private Map<AbstractUnterminator, Set<CFGProduction>> beginProductions;
+
+    public Map<AbstractUnterminator, Set<CFGProduction>> getBeginProductions() {
+        return beginProductions;
     }
 
-    private AbstractUnterminator CFGmarkin;
-    
-    private SymbolPool symbolPool;
-    
     public CFG(SymbolPool pool,
                Collection<? extends CFGProduction> productions,
                String markinStr) throws PLDLParsingException {
@@ -41,30 +40,6 @@ public class CFG {
 
     }
 
-    public CFG(SymbolPool pool,
-               List<String> CFGProductionStrs,
-               String markinStr) throws PLDLParsingException {
-        symbolPool = pool;
-        this.CFGProductions = new ArrayList<>();
-        for (int i = 0; i < CFGProductionStrs.size(); ++i) {
-            String CFGProductionStr = CFGProductionStrs.get(i);
-            CFGProduction production = CFGProduction.getCFGProductionFromCFGString(CFGProductionStr, pool);
-            production.setSerialNumber(i + 1);
-            CFGProductions.add(production);
-        }
-        if (markinStr == null) {
-            CFGmarkin = (AbstractUnterminator) CFGProductions.get(0).getBeforeAbstractSymbol();
-            PLDLParsingWarning.setLog("警告：您没有传递任何参数作为开始符号，因而自动将第一个产生式的左部符号 " + CFGmarkin.getName() + " 作为开始符号。");
-        } else {
-            markinStr = markinStr.trim();
-            if (pool.getUnterminatorsStr().contains(markinStr)) {
-                CFGmarkin = new AbstractUnterminator(markinStr);
-            } else {
-                throw new PLDLParsingException("解析失败：开始符号不是非终结符。", null);
-            }
-        }
-    }
-
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
@@ -82,35 +57,6 @@ public class CFG {
 
     public Set<String> getCFGUnterminators() {
         return symbolPool.getUnterminatorsStr();
-    }
-
-    public List<CFGProduction> getCFGProductions() {
-        return CFGProductions;
-    }
-
-    public AbstractUnterminator getMarkin() {
-        return CFGmarkin;
-    }
-
-    public void setMarkin(AbstractUnterminator markin) {
-        this.CFGmarkin = markin;
-    }
-
-    public void augmentCFG() {
-        if (getCFGUnterminators().contains(newMarkinStr)) {
-            PLDLParsingWarning.setLog("该文法已经进行过增广，不能再次增广。");
-        } else {
-            symbolPool.addUnterminatorStr(newMarkinStr);
-            CFGProduction augmentCFGProduction = new CFGProduction();
-            AbstractUnterminator beforeSymbol = new AbstractUnterminator(newMarkinStr);
-            augmentCFGProduction.setBeforeAbstractSymbol(beforeSymbol);
-            List<AbstractSymbol> afterAbstractSymbols = new ArrayList<>();
-            afterAbstractSymbols.add(CFGmarkin);
-            augmentCFGProduction.setAfterAbstractSymbols(afterAbstractSymbols);
-            augmentCFGProduction.setSerialNumber(0);
-            CFGProductions.add(augmentCFGProduction);
-            CFGmarkin = beforeSymbol;
-        }
     }
 
     public void setCanEmpty() throws PLDLParsingException {
@@ -149,12 +95,13 @@ public class CFG {
     }
 
     public void setBeginProductions() {
+        beginProductions = new HashMap<>();
         for (CFGProduction cfgproduction : CFGProductions) {
             AbstractUnterminator beforeSymbol = (AbstractUnterminator) cfgproduction.getBeforeAbstractSymbol();
-            if (beforeSymbol.getBeginProductions() == null) {
-                beforeSymbol.setBeginProductions(new HashSet<>());
+            if (beginProductions.get(beforeSymbol) == null) {
+                beginProductions.put(beforeSymbol, new HashSet<>());
             }
-            beforeSymbol.getBeginProductions().add(cfgproduction);
+            beginProductions.get(beforeSymbol).add(cfgproduction);
         }
     }
 

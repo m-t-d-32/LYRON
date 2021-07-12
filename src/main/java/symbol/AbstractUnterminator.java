@@ -1,7 +1,5 @@
 package symbol;
 
-import parser.CFGProduction;
-
 import java.util.Set;
 
 public class AbstractUnterminator extends AbstractSymbol {
@@ -9,8 +7,6 @@ public class AbstractUnterminator extends AbstractSymbol {
     private String name = null;
 
     private Set<AbstractTerminator> firstSet = null;
-
-    private Set<CFGProduction> beginProductions = null;
 
     public AbstractUnterminator(String _name) {
         name = _name;
@@ -47,11 +43,4 @@ public class AbstractUnterminator extends AbstractSymbol {
         return firstSet;
     }
 
-    public Set<CFGProduction> getBeginProductions() {
-        return beginProductions;
-    }
-
-    public void setBeginProductions(Set<CFGProduction> beginProductions) {
-        this.beginProductions = beginProductions;
-    }
 }

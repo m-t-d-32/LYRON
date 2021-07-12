@@ -84,7 +84,7 @@ public class CFGStatement {
                     }
                     outlookAbstractSymbols.add(pointedProduction.getOutlookAbstractTerminator());
                     Set<AbstractTerminator> firstsOfList = getFirstsOfSymbolList(outlookAbstractSymbols);
-                    for (CFGProduction production : ((AbstractUnterminator) abstractSymbol).getBeginProductions()) {
+                    for (CFGProduction production : cfg.getBeginProductions().get(abstractSymbol)) {
                         for (AbstractTerminator outlookSymbol : firstsOfList) {
                             PointedCFGProduction generatedProduction = new PointedCFGProduction(production, outlookSymbol);
                             if (!checkPointedProductions.contains(generatedProduction)) {

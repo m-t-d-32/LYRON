@@ -2,9 +2,6 @@ package symbol;
 
 import exception.PLDLParsingException;
 import exception.PLDLParsingWarning;
-import symbol.AbstractSymbol;
-import symbol.AbstractTerminator;
-import symbol.AbstractUnterminator;
 
 import java.util.Collection;
 import java.util.HashMap;

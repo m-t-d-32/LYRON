@@ -11,10 +11,6 @@ public class AnalysisNode {
         return value;
     }
 
-    public void setValue(Symbol value) {
-        this.value = value;
-    }
-
     private List<AnalysisNode> children;
 
     public CFGProduction getProduction() {
@@ -39,20 +35,12 @@ public class AnalysisNode {
         this.children = null;
     }
 
-    public boolean getIsLeaf() {
-        return children == null;
-    }
-
     public void setChildren(List<AnalysisNode> symbols) {
         children = symbols;
     }
 
     public List<AnalysisNode> getChildren(){
         return children;
-    }
-
-    public AnalysisNode getParent() {
-        return parent;
     }
 
     public String toString(int tabCount) {

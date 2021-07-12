@@ -5,17 +5,11 @@ import symbol.AbstractTerminator;
 import symbol.Symbol;
 import symbol.Terminator;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class Lexer {
 
     private DFA dfa = null;
-
-    public Lexer(DFA dfa) {
-        this.dfa = dfa;
-    }
 
     public Lexer(List<Map.Entry<String, NFA>> regexes, Map<String, String> bannedStrs) {
         Map<String, NFA> regexesNFAs = new HashMap<>();

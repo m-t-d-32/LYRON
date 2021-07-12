@@ -3,6 +3,7 @@ package util;
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
 import exception.PLDLParsingWarning;
+import generator.Generator;
 import lexer.NFA;
 import lexer.SimpleREApply;
 import org.dom4j.Document;
@@ -13,10 +14,9 @@ import parser.AnalysisTree;
 import parser.CFG;
 import parser.CFGProduction;
 import symbol.SymbolPool;
-import generator.Generator;
 import translator.MovementCreator;
 import translator.Translator;
-import java.io.File;
+
 import java.io.InputStream;
 import java.util.*;
 

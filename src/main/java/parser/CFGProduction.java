@@ -2,7 +2,6 @@ package parser;
 
 import exception.PLDLParsingException;
 import symbol.AbstractSymbol;
-import symbol.AbstractUnterminator;
 import symbol.SymbolPool;
 
 import java.util.ArrayList;
@@ -89,16 +88,8 @@ public class CFGProduction{
         return beforeAbstractSymbol;
     }
 
-    public void setBeforeAbstractSymbol(AbstractUnterminator symbol) {
-        beforeAbstractSymbol = symbol;
-    }
-
     public List<AbstractSymbol> getAfterAbstractSymbols() {
         return afterAbstractSymbols;
-    }
-
-    public void setAfterAbstractSymbols(List<AbstractSymbol> abstractSymbols) {
-        afterAbstractSymbols = abstractSymbols;
     }
 
     @Override

@@ -1,7 +1,5 @@
 package lexer;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class DFA {
@@ -14,17 +12,6 @@ public class DFA {
 
     public Set<DFANode> getFinalNodes() {
         return finalNodes;
-    }
-
-    public void setFinalNodes(Set<DFANode> finalNodes) {
-        this.finalNodes = finalNodes;
-    }
-
-    DFA(){
-        root = new DFANode();
-        root.setFinal(true);
-        finalNodes = new HashSet<>();
-        finalNodes.add(root);
     }
 
     DFA(DFANode root){
@@ -166,19 +153,6 @@ public class DFA {
                 dfsMakeMerged(anotherNode, linkedNodes, partMergedNodes);
             }
         }
-    }
-
-    public static DFA fastDFA(String str) {
-        DFANode root = new DFANode();
-        DFANode pointer = root;
-        for (int i = 0; i < str.length(); ++i) {
-            DFANode next = new DFANode();
-            String c = String.valueOf(str.charAt(i));
-            pointer.addToTransformTable(c, next);
-            pointer = next;
-        }
-        pointer.setFinal(true);
-        return new DFA(root);
     }
 
     public Map.Entry<String, Integer> analysis(String substring) {

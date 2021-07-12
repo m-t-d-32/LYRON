@@ -10,7 +10,10 @@ import parser.AnalysisNode;
 import parser.AnalysisTree;
 import parser.CFG;
 import parser.CFGProduction;
-import symbol.*;
+import symbol.AbstractSymbol;
+import symbol.Symbol;
+import symbol.SymbolPool;
+import symbol.Terminator;
 
 import java.util.*;
 

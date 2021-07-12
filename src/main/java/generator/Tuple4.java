@@ -10,13 +10,6 @@ public class Tuple4 {
         elements[3] = s4;
     }
 
-    public Tuple4(Tuple4 other) {
-        elements[0] = other.get(0);
-        elements[1] = other.get(1);
-        elements[2] = other.get(2);
-        elements[3] = other.get(3);
-    }
-
     @Override
     public String toString() {
         return elements[0] + "," + elements[1] + "," + elements[2] + "," + elements[3];

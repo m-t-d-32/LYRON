@@ -68,10 +68,6 @@ public class PointedCFGProduction {
         return outlookAbstractTerminator;
     }
 
-    public void setOutlookAbstractTerminator(AbstractTerminator outlookAbstractTerminator) {
-        this.outlookAbstractTerminator = outlookAbstractTerminator;
-    }
-
     public int getPointer() {
         return pointer;
     }

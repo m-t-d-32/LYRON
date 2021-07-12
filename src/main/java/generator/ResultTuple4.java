@@ -5,10 +5,6 @@ import java.util.List;
 
 public class ResultTuple4 {
 
-    public List<Tuple4> getTuple4s() {
-        return tuple4s;
-    }
-
     private List<Tuple4> tuple4s = new ArrayList<>();
 
     public void append(String s1, String s2, String s3, String s4) {
