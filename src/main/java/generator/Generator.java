@@ -103,9 +103,21 @@ public class Generator implements MovementCreator, Serializable {
                                 9: )
                              */
                             String val1 = (String) movementTree.getChildren().get(2).getValue().getProperties().get("val");
+                            if (val1 == null || val1.equals("null")){
+                                val1 = "NULL";
+                            }
                             String val2 = (String) movementTree.getChildren().get(4).getValue().getProperties().get("val");
+                            if (val2 == null || val2.equals("null")){
+                                val2 = "NULL";
+                            }
                             String val3 = (String) movementTree.getChildren().get(6).getValue().getProperties().get("val");
+                            if (val3 == null || val3.equals("null")){
+                                val3 = "NULL";
+                            }
                             String val4 = (String) movementTree.getChildren().get(8).getValue().getProperties().get("val");
+                            if (val4 == null || val4.equals("null")){
+                                val4 = "NULL";
+                            }
                             resultCOMM.add(val1 + ", " + val2 + ", " + val3 + ", " + val4);
                         }
                     },
