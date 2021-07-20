@@ -14,6 +14,7 @@ import symbol.Symbol;
 import symbol.SymbolPool;
 import symbol.Terminator;
 import translator.MovementCreator;
+import translator.MovementProduction;
 
 import java.io.Serializable;
 import java.util.*;
@@ -215,19 +216,41 @@ public class Generator implements MovementCreator, Serializable {
     }
 
     public void doTreesMovements(AnalysisTree analysisTree, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
-        rr_doTreesMovements(analysisTree.getRoot(), resultCOMM);
-    }
+        Queue<AnalysisNode> beforeQueue = new ArrayDeque<>();
 
-    private void rr_doTreesMovements(AnalysisNode analysisNode, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
-        doTreeMovement(beforeMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
-        if (analysisNode.getChildren() != null) {
-            for (AnalysisNode childNode : analysisNode.getChildren()) {
-                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
-                    rr_doTreesMovements(childNode, resultCOMM);
+        beforeQueue.add(analysisTree.getRoot());
+        while (!beforeQueue.isEmpty()){
+            AnalysisNode beforeAnalysisNode = beforeQueue.poll();
+            doTreeMovement(beforeMovementsMap.get(beforeAnalysisNode.getProduction()), beforeAnalysisNode, resultCOMM);
+            if (beforeAnalysisNode.getChildren() != null) {
+                for (AnalysisNode childNode : beforeAnalysisNode.getChildren()) {
+                    if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                        beforeQueue.add(childNode);
+                    }
                 }
             }
         }
-        doTreeMovement(afterMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
+
+        Stack<AnalysisNode> afterMovementTreeStack = new Stack<>();
+        Stack<AnalysisNode> afterOutputStack = new Stack<>();
+        for (AnalysisNode childNode : analysisTree.getRoot().getChildren()) {
+            afterMovementTreeStack.push(childNode);
+        }
+        while (!afterMovementTreeStack.empty()){
+            AnalysisNode movementNode = afterMovementTreeStack.pop();
+            afterOutputStack.push(movementNode);
+            if (movementNode.getChildren() != null) {
+                for (AnalysisNode childNode: movementNode.getChildren()) {
+                    if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                        afterMovementTreeStack.push(childNode);
+                    }
+                }
+            }
+        }
+        while (!afterOutputStack.empty()){
+            AnalysisNode analysisNode = afterOutputStack.pop();
+            doTreeMovement(afterMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
+        }
     }
 
     private void doTreeMovement(List<AnalysisTree> movementTrees, AnalysisNode analysisNode, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {

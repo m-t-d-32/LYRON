@@ -218,25 +218,32 @@ public class Translator implements MovementCreator, Serializable {
     }
 
     private void doTreeMovement(List<AnalysisTree> movementTrees, AnalysisNode analysisNode) throws PLDLParsingException, PLDLAnalysisException {
+        Stack<AnalysisNode> movementTreeStack = new Stack<>();
+        Stack<AnalysisNode> outputStack = new Stack<>();
         for (AnalysisTree movementTree : movementTrees) {
-            rr_doTreeMovement(movementTree.getRoot(), analysisNode);
+            AnalysisNode childNode = movementTree.getRoot();
+            movementTreeStack.push(childNode);
         }
-    }
-
-    private void rr_doTreeMovement(AnalysisNode movementNode, AnalysisNode analysisNode) throws PLDLParsingException, PLDLAnalysisException {
-        if (movementNode.getChildren() != null) {
-            for (AnalysisNode childNode : movementNode.getChildren()) {
-                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
-                    rr_doTreeMovement(childNode, analysisNode);
+        while (!movementTreeStack.empty()){
+            AnalysisNode movementNode = movementTreeStack.pop();
+            outputStack.push(movementNode);
+            if (movementNode.getChildren() != null) {
+                for (AnalysisNode childNode: movementNode.getChildren()) {
+                    if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                        movementTreeStack.push(childNode);
+                    }
                 }
             }
         }
-        try {
-            MovementProduction movementProduction = (MovementProduction) movementNode.getProduction();
-            movementProduction.doMovement(movementNode, analysisNode);
-        }
-        catch (PLDLAnalysisException e){
-            throw new PLDLAnalysisException("在" + analysisNode.getProduction(), e);
+        while (!outputStack.empty()){
+            AnalysisNode movementNode = outputStack.pop();
+            try {
+                MovementProduction movementProduction = (MovementProduction) movementNode.getProduction();
+                movementProduction.doMovement(movementNode, analysisNode);
+            }
+            catch (PLDLAnalysisException e){
+                throw new PLDLAnalysisException("在" + analysisNode.getProduction(), e);
+            }
         }
     }
 
