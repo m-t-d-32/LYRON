@@ -216,40 +216,27 @@ public class Generator implements MovementCreator, Serializable {
     }
 
     public void doTreesMovements(AnalysisTree analysisTree, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
-        Queue<AnalysisNode> beforeQueue = new ArrayDeque<>();
-
-        beforeQueue.add(analysisTree.getRoot());
-        while (!beforeQueue.isEmpty()){
-            AnalysisNode beforeAnalysisNode = beforeQueue.poll();
-            doTreeMovement(beforeMovementsMap.get(beforeAnalysisNode.getProduction()), beforeAnalysisNode, resultCOMM);
-            if (beforeAnalysisNode.getChildren() != null) {
-                for (AnalysisNode childNode : beforeAnalysisNode.getChildren()) {
-                    if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
-                        beforeQueue.add(childNode);
+        Set<AnalysisNode> unfoldedAnalysisNode = new HashSet<>();
+        Stack<AnalysisNode> beforeMovementTreeStack = new Stack<>();
+        beforeMovementTreeStack.push(analysisTree.getRoot());
+        while (!beforeMovementTreeStack.isEmpty()){
+            AnalysisNode beforeAnalysisNode = beforeMovementTreeStack.peek();
+            if (!unfoldedAnalysisNode.contains(beforeAnalysisNode)) {
+                doTreeMovement(beforeMovementsMap.get(beforeAnalysisNode.getProduction()), beforeAnalysisNode, resultCOMM);
+                if (beforeAnalysisNode.getChildren() != null) {
+                    for (int i = beforeAnalysisNode.getChildren().size() - 1; i >= 0; --i) {
+                        AnalysisNode childNode = beforeAnalysisNode.getChildren().get(i);
+                        if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                            beforeMovementTreeStack.push(childNode);
+                        }
                     }
                 }
+                unfoldedAnalysisNode.add(beforeAnalysisNode);
             }
-        }
-
-        Stack<AnalysisNode> afterMovementTreeStack = new Stack<>();
-        Stack<AnalysisNode> afterOutputStack = new Stack<>();
-        for (AnalysisNode childNode : analysisTree.getRoot().getChildren()) {
-            afterMovementTreeStack.push(childNode);
-        }
-        while (!afterMovementTreeStack.empty()){
-            AnalysisNode movementNode = afterMovementTreeStack.pop();
-            afterOutputStack.push(movementNode);
-            if (movementNode.getChildren() != null) {
-                for (AnalysisNode childNode: movementNode.getChildren()) {
-                    if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
-                        afterMovementTreeStack.push(childNode);
-                    }
-                }
+            else {
+                doTreeMovement(afterMovementsMap.get(beforeAnalysisNode.getProduction()), beforeAnalysisNode, resultCOMM);
+                beforeMovementTreeStack.pop();
             }
-        }
-        while (!afterOutputStack.empty()){
-            AnalysisNode analysisNode = afterOutputStack.pop();
-            doTreeMovement(afterMovementsMap.get(analysisNode.getProduction()), analysisNode, resultCOMM);
         }
     }
 

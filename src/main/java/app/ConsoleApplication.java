@@ -144,10 +144,10 @@ public class ConsoleApplication {
             System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
             File []testfolders = {
-                    new File("C:/Users/User/Desktop/compiler/compiler2021/公开用例与运行时库/function_test2020"),
-                    new File("C:/Users/User/Desktop/compiler/compiler2021/公开用例与运行时库/function_test2021"),
-                        new File("C:/Users/User/Desktop/compiler/compiler2021/公开用例与运行时库/functional_test"),
-                    new File("C:/Users/User/Desktop/compiler/compiler2021/公开用例与运行时库/performance_test2021_pre")
+                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/function_test2020"),
+                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/function_test2021"),
+                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/functional_test"),
+                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/performance_test2021_pre")
             };
 
             for (File folder: testfolders){
@@ -166,7 +166,7 @@ public class ConsoleApplication {
                     }
                 }
                 catch (Exception e){
-                    System.out.println(e);
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {

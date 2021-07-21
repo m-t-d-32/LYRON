@@ -41,6 +41,8 @@ public class Translator implements MovementCreator, Serializable {
 
     private Lexer lexer;
 
+    private Stack<Map.Entry<AnalysisTree, AnalysisNode>> accessStack = new Stack<>();
+
     public Translator() throws PLDLParsingException, PLDLAnalysisException {
         List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$$", NFA.fastNFA("$$")));
@@ -102,10 +104,7 @@ public class Translator implements MovementCreator, Serializable {
                                 throw new PLDLParsingException("$后面的数字超出这条产生式右部元素的范围", null);
                             }
                             AnalysisNode rightTreeNode = analysisTree.getChildren().get(num);
-                            List<AnalysisTree> trees = movementsMap.get(rightTreeNode.getProduction());
-                            if (trees != null) {
-                                doTreeMovement(movementsMap.get(rightTreeNode.getProduction()), rightTreeNode);
-                            }
+                            rr_addToAccessStack(rightTreeNode);
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("H -> Var ( val )", pool)) {
@@ -211,44 +210,41 @@ public class Translator implements MovementCreator, Serializable {
     }
 
     public void doTreesMovements(AnalysisTree rootTree) throws PLDLParsingException, PLDLAnalysisException {
-        List<AnalysisTree> trees = movementsMap.get(rootTree.getRoot().getProduction());
-        if (trees != null) {
-            doTreeMovement(trees, rootTree.getRoot());
+        AnalysisNode rootParseNode = rootTree.getRoot();
+        rr_addToAccessStack(rootParseNode);
+        while (!accessStack.empty()){
+            //前者是movementTree, 后者是analysisTree
+            Map.Entry<AnalysisTree, AnalysisNode> nowParseNode = accessStack.pop();
+            rr_doTreeMovement(nowParseNode.getKey().getRoot(), nowParseNode.getValue());
         }
     }
 
-    private void doTreeMovement(List<AnalysisTree> movementTrees, AnalysisNode analysisNode) throws PLDLParsingException, PLDLAnalysisException {
-        Stack<AnalysisNode> movementTreeStack = new Stack<>();
-        Stack<AnalysisNode> outputStack = new Stack<>();
-        for (AnalysisTree movementTree : movementTrees) {
-            AnalysisNode childNode = movementTree.getRoot();
-            movementTreeStack.push(childNode);
-        }
-        while (!movementTreeStack.empty()){
-            AnalysisNode movementNode = movementTreeStack.pop();
-            outputStack.push(movementNode);
-            if (movementNode.getChildren() != null) {
-                for (AnalysisNode childNode: movementNode.getChildren()) {
-                    if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
-                        movementTreeStack.push(childNode);
-                    }
+    private void rr_addToAccessStack(AnalysisNode toPushRightTreeNode){
+        List<AnalysisTree> toPushMovementNode = movementsMap.get(toPushRightTreeNode.getProduction());
+        if (toPushMovementNode != null) {
+            for (int j = toPushMovementNode.size() - 1; j >= 0; --j) {
+                if (toPushMovementNode.get(j).getRoot().getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                    accessStack.push(new AbstractMap.SimpleEntry<>(toPushMovementNode.get(j), toPushRightTreeNode));
                 }
             }
         }
-        while (!outputStack.empty()){
-            AnalysisNode movementNode = outputStack.pop();
-            try {
-                MovementProduction movementProduction = (MovementProduction) movementNode.getProduction();
-                movementProduction.doMovement(movementNode, analysisNode);
-            }
-            catch (PLDLAnalysisException e){
-                throw new PLDLAnalysisException("在" + analysisNode.getProduction(), e);
-            }
-        }
     }
 
-    public Map<CFGProduction, List<AnalysisTree>> getMovementsMap() {
-        return movementsMap;
+    private void rr_doTreeMovement(AnalysisNode movementNode, AnalysisNode analysisNode) throws PLDLParsingException, PLDLAnalysisException {
+        if (movementNode.getChildren() != null) {
+            for (AnalysisNode childNode : movementNode.getChildren()) {
+                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                    rr_doTreeMovement(childNode, analysisNode);
+                }
+            }
+        }
+        try {
+            MovementProduction movementProduction = (MovementProduction) movementNode.getProduction();
+            movementProduction.doMovement(movementNode, analysisNode);
+        }
+        catch (PLDLAnalysisException e){
+            throw new PLDLAnalysisException("在" + analysisNode.getProduction(), e);
+        }
     }
 
     public void checkMovementsMap(){
