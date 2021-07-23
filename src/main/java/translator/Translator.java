@@ -49,8 +49,10 @@ public class Translator implements MovementCreator, Serializable {
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$", NFA.fastNFA("$")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("(", NFA.fastNFA("(")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>(")", NFA.fastNFA(")")));
+        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("+", NFA.fastNFA("+")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("=", NFA.fastNFA("=")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("newTemp", NFA.fastNFA("newTemp")));
+        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("str", NFA.fastNFA("str")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("go", NFA.fastNFA("go")));
         terminatorsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
@@ -72,7 +74,7 @@ public class Translator implements MovementCreator, Serializable {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "+"));
+        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "+", "str"));
         Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("H", "Var", "E", "G"));
         SymbolPool pool = new SymbolPool();
         try {
@@ -160,6 +162,17 @@ public class Translator implements MovementCreator, Serializable {
                             AnalysisNode HrightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");   //右树节点
                             String H1name = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
                             HrightTreeNode.getValue().getProperties().put(H1name, "t_" + name + String.valueOf(tempStorages.get(name)));
+                        }
+                    },
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> H = str ( val )", pool)) {
+
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) {
+                            String name = (String) movementTree.getChildren().get(4).getValue().getProperties().get("val");
+                            //键值对
+                            AnalysisNode HrightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");   //右树节点
+                            String H1name = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
+                            HrightTreeNode.getValue().getProperties().put(H1name, name);
                         }
                     },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $$", pool)) {
@@ -271,8 +284,8 @@ public class Translator implements MovementCreator, Serializable {
             if (unterminatorIndices.size() > 0){
                 for (int i: unterminatorIndices){
                     PLDLParsingWarning.setLog("在" + production + "中，非终结符节点" + String.valueOf(i + 1) + "("
-                        + production.getAfterAbstractSymbols().get(i) + ")不会被遍历，如果你忘记使用go语句，请考虑使用。" +
-                        "否则将无法获得该非终结符的综合属性。");
+                            + production.getAfterAbstractSymbols().get(i) + ")不会被遍历，如果你忘记使用go语句，请考虑使用。" +
+                            "否则将无法获得该非终结符的综合属性。");
                 }
             }
         }
