@@ -13,7 +13,7 @@ import parser.CFGProduction;
 import symbol.AbstractSymbol;
 import symbol.Symbol;
 import symbol.SymbolPool;
-import symbol.Terminator;
+import symbol.Terminal;
 
 import java.io.Serializable;
 import java.util.*;
@@ -44,21 +44,21 @@ public class Translator implements MovementCreator, Serializable {
     private Stack<Map.Entry<AnalysisTree, AnalysisNode>> accessStack = new Stack<>();
 
     public Translator() throws PLDLParsingException, PLDLAnalysisException {
-        List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$$", NFA.fastNFA("$$")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$", NFA.fastNFA("$")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("(", NFA.fastNFA("(")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>(")", NFA.fastNFA(")")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("+", NFA.fastNFA("+")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("=", NFA.fastNFA("=")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("newTemp", NFA.fastNFA("newTemp")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("str", NFA.fastNFA("str")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("go", NFA.fastNFA("go")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
+        List<Map.Entry<String, NFA>> terminalsNFA = new ArrayList<>();
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("$$", NFA.fastNFA("$$")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("$", NFA.fastNFA("$")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("(", NFA.fastNFA("(")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>(")", NFA.fastNFA(")")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("+", NFA.fastNFA("+")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("=", NFA.fastNFA("=")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("newTemp", NFA.fastNFA("newTemp")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("str", NFA.fastNFA("str")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("go", NFA.fastNFA("go")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
 
-        lexer = new Lexer(terminatorsNFA, null);
+        lexer = new Lexer(terminalsNFA, null);
         emptyChars.add(' ');
         emptyChars.add('\t');
         emptyChars.add('\n');
@@ -74,12 +74,12 @@ public class Translator implements MovementCreator, Serializable {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "+", "str"));
-        Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("H", "Var", "E", "G"));
+        Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "+", "str"));
+        Set<String> unterminalStrs = new HashSet<>(Arrays.asList("H", "Var", "E", "G"));
         SymbolPool pool = new SymbolPool();
         try {
-            pool.initTerminatorString(terminatorStrs);
-            pool.initUnterminatorString(unterminatorStrs);
+            pool.initTerminalString(terminalStrs);
+            pool.initUnterminalString(unterminalStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> print ( H )", pool)) {
 
@@ -130,7 +130,7 @@ public class Translator implements MovementCreator, Serializable {
                             String Hname = (String) movementTree.getChildren().get(2).getValue().getProperties().get("name");   //索引名
                             String HValue = (String) HrightTreeNode.getValue().getProperties().get(Hname);
 
-                            AnalysisNode node = new AnalysisNode(new Terminator(null));
+                            AnalysisNode node = new AnalysisNode(new Terminal(null));
                             node.getValue().addProperty("val", G2Value + HValue);
                             movementTree.getValue().addProperty("rightTreeNode", node);   //右树节点
                             movementTree.getValue().addProperty("name", "val");  //索引名
@@ -236,7 +236,7 @@ public class Translator implements MovementCreator, Serializable {
         List<AnalysisTree> toPushMovementNode = movementsMap.get(toPushRightTreeNode.getProduction());
         if (toPushMovementNode != null) {
             for (int j = toPushMovementNode.size() - 1; j >= 0; --j) {
-                if (toPushMovementNode.get(j).getRoot().getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                if (toPushMovementNode.get(j).getRoot().getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINAL) {
                     accessStack.push(new AbstractMap.SimpleEntry<>(toPushMovementNode.get(j), toPushRightTreeNode));
                 }
             }
@@ -246,7 +246,7 @@ public class Translator implements MovementCreator, Serializable {
     private void rr_doTreeMovement(AnalysisNode movementNode, AnalysisNode analysisNode) throws PLDLParsingException, PLDLAnalysisException {
         if (movementNode.getChildren() != null) {
             for (AnalysisNode childNode : movementNode.getChildren()) {
-                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINAL) {
                     rr_doTreeMovement(childNode, analysisNode);
                 }
             }
@@ -263,16 +263,16 @@ public class Translator implements MovementCreator, Serializable {
     public void checkMovementsMap(){
         for (CFGProduction production: movementsMap.keySet()){
             List<AnalysisTree> movementTrees = movementsMap.get(production);
-            Set<Integer> unterminatorIndices = new HashSet<>();
+            Set<Integer> unterminalIndices = new HashSet<>();
             Set<Integer> trulyWentIndices = new HashSet<>();
             for (int i = 0; i < production.getAfterAbstractSymbols().size(); ++i){
-                if (production.getAfterAbstractSymbols().get(i).getType() == AbstractSymbol.UNTERMINATOR){
-                    unterminatorIndices.add(i);
+                if (production.getAfterAbstractSymbols().get(i).getType() == AbstractSymbol.UNTERMINAL){
+                    unterminalIndices.add(i);
                 }
             }
             for (AnalysisTree movementTree : movementTrees) {
                 try {
-                    if (movementTree.getRoot().getProduction().getAfterAbstractSymbols().get(0).equals(cfg.getSymbolPool().getTerminator("go"))) {
+                    if (movementTree.getRoot().getProduction().getAfterAbstractSymbols().get(0).equals(cfg.getSymbolPool().getTerminal("go"))) {
                         String numVal = (String) movementTree.getRoot().getChildren().get(3).getValue().getProperties().get("val");
                         trulyWentIndices.add(Integer.valueOf(numVal) - 1);
                     }
@@ -280,9 +280,9 @@ public class Translator implements MovementCreator, Serializable {
                     e.printStackTrace();
                 }
             }
-            unterminatorIndices.removeAll(trulyWentIndices);
-            if (unterminatorIndices.size() > 0){
-                for (int i: unterminatorIndices){
+            unterminalIndices.removeAll(trulyWentIndices);
+            if (unterminalIndices.size() > 0){
+                for (int i: unterminalIndices){
                     PLDLParsingWarning.setLog("在" + production + "中，非终结符节点" + String.valueOf(i + 1) + "("
                             + production.getAfterAbstractSymbols().get(i) + ")不会被遍历，如果你忘记使用go语句，请考虑使用。" +
                             "否则将无法获得该非终结符的综合属性。");

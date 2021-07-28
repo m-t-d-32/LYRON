@@ -2,7 +2,7 @@ package parser;
 
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
-import symbol.Terminator;
+import symbol.Terminal;
 import symbol.*;
 
 import java.io.Serializable;
@@ -38,7 +38,7 @@ public class TransformTable implements Serializable {
 
     public void add(int statementIndex, AbstractSymbol nextAbstractSymbol, int nextStatementIndex) {
         Movement movement;
-        if (nextAbstractSymbol.getType() == AbstractSymbol.UNTERMINATOR) {
+        if (nextAbstractSymbol.getType() == AbstractSymbol.UNTERMINAL) {
             movement = new Movement(Movement.GOTO, nextStatementIndex);
         } else {
             movement = new Movement(Movement.SHIFT, nextStatementIndex);
@@ -87,7 +87,7 @@ public class TransformTable implements Serializable {
                 
                 if (table.get(i).containsKey(s)) {
                     try {
-                        if (endStatements.contains(i) && s.equals(cfg.getSymbolPool().getTerminator("eof"))) {
+                        if (endStatements.contains(i) && s.equals(cfg.getSymbolPool().getTerminal("eof"))) {
                             result.append("acc(").append(table.get(i).get(s).toString()).append(")");
                         }
                         else {
@@ -116,7 +116,7 @@ public class TransformTable implements Serializable {
         int i = 0;
         while(true){
             int nowStatement = statementStack.peek();
-            Symbol nowSymbol = i < symbols.size() ? symbols.get(i) : new Terminator(cfg.getSymbolPool().getTerminator("eof"));
+            Symbol nowSymbol = i < symbols.size() ? symbols.get(i) : new Terminal(cfg.getSymbolPool().getTerminal("eof"));
             Movement movement = table.get(nowStatement).get(nowSymbol.getAbstractSymbol());
             if (movement == null) {
                 throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
@@ -133,20 +133,20 @@ public class TransformTable implements Serializable {
             } else if (movement.getMovement() == Movement.REGRESSION) {
                 CFGProduction production = movement.getRegressionProduction();
 //                System.out.println("归约：" + production.toString());
-                AnalysisNode node = new AnalysisNode(new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol()));
+                AnalysisNode node = new AnalysisNode(new Unterminal((AbstractUnterminal) production.getBeforeAbstractSymbol()));
                 node.setProduction(production);
                 node.setChildren(new ArrayList<>());
-                AbstractTerminator nullTerminator = cfg.getSymbolPool().getTerminator("null");
+                AbstractTerminal nullTerminal = cfg.getSymbolPool().getTerminal("null");
                 Stack<AnalysisNode> tempStack = new Stack<>();
                 for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                    if (symbol != nullTerminator) {
+                    if (symbol != nullTerminal) {
                         symbolStack.pop();
                         statementStack.pop();
                         tempStack.push(nodeStack.pop());
                     }
                 }
                 for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                    if (symbol != nullTerminator) {
+                    if (symbol != nullTerminal) {
                         AnalysisNode childNode = tempStack.pop();
                         childNode.setParent(node);
                         node.getChildren().add(childNode);

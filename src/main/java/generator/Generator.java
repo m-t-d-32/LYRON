@@ -12,7 +12,7 @@ import parser.CFGProduction;
 import symbol.AbstractSymbol;
 import symbol.Symbol;
 import symbol.SymbolPool;
-import symbol.Terminator;
+import symbol.Terminal;
 import translator.MovementCreator;
 import translator.MovementProduction;
 
@@ -31,19 +31,19 @@ public class Generator implements MovementCreator, Serializable {
     private Lexer lexer;
 
     public Generator() throws PLDLParsingException, PLDLAnalysisException {
-        List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$$", NFA.fastNFA("$$")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("$", NFA.fastNFA("$")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("(", NFA.fastNFA("(")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>(")", NFA.fastNFA(")")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>(",", NFA.fastNFA(",")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("gen", NFA.fastNFA("gen")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("_", NFA.fastNFA("_")));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
-        terminatorsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
+        List<Map.Entry<String, NFA>> terminalsNFA = new ArrayList<>();
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("$$", NFA.fastNFA("$$")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("$", NFA.fastNFA("$")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("(", NFA.fastNFA("(")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>(")", NFA.fastNFA(")")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>(",", NFA.fastNFA(",")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("gen", NFA.fastNFA("gen")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("_", NFA.fastNFA("_")));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
 
-        lexer = new Lexer(terminatorsNFA, null);
+        lexer = new Lexer(terminalsNFA, null);
         emptyChars.add(' ');
         emptyChars.add('\t');
         emptyChars.add('\n');
@@ -59,12 +59,12 @@ public class Generator implements MovementCreator, Serializable {
 
 
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "_", "print", "gen", "checkvar"));
-        Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("F", "G", "H", "Var", "E", "L", "L_"));
+        Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "_", "print", "gen", "checkvar"));
+        Set<String> unterminalStrs = new HashSet<>(Arrays.asList("F", "G", "H", "Var", "E", "L", "L_"));
         SymbolPool pool = new SymbolPool();
         try {
-            pool.initTerminatorString(terminatorStrs);
-            pool.initUnterminatorString(unterminatorStrs);
+            pool.initTerminalString(terminalStrs);
+            pool.initUnterminalString(unterminalStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("G -> Var", pool)) {
 
@@ -160,7 +160,7 @@ public class Generator implements MovementCreator, Serializable {
                             String varname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("val");
                             AnalysisNode rightTreeNode;
                             if (!analysisTree.getValue().getProperties().containsKey("var_" + varname)) {
-                                rightTreeNode = new AnalysisNode(new Terminator(null));
+                                rightTreeNode = new AnalysisNode(new Terminal(null));
                                 rightTreeNode.getValue().addProperty("val", "var_" + varname);
                                 analysisTree.getValue().getProperties().put("var_" + varname, rightTreeNode);
                             } else {
@@ -226,7 +226,7 @@ public class Generator implements MovementCreator, Serializable {
                 if (beforeAnalysisNode.getChildren() != null) {
                     for (int i = beforeAnalysisNode.getChildren().size() - 1; i >= 0; --i) {
                         AnalysisNode childNode = beforeAnalysisNode.getChildren().get(i);
-                        if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                        if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINAL) {
                             beforeMovementTreeStack.push(childNode);
                         }
                     }
@@ -249,7 +249,7 @@ public class Generator implements MovementCreator, Serializable {
     private void rr_doTreeMovement(AnalysisNode movementNode, AnalysisNode analysisNode, List<String> resultCOMM) throws PLDLParsingException, PLDLAnalysisException {
         if (movementNode.getChildren() != null) {
             for (AnalysisNode childNode : movementNode.getChildren()) {
-                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINATOR) {
+                if (childNode.getValue().getAbstractSymbol().getType() != AbstractSymbol.TERMINAL) {
                     rr_doTreeMovement(childNode, analysisNode, resultCOMM);
                 }
             }

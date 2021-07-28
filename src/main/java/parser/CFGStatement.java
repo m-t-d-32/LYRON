@@ -2,8 +2,8 @@ package parser;
 
 import exception.PLDLParsingException;
 import symbol.AbstractSymbol;
-import symbol.AbstractTerminator;
-import symbol.AbstractUnterminator;
+import symbol.AbstractTerminal;
+import symbol.AbstractUnterminal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -46,23 +46,23 @@ public class CFGStatement implements Serializable {
         return pointedProductions;
     }
 
-    private Set<AbstractTerminator> getFirstsOfSymbolList(List<AbstractSymbol> abstractSymbols) {
-        Set<AbstractTerminator> result = new HashSet<>();
+    private Set<AbstractTerminal> getFirstsOfSymbolList(List<AbstractSymbol> abstractSymbols) {
+        Set<AbstractTerminal> result = new HashSet<>();
         for (AbstractSymbol abstractSymbol : abstractSymbols) {
-            if (abstractSymbol.getType() == AbstractSymbol.UNTERMINATOR) {
-                result.addAll(((AbstractUnterminator) abstractSymbol).getFirstSet());
-                if (!((AbstractUnterminator) abstractSymbol).getCanEmpty()) {
+            if (abstractSymbol.getType() == AbstractSymbol.UNTERMINAL) {
+                result.addAll(((AbstractUnterminal) abstractSymbol).getFirstSet());
+                if (!((AbstractUnterminal) abstractSymbol).getCanEmpty()) {
                     break;
                 }
             } else {
-                result.add((AbstractTerminator) abstractSymbol);
+                result.add((AbstractTerminal) abstractSymbol);
                 if (!abstractSymbol.getName().equals("null")) {
                     break;
                 }
             }
         }
         try {
-            result.remove(cfg.getSymbolPool().getTerminator("null"));
+            result.remove(cfg.getSymbolPool().getTerminal("null"));
         } catch (PLDLParsingException e) {
             e.printStackTrace();
         }
@@ -76,17 +76,17 @@ public class CFGStatement implements Serializable {
             PointedCFGProduction pointedProduction = iterPointedProductions.get(i);
             if (!pointedProduction.finished()) {
                 AbstractSymbol abstractSymbol = pointedProduction.getNextSymbol();
-                if (abstractSymbol.getType() == AbstractSymbol.UNTERMINATOR) {
+                if (abstractSymbol.getType() == AbstractSymbol.UNTERMINAL) {
                     List<AbstractSymbol> outlookAbstractSymbols = new ArrayList<>();
                     for (int j = pointedProduction.getPointer() + 1;
                          j < pointedProduction.getProduction().getAfterAbstractSymbols().size();
                          ++j) {
                         outlookAbstractSymbols.add(pointedProduction.getProduction().getAfterAbstractSymbols().get(j));
                     }
-                    outlookAbstractSymbols.add(pointedProduction.getOutlookAbstractTerminator());
-                    Set<AbstractTerminator> firstsOfList = getFirstsOfSymbolList(outlookAbstractSymbols);
+                    outlookAbstractSymbols.add(pointedProduction.getOutlookAbstractTerminal());
+                    Set<AbstractTerminal> firstsOfList = getFirstsOfSymbolList(outlookAbstractSymbols);
                     for (CFGProduction production : cfg.getBeginProductions().get(abstractSymbol)) {
-                        for (AbstractTerminator outlookSymbol : firstsOfList) {
+                        for (AbstractTerminal outlookSymbol : firstsOfList) {
                             PointedCFGProduction generatedProduction = new PointedCFGProduction(production, outlookSymbol);
                             if (!checkPointedProductions.contains(generatedProduction)) {
                                 checkPointedProductions.add(generatedProduction);

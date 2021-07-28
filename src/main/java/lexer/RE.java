@@ -6,7 +6,7 @@ import exception.REParsingException;
 import parser.CFG;
 import parser.Movement;
 import parser.TransformTable;
-import symbol.Terminator;
+import symbol.Terminal;
 import symbol.*;
 
 import java.io.Serializable;
@@ -51,10 +51,10 @@ public abstract class RE implements Serializable {
         if (endStatements.size() <= 0) {
             throw new PLDLAnalysisException("状态数为0或者小于0，程序失败。", null);
         }
-        AbstractSymbol beginAbstractSymbol = tableMap.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminator("eof")).getRegressionProduction().getBeforeAbstractSymbol();
+        AbstractSymbol beginAbstractSymbol = tableMap.get(endStatements.iterator().next()).get(cfg.getSymbolPool().getTerminal("eof")).getRegressionProduction().getBeforeAbstractSymbol();
         while(beginI != symbols.size() - 1 || !symbols.get(beginI).getAbstractSymbol().equals(beginAbstractSymbol)){
             int nowStatement = statementStack.peek();
-            Symbol nowSymbol = beginI < symbols.size() ? symbols.get(beginI) : new Terminator(cfg.getSymbolPool().getTerminator("eof"));
+            Symbol nowSymbol = beginI < symbols.size() ? symbols.get(beginI) : new Terminal(cfg.getSymbolPool().getTerminal("eof"));
             Movement movement =  tableMap.get(nowStatement).get(nowSymbol.getAbstractSymbol());
             if (movement == null) {
                 throw new PLDLAnalysisException("程序分析到第 " + (beginI + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
@@ -74,9 +74,9 @@ public abstract class RE implements Serializable {
                         REProduction production = (REProduction) movement.getRegressionProduction();
                         List<NFA> tempNFA = new ArrayList<>();
                         List<Symbol> tempSymbol = new ArrayList<>();
-                        AbstractTerminator nullTerminator = cfg.getSymbolPool().getTerminator("null");
+                        AbstractTerminal nullTerminal = cfg.getSymbolPool().getTerminal("null");
                         for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                            if (symbol != nullTerminator) {
+                            if (symbol != nullTerminal) {
                                 statementStack.pop();
                                 tempNFA.add(nodeStack.pop());
                                 tempSymbol.add(symbolStack.pop());
@@ -85,7 +85,7 @@ public abstract class RE implements Serializable {
                         Collections.reverse(tempNFA);
                         Collections.reverse(tempSymbol);
                         nodeStack.push(production.getNFANode(tempNFA, tempSymbol));
-                        Symbol newSymbol = new Unterminator((AbstractUnterminator) production.getBeforeAbstractSymbol());
+                        Symbol newSymbol = new Unterminal((AbstractUnterminal) production.getBeforeAbstractSymbol());
                         symbolStack.push(newSymbol);
                         --beginI;
                         symbols.set(beginI, newSymbol);

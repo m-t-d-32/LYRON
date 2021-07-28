@@ -1,9 +1,9 @@
 package lexer;
 
 import exception.PLDLAnalysisException;
-import symbol.AbstractTerminator;
+import symbol.AbstractTerminal;
 import symbol.Symbol;
-import symbol.Terminator;
+import symbol.Terminal;
 
 import java.io.Serializable;
 import java.util.*;
@@ -45,7 +45,7 @@ public class Lexer implements Serializable {
                     String substring = str.substring(pointer);
                     Map.Entry<String, Integer> analysisResult = dfa.analysis(substring);
                     if (analysisResult != null) {
-                        Terminator simpleResult = new Terminator(new AbstractTerminator(analysisResult.getKey()));
+                        Terminal simpleResult = new Terminal(new AbstractTerminal(analysisResult.getKey()));
                         simpleResult.addProperty("val", str.substring(pointer, pointer + analysisResult.getValue()));
                         result.add(simpleResult);
                         //System.out.println("matched: " + str.substring(pointer, pointer + analysisResult.getValue()) + " by " + analysisResult.getKey());
@@ -61,7 +61,7 @@ public class Lexer implements Serializable {
         else {
             Map.Entry<String, Integer> analysisResult = dfa.analysis(str);
             if (analysisResult != null) {
-                Terminator simpleResult = new Terminator(new AbstractTerminator(analysisResult.getKey()));
+                Terminal simpleResult = new Terminal(new AbstractTerminal(analysisResult.getKey()));
                 simpleResult.addProperty("name", str.substring(pointer, pointer + analysisResult.getValue()));
                 result.add(simpleResult);
                 //System.out.println("matched: " + str.substring(pointer, pointer + analysisResult.getValue()) + " by " + analysisResult.getKey());

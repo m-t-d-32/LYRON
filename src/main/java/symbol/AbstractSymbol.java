@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public abstract class AbstractSymbol implements Serializable {
 
-    public static final int TERMINATOR = 0x01, UNTERMINATOR = 0xff;
+    public static final int TERMINAL = 0x01, UNTERMINAL = 0xff;
 
     @Override
     public boolean equals(Object obj) {

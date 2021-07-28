@@ -43,7 +43,7 @@ public class ConsoleApplication {
         System.out.println("XML文件解析成功。");
 
         System.out.println("正在构建词法分析器...");
-        lexer = new Lexer(preParse.getTerminatorRegexes(), preParse.getBannedStrs());
+        lexer = new Lexer(preParse.getTerminalRegexes(), preParse.getBannedStrs());
         emptyChars = new HashSet<>();
         emptyChars.add(' ');
         emptyChars.add('\t');
@@ -56,7 +56,7 @@ public class ConsoleApplication {
         cfg = preParse.getCFG();
         table = cfg.getTable();
         System.out.println("表项共" + table.getTableMap().size() + "*" +
-                (cfg.getCFGUnterminators().size() + cfg.getCFGTerminators().size()) + "项");
+                (cfg.getCFGUnterminals().size() + cfg.getCFGTerminals().size()) + "项");
         System.out.println("基于LR（1）分析的语法分析器构建成功。");
 
         System.out.println("特定语言类型的内部编译器架构形成。");
@@ -144,10 +144,10 @@ public class ConsoleApplication {
             System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
             File []testfolders = {
-                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/function_test2020"),
-                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/function_test2021"),
-                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/functional_test"),
-                    new File("/home/user/桌面/compiler/compiler2021/公开用例与运行时库/performance_test2021_pre")
+                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2020"),
+                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2021"),
+                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/functional_test"),
+                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/performance_test2021_pre")
             };
 
             for (File folder: testfolders){
@@ -156,6 +156,7 @@ public class ConsoleApplication {
                     for (File f: testfiles){
                         if (f.getName().endsWith("sy")){
                             codeFileName = f.getAbsolutePath();
+                            System.out.println(codeFileName);
                             wrongTestFiles.add(codeFileName);
                             LLParse(new FileInputStream(codeFileName));
                             wrongTestFiles.remove(codeFileName);

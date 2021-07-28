@@ -5,10 +5,10 @@ import exception.PLDLParsingException;
 import exception.REParsingException;
 import parser.CFG;
 import parser.CFGProduction;
-import symbol.AbstractTerminator;
+import symbol.AbstractTerminal;
 import symbol.Symbol;
 import symbol.SymbolPool;
-import symbol.Terminator;
+import symbol.Terminal;
 
 import java.io.Serializable;
 import java.util.*;
@@ -21,12 +21,12 @@ public class SimpleREApply extends RE implements Serializable {
 
     @Override
     protected void setCFG() {
-        Set<String> terminatorStrs = new HashSet<>(Arrays.asList("|","(", ")", "*", "+", "[", "]", "-", "char", "^", "."));
-        Set<String> unterminatorStrs = new HashSet<>(Arrays.asList("E", "T", "F", "Fx", "Fxs"));
+        Set<String> terminalStrs = new HashSet<>(Arrays.asList("|","(", ")", "*", "+", "[", "]", "-", "char", "^", "."));
+        Set<String> unterminalStrs = new HashSet<>(Arrays.asList("E", "T", "F", "Fx", "Fxs"));
         SymbolPool pool = new SymbolPool();
         try {
-            pool.initTerminatorString(terminatorStrs);
-            pool.initUnterminatorString(unterminatorStrs);
+            pool.initTerminalString(terminalStrs);
+            pool.initUnterminalString(unterminalStrs);
             List<REProduction> res = new ArrayList<>(Arrays.asList(
                     new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> E | T", pool)) {
 
@@ -257,9 +257,9 @@ public class SimpleREApply extends RE implements Serializable {
 
     }
 
-    private Terminator getCharTerminator(char c) throws PLDLParsingException {
-        AbstractTerminator abstractTerminator = cfg.getSymbolPool().getTerminator("char");
-        Terminator sym = new Terminator(abstractTerminator);
+    private Terminal getCharTerminal(char c) throws PLDLParsingException {
+        AbstractTerminal abstractTerminal = cfg.getSymbolPool().getTerminal("char");
+        Terminal sym = new Terminal(abstractTerminal);
         sym.addProperty("name", String.valueOf(c));
         return sym;
     }
@@ -288,22 +288,22 @@ public class SimpleREApply extends RE implements Serializable {
                             case '(':
                             case '^':
                             case '.':
-                            case ')': result.add(getCharTerminator(c)); break;
-                            case 'r': result.add(getCharTerminator('\r')); break;
-                            case 'n': result.add(getCharTerminator('\n')); break;
-                            case 't': result.add(getCharTerminator('\t')); break;
-                            case 'f': result.add(getCharTerminator('\f')); break;
-                            case '\\': result.add(getCharTerminator('\\')); break;
+                            case ')': result.add(getCharTerminal(c)); break;
+                            case 'r': result.add(getCharTerminal('\r')); break;
+                            case 'n': result.add(getCharTerminal('\n')); break;
+                            case 't': result.add(getCharTerminal('\t')); break;
+                            case 'f': result.add(getCharTerminal('\f')); break;
+                            case '\\': result.add(getCharTerminal('\\')); break;
                         }
                     }
                 }
                 else if (c == '-' || c == '+' || c == '*' || c == '|' || c == '(' || c == ')' || c == '[' || c == ']' || c == '^' || c == '.') {
-                    AbstractTerminator abstractTerminator = cfg.getSymbolPool().getTerminator(String.valueOf(c));
-                    Terminator sym = new Terminator(abstractTerminator);
+                    AbstractTerminal abstractTerminal = cfg.getSymbolPool().getTerminal(String.valueOf(c));
+                    Terminal sym = new Terminal(abstractTerminal);
                     result.add(sym);
                 }
                 else if (c != '\n' && c != '\r') {
-                    result.add(getCharTerminator(c));
+                    result.add(getCharTerminal(c));
                 }
             }
             catch (PLDLParsingException e) {

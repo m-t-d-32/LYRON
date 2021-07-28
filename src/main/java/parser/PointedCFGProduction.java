@@ -1,7 +1,7 @@
 package parser;
 
 import symbol.AbstractSymbol;
-import symbol.AbstractTerminator;
+import symbol.AbstractTerminal;
 
 import java.io.Serializable;
 
@@ -9,12 +9,12 @@ public class PointedCFGProduction implements Serializable {
 
     private final CFGProduction cfgproduction;
     private int pointer;
-    private AbstractTerminator outlookAbstractTerminator;
+    private AbstractTerminal outlookAbstractTerminal;
 
-    public PointedCFGProduction(CFGProduction cfgproduction, AbstractTerminator outlookAbstractTerminator) {
+    public PointedCFGProduction(CFGProduction cfgproduction, AbstractTerminal outlookAbstractTerminal) {
         this.cfgproduction = cfgproduction;
         this.pointer = 0;
-        this.outlookAbstractTerminator = outlookAbstractTerminator;
+        this.outlookAbstractTerminal = outlookAbstractTerminal;
     }
 
     public AbstractSymbol getNextSymbol() {
@@ -28,7 +28,7 @@ public class PointedCFGProduction implements Serializable {
     }
 
     public PointedCFGProduction next() {
-        PointedCFGProduction pointedProduction = new PointedCFGProduction(cfgproduction, outlookAbstractTerminator);
+        PointedCFGProduction pointedProduction = new PointedCFGProduction(cfgproduction, outlookAbstractTerminal);
         pointedProduction.pointer = pointer + 1;
         return pointedProduction;
     }
@@ -38,7 +38,7 @@ public class PointedCFGProduction implements Serializable {
         PointedCFGProduction argument = (PointedCFGProduction) obj;
         return argument.pointer == pointer
                 && argument.cfgproduction.equals(cfgproduction)
-                && argument.outlookAbstractTerminator.equals(outlookAbstractTerminator);
+                && argument.outlookAbstractTerminal.equals(outlookAbstractTerminal);
     }
 
     @Override
@@ -61,13 +61,13 @@ public class PointedCFGProduction implements Serializable {
             result.append(cfgproduction.getAfterAbstractSymbols().get(i).toString());
         }
         result.append("（展望符：");
-        result.append(outlookAbstractTerminator);
+        result.append(outlookAbstractTerminal);
         result.append("）");
         return result.toString();
     }
 
-    public AbstractTerminator getOutlookAbstractTerminator() {
-        return outlookAbstractTerminator;
+    public AbstractTerminal getOutlookAbstractTerminal() {
+        return outlookAbstractTerminal;
     }
 
     public int getPointer() {

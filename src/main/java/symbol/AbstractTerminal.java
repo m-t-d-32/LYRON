@@ -2,11 +2,11 @@ package symbol;
 
 import java.io.Serializable;
 
-public class AbstractTerminator extends AbstractSymbol implements Serializable {
+public class AbstractTerminal extends AbstractSymbol implements Serializable {
 
     private String name = null;
 
-    public AbstractTerminator(String _name) {
+    public AbstractTerminal(String _name) {
         name = _name;
     }
 
@@ -15,7 +15,7 @@ public class AbstractTerminator extends AbstractSymbol implements Serializable {
     }
 
     public int getType() {
-        return AbstractSymbol.TERMINATOR;
+        return AbstractSymbol.TERMINAL;
     }
 
     @Override
@@ -23,8 +23,8 @@ public class AbstractTerminator extends AbstractSymbol implements Serializable {
         return "终结符：" + name;
     }
 
-    public static AbstractTerminator getNullTerminator() {
-        return new AbstractTerminator("null");
+    public static AbstractTerminal getNullTerminal() {
+        return new AbstractTerminal("null");
     }
 
     private boolean isComment = false;

@@ -3,13 +3,13 @@ package symbol;
 import java.io.Serializable;
 import java.util.Set;
 
-public class AbstractUnterminator extends AbstractSymbol implements Serializable {
+public class AbstractUnterminal extends AbstractSymbol implements Serializable {
 
     private String name = null;
 
-    private Set<AbstractTerminator> firstSet = null;
+    private Set<AbstractTerminal> firstSet = null;
 
-    public AbstractUnterminator(String _name) {
+    public AbstractUnterminal(String _name) {
         name = _name;
     }
 
@@ -18,7 +18,7 @@ public class AbstractUnterminator extends AbstractSymbol implements Serializable
     }
 
     public int getType() {
-        return AbstractSymbol.UNTERMINATOR;
+        return AbstractSymbol.UNTERMINAL;
     }
 
     private boolean canEmpty = false;
@@ -36,11 +36,11 @@ public class AbstractUnterminator extends AbstractSymbol implements Serializable
         return "非终结符：" + name;
     }
 
-    public void setFirstSet(Set<AbstractTerminator> firstSet) {
+    public void setFirstSet(Set<AbstractTerminal> firstSet) {
         this.firstSet = firstSet;
     }
 
-    public Set<AbstractTerminator> getFirstSet() {
+    public Set<AbstractTerminal> getFirstSet() {
         return firstSet;
     }
 

@@ -23,7 +23,7 @@ import java.util.*;
 
 public class PreParse implements Serializable {
 
-    List<Map.Entry<String, NFA>> terminatorsNFA = new ArrayList<>();
+    List<Map.Entry<String, NFA>> terminalsNFA = new ArrayList<>();
     Translator translator = null;
     Generator generator = null;
     CFG cfg = null;
@@ -49,8 +49,8 @@ public class PreParse implements Serializable {
     public PreParse(InputStream inputStream, String markinStr) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
         translator = new Translator();
         generator = new Generator();
-        Set<String> terminators = new HashSet<>();
-        Set<String> unterminators = new HashSet<>();
+        Set<String> terminals = new HashSet<>();
+        Set<String> unterminals = new HashSet<>();
         Set<String> comments = new HashSet<>();
         Map<String, Set<String>> bannedStrMap = new HashMap<>();
         List<String> prods = new ArrayList<>();
@@ -62,10 +62,10 @@ public class PreParse implements Serializable {
         Document document = reader.read(inputStream);
         Element root = document.getRootElement();
         if (root.getName().equals("pldl")) {
-            Element el = root.element("terminators");
-            List<Element> terminatorsEl = null;
+            Element el = root.element("terminals");
+            List<Element> terminalsEl = null;
             if (el != null){
-                terminatorsEl = el.elements("item");
+                terminalsEl = el.elements("item");
             }
             el = root.element("cfgproductions");
             List<Element> pdsEl = null;
@@ -81,17 +81,17 @@ public class PreParse implements Serializable {
                 for (Element e : pdsEl) {
                     String production = e.element("production").getText().trim();
                     prods.add(production);
-                    unterminators.add(production.split("->")[0].trim());
+                    unterminals.add(production.split("->")[0].trim());
 
                     movementsTrees.add(getAnalysisTreeList(e, "movements", translator));
                     beforeGenerationsTrees.add(getAnalysisTreeList(e, "before-generations", generator));
                     afterGenerationsTrees.add(getAnalysisTreeList(e, "after-generations", generator));
                 }
             }
-            if (terminatorsEl != null){
-                for (Element e : terminatorsEl) {
+            if (terminalsEl != null){
+                for (Element e : terminalsEl) {
                     String name = e.element("name").getText().trim();
-                    terminators.add(name);
+                    terminals.add(name);
                 }
             }
             if (commentsEl != null) {
@@ -106,18 +106,18 @@ public class PreParse implements Serializable {
                     String[] afters = production.split("->")[1].trim().split(" +");
                     for (String after : afters) {
                         if (!after.equals("null") && !comments.contains(after.trim()) &&
-                                !unterminators.contains(after.trim()) && !terminators.contains(after.trim())) {
-                            terminatorsNFA.add(new AbstractMap.SimpleEntry<>(after.trim(), NFA.fastNFA(after.trim())));
-                            terminators.add(after.trim());
+                                !unterminals.contains(after.trim()) && !terminals.contains(after.trim())) {
+                            terminalsNFA.add(new AbstractMap.SimpleEntry<>(after.trim(), NFA.fastNFA(after.trim())));
+                            terminals.add(after.trim());
                         }
                     }
                 }
             }
-            if (terminatorsEl != null) {
-                for (Element e : terminatorsEl) {
+            if (terminalsEl != null) {
+                for (Element e : terminalsEl) {
                     String name = e.element("name").getText().trim();
                     String regex = e.element("regex").getText().trim();
-                    terminatorsNFA.add(new AbstractMap.SimpleEntry<>(name, new SimpleREApply(regex).getNFA()));
+                    terminalsNFA.add(new AbstractMap.SimpleEntry<>(name, new SimpleREApply(regex).getNFA()));
                     if (e.element("ban") != null){
                         String bannedStrs = e.element("ban").getText().trim();
                         Set<String> bannedStrsSet = new HashSet<>();
@@ -146,15 +146,15 @@ public class PreParse implements Serializable {
                 for (Element e : commentsEl) {
                     String name = e.element("name").getText().trim();
                     String regex = e.element("regex").getText().trim();
-                    terminatorsNFA.add(new AbstractMap.SimpleEntry<>(name, new SimpleREApply(regex).getNFA()));
+                    terminalsNFA.add(new AbstractMap.SimpleEntry<>(name, new SimpleREApply(regex).getNFA()));
                 }
             }
         }
 
 
         SymbolPool pool = new SymbolPool();
-        pool.initTerminatorString(terminators);
-        pool.initUnterminatorString(unterminators);
+        pool.initTerminalString(terminals);
+        pool.initUnterminalString(unterminals);
         for (String comment : comments){
             pool.addCommentStr(comment);
         }
@@ -182,8 +182,8 @@ public class PreParse implements Serializable {
         return generator;
     }
 
-    public List<Map.Entry<String, NFA>> getTerminatorRegexes() {
-        return terminatorsNFA;
+    public List<Map.Entry<String, NFA>> getTerminalRegexes() {
+        return terminalsNFA;
     }
 
     public Map<String, String> getBannedStrs() {

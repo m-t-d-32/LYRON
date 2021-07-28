@@ -11,92 +11,92 @@ import java.util.Set;
 
 public class SymbolPool implements Serializable {
 
-    private Map<String, AbstractUnterminator> unterminators = null;
+    private Map<String, AbstractUnterminal> unterminals = null;
     
-    private Map<String, AbstractTerminator> terminators = null;
+    private Map<String, AbstractTerminal> terminals = null;
 
-    public void initUnterminatorString(Set<String> unterminatorStrs) throws PLDLParsingException {
-        if (unterminators != null) {
+    public void initUnterminalString(Set<String> unterminalStrs) throws PLDLParsingException {
+        if (unterminals != null) {
             PLDLParsingWarning.setLog("非终结符集合已经初始化过，重新初始化可能会导致不可预料的问题。");
         }
-        if (unterminatorStrs.contains("null")) {
+        if (unterminalStrs.contains("null")) {
             throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他非终结符，请更换非终结符的名字。", null);
         }
-        unterminators = new HashMap<>();
-        for (String str : unterminatorStrs) {
-            unterminators.put(str, new AbstractUnterminator(str));
+        unterminals = new HashMap<>();
+        for (String str : unterminalStrs) {
+            unterminals.put(str, new AbstractUnterminal(str));
         }
     }
 
-    public void initTerminatorString(Set<String> terminatorStrs) throws PLDLParsingException {
-        if (terminators != null) {
+    public void initTerminalString(Set<String> terminalStrs) throws PLDLParsingException {
+        if (terminals != null) {
             PLDLParsingWarning.setLog("终结符集合已经初始化过，重新初始化可能会导致不可预料的问题。");
         }
-        if (terminatorStrs.contains("null")){
+        if (terminalStrs.contains("null")){
             throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他终结符，请更换终结符的名字。", null);
         }
-        terminators = new HashMap<>();
-        for (String str : terminatorStrs) {
-            terminators.put(str, new AbstractTerminator(str));
+        terminals = new HashMap<>();
+        for (String str : terminalStrs) {
+            terminals.put(str, new AbstractTerminal(str));
         }
-        terminators.put("null", AbstractTerminator.getNullTerminator());
+        terminals.put("null", AbstractTerminal.getNullTerminal());
     }
 
-    public Set<String> getTerminatorsStr() {
-        return terminators.keySet();
+    public Set<String> getTerminalsStr() {
+        return terminals.keySet();
     }
 
-    public Collection<AbstractTerminator> getTerminators() {
-        return terminators.values();
+    public Collection<AbstractTerminal> getTerminals() {
+        return terminals.values();
     }
 
-    public Set<String> getUnterminatorsStr() {
-        return unterminators.keySet();
+    public Set<String> getUnterminalsStr() {
+        return unterminals.keySet();
     }
 
-    public Collection<AbstractUnterminator> getUnterminators() {
-        return unterminators.values();
+    public Collection<AbstractUnterminal> getUnterminals() {
+        return unterminals.values();
     }
 
-    public void addUnterminatorStr(String str) {
-        if (!unterminators.containsKey(str)) {
-            unterminators.put(str, new AbstractUnterminator(str));
+    public void addUnterminalStr(String str) {
+        if (!unterminals.containsKey(str)) {
+            unterminals.put(str, new AbstractUnterminal(str));
         }
     }
 
-    public void addTerminatorStr(String str) {
-        if (!terminators.containsKey(str)) {
-            terminators.put(str, new AbstractTerminator(str));
+    public void addTerminalStr(String str) {
+        if (!terminals.containsKey(str)) {
+            terminals.put(str, new AbstractTerminal(str));
         }
     }
 
     public void addCommentStr(String comment) {
-        if (!terminators.containsKey(comment)){
-            AbstractTerminator terminator = new AbstractTerminator(comment);
-            terminator.setIsComment(true);
-            terminators.put(comment, terminator);
+        if (!terminals.containsKey(comment)){
+            AbstractTerminal terminal = new AbstractTerminal(comment);
+            terminal.setIsComment(true);
+            terminals.put(comment, terminal);
         }
     }
 
-    public AbstractUnterminator getUnterminator(String name) throws PLDLParsingException {
-        if (unterminators.containsKey(name)) {
-            return unterminators.get(name);
+    public AbstractUnterminal getUnterminal(String name) throws PLDLParsingException {
+        if (unterminals.containsKey(name)) {
+            return unterminals.get(name);
         }
         throw new PLDLParsingException("符号 " + name + " 不能识别为非终结符。", null);
     }
 
-    public AbstractTerminator getTerminator(String name) throws PLDLParsingException {
-        if (terminators.containsKey(name)) {
-            return terminators.get(name);
+    public AbstractTerminal getTerminal(String name) throws PLDLParsingException {
+        if (terminals.containsKey(name)) {
+            return terminals.get(name);
         }
         throw new PLDLParsingException("符号 " + name + " 不能识别为终结符。", null);
     }
 
     public AbstractSymbol getSymbol(String name) throws PLDLParsingException {
-        if (unterminators.containsKey(name)) {
-            return getUnterminator(name);
-        } else if (terminators.containsKey(name)) {
-            return getTerminator(name);
+        if (unterminals.containsKey(name)) {
+            return getUnterminal(name);
+        } else if (terminals.containsKey(name)) {
+            return getTerminal(name);
         }
         throw new PLDLParsingException("符号 " + name + " 既不能识别为终结符，也不能识别为非终结符。", null);
     }

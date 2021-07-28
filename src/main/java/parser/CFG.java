@@ -11,13 +11,13 @@ public class CFG implements Serializable {
 
     private List<CFGProduction> CFGProductions;
 
-    private AbstractUnterminator CFGmarkin;
+    private AbstractUnterminal CFGmarkin;
 
     private SymbolPool symbolPool;
 
-    private Map<AbstractUnterminator, Set<CFGProduction>> beginProductions;
+    private Map<AbstractUnterminal, Set<CFGProduction>> beginProductions;
 
-    public Map<AbstractUnterminator, Set<CFGProduction>> getBeginProductions() {
+    public Map<AbstractUnterminal, Set<CFGProduction>> getBeginProductions() {
         return beginProductions;
     }
 
@@ -28,12 +28,12 @@ public class CFG implements Serializable {
         CFGProductions = new ArrayList<>();
         CFGProductions.addAll(productions);
         if (markinStr == null) {
-            CFGmarkin = (AbstractUnterminator) CFGProductions.get(0).getBeforeAbstractSymbol();
+            CFGmarkin = (AbstractUnterminal) CFGProductions.get(0).getBeforeAbstractSymbol();
             PLDLParsingWarning.setLog("警告：您没有传递任何参数作为开始符号，因而自动将第一个产生式的左部符号 " + CFGmarkin.getName() + " 作为开始符号。");
         } else {
             markinStr = markinStr.trim();
-            if (pool.getUnterminatorsStr().contains(markinStr)) {
-                CFGmarkin = new AbstractUnterminator(markinStr);
+            if (pool.getUnterminalsStr().contains(markinStr)) {
+                CFGmarkin = new AbstractUnterminal(markinStr);
             } else {
                 throw new PLDLParsingException("解析失败：开始符号不是非终结符。", null);
             }
@@ -52,36 +52,36 @@ public class CFG implements Serializable {
         return result.toString();
     }
 
-    public Set<String> getCFGTerminators() {
-        return symbolPool.getTerminatorsStr();
+    public Set<String> getCFGTerminals() {
+        return symbolPool.getTerminalsStr();
     }
 
-    public Set<String> getCFGUnterminators() {
-        return symbolPool.getUnterminatorsStr();
+    public Set<String> getCFGUnterminals() {
+        return symbolPool.getUnterminalsStr();
     }
 
     public void setCanEmpty() throws PLDLParsingException {
-        Map<AbstractUnterminator, Set<CFGProduction>> productions = new HashMap<>();
+        Map<AbstractUnterminal, Set<CFGProduction>> productions = new HashMap<>();
         Set<AbstractSymbol> tempSetOfEmpty = new HashSet<>(), setOfEmpty = new HashSet<>();
-        AbstractSymbol nullAbstractSymbol = symbolPool.getTerminator("null");
+        AbstractSymbol nullAbstractSymbol = symbolPool.getTerminal("null");
         tempSetOfEmpty.add(nullAbstractSymbol);
         for (CFGProduction cfgproduction : CFGProductions) {
             if (!productions.containsKey(cfgproduction.getBeforeAbstractSymbol())) {
-                productions.put((AbstractUnterminator) cfgproduction.getBeforeAbstractSymbol(), new HashSet<>());
+                productions.put((AbstractUnterminal) cfgproduction.getBeforeAbstractSymbol(), new HashSet<>());
             }
             productions.get(cfgproduction.getBeforeAbstractSymbol()).add(new CFGProduction(cfgproduction));
         }
         while (!tempSetOfEmpty.isEmpty()) {
             Set<AbstractSymbol> nextTempSetOfEmpty = new HashSet<>();
-            for (AbstractUnterminator abstractUnterminator : productions.keySet()) {
-                Set<CFGProduction> everyProductions = productions.get(abstractUnterminator);
+            for (AbstractUnterminal abstractUnterminal : productions.keySet()) {
+                Set<CFGProduction> everyProductions = productions.get(abstractUnterminal);
                 for (CFGProduction production : everyProductions) {
                     List<AbstractSymbol> afterAbstractSymbols = production.getAfterAbstractSymbols();
                     for (AbstractSymbol s : tempSetOfEmpty) {
                         afterAbstractSymbols.remove(s);
                     }
                     if (afterAbstractSymbols.size() <= 0) {
-                        nextTempSetOfEmpty.add(abstractUnterminator);
+                        nextTempSetOfEmpty.add(abstractUnterminal);
                         break;
                     }
                 }
@@ -91,14 +91,14 @@ public class CFG implements Serializable {
             tempSetOfEmpty = nextTempSetOfEmpty;
         }
         for (AbstractSymbol s : setOfEmpty) {
-            ((AbstractUnterminator) s).setCanEmpty(true);
+            ((AbstractUnterminal) s).setCanEmpty(true);
         }
     }
 
     public void setBeginProductions() {
         beginProductions = new HashMap<>();
         for (CFGProduction cfgproduction : CFGProductions) {
-            AbstractUnterminator beforeSymbol = (AbstractUnterminator) cfgproduction.getBeforeAbstractSymbol();
+            AbstractUnterminal beforeSymbol = (AbstractUnterminal) cfgproduction.getBeforeAbstractSymbol();
             if (beginProductions.get(beforeSymbol) == null) {
                 beginProductions.put(beforeSymbol, new HashSet<>());
             }
@@ -108,25 +108,25 @@ public class CFG implements Serializable {
 
     public void setFirstSet() throws PLDLParsingException {
         setCanEmpty();
-        Map<AbstractUnterminator, Set<AbstractUnterminator>> signalPasses = new HashMap<>();
-        Map<AbstractUnterminator, Set<AbstractTerminator>> firstSet = new HashMap<>();
-        Map<AbstractUnterminator, Set<AbstractTerminator>> tempFirstSet = new HashMap<>();
-        AbstractTerminator nullSymbol = symbolPool.getTerminator("null");
+        Map<AbstractUnterminal, Set<AbstractUnterminal>> signalPasses = new HashMap<>();
+        Map<AbstractUnterminal, Set<AbstractTerminal>> firstSet = new HashMap<>();
+        Map<AbstractUnterminal, Set<AbstractTerminal>> tempFirstSet = new HashMap<>();
+        AbstractTerminal nullSymbol = symbolPool.getTerminal("null");
         for (CFGProduction production : CFGProductions) {
             for (AbstractSymbol s : production.getAfterAbstractSymbols()) {
-                if (s.getType() == AbstractSymbol.UNTERMINATOR) {
+                if (s.getType() == AbstractSymbol.UNTERMINAL) {
                     if (!signalPasses.containsKey(s)) {
-                        signalPasses.put((AbstractUnterminator) s, new HashSet<>());
+                        signalPasses.put((AbstractUnterminal) s, new HashSet<>());
                     }
-                    signalPasses.get(s).add((AbstractUnterminator) production.getBeforeAbstractSymbol());
-                    if (!((AbstractUnterminator) s).getCanEmpty()) {
+                    signalPasses.get(s).add((AbstractUnterminal) production.getBeforeAbstractSymbol());
+                    if (!((AbstractUnterminal) s).getCanEmpty()) {
                         break;
                     }
                 } else if (!s.equals(nullSymbol)) {
                     if (!tempFirstSet.containsKey(production.getBeforeAbstractSymbol())) {
-                        tempFirstSet.put((AbstractUnterminator) production.getBeforeAbstractSymbol(), new HashSet<>());
+                        tempFirstSet.put((AbstractUnterminal) production.getBeforeAbstractSymbol(), new HashSet<>());
                     }
-                    tempFirstSet.get(production.getBeforeAbstractSymbol()).add((AbstractTerminator) s);
+                    tempFirstSet.get(production.getBeforeAbstractSymbol()).add((AbstractTerminal) s);
                     break;
                 } else {
                     break;
@@ -134,39 +134,39 @@ public class CFG implements Serializable {
             }
         }
         while (!tempFirstSet.isEmpty()) {
-            Map<AbstractUnterminator, Set<AbstractTerminator>> newTempFirstSet = new HashMap<>();
-            for (AbstractUnterminator abstractUnterminator : tempFirstSet.keySet()) {
-                if (!firstSet.containsKey(abstractUnterminator)) {
-                    firstSet.put(abstractUnterminator, new HashSet<>());
+            Map<AbstractUnterminal, Set<AbstractTerminal>> newTempFirstSet = new HashMap<>();
+            for (AbstractUnterminal abstractUnterminal : tempFirstSet.keySet()) {
+                if (!firstSet.containsKey(abstractUnterminal)) {
+                    firstSet.put(abstractUnterminal, new HashSet<>());
                 }
-                firstSet.get(abstractUnterminator).addAll(tempFirstSet.get(abstractUnterminator));
-                if (signalPasses.containsKey(abstractUnterminator)) {
-                    for (AbstractUnterminator signalReceiver : signalPasses.get(abstractUnterminator)) {
+                firstSet.get(abstractUnterminal).addAll(tempFirstSet.get(abstractUnterminal));
+                if (signalPasses.containsKey(abstractUnterminal)) {
+                    for (AbstractUnterminal signalReceiver : signalPasses.get(abstractUnterminal)) {
                         if (!newTempFirstSet.containsKey(signalReceiver)) {
                             newTempFirstSet.put(signalReceiver, new HashSet<>());
                         }
-                        newTempFirstSet.get(signalReceiver).addAll(tempFirstSet.get(abstractUnterminator));
+                        newTempFirstSet.get(signalReceiver).addAll(tempFirstSet.get(abstractUnterminal));
                     }
                 }
             }
             tempFirstSet.clear();
-            for (AbstractUnterminator abstractUnterminator : newTempFirstSet.keySet()) {
-                if (firstSet.containsKey(abstractUnterminator)) {
-                    newTempFirstSet.get(abstractUnterminator).removeAll(firstSet.get(abstractUnterminator));
+            for (AbstractUnterminal abstractUnterminal : newTempFirstSet.keySet()) {
+                if (firstSet.containsKey(abstractUnterminal)) {
+                    newTempFirstSet.get(abstractUnterminal).removeAll(firstSet.get(abstractUnterminal));
                 }
-                if (newTempFirstSet.get(abstractUnterminator).size() > 0) {
-                    tempFirstSet.put(abstractUnterminator, newTempFirstSet.get(abstractUnterminator));
+                if (newTempFirstSet.get(abstractUnterminal).size() > 0) {
+                    tempFirstSet.put(abstractUnterminal, newTempFirstSet.get(abstractUnterminal));
                 }
             }
         }
-        for (AbstractUnterminator abstractUnterminator : symbolPool.getUnterminators()) {
-            if (!firstSet.containsKey(abstractUnterminator)) {
-                firstSet.put(abstractUnterminator, new HashSet<>());
+        for (AbstractUnterminal abstractUnterminal : symbolPool.getUnterminals()) {
+            if (!firstSet.containsKey(abstractUnterminal)) {
+                firstSet.put(abstractUnterminal, new HashSet<>());
             }
-            if (abstractUnterminator.getCanEmpty()) {
-                firstSet.get(abstractUnterminator).add(nullSymbol);
+            if (abstractUnterminal.getCanEmpty()) {
+                firstSet.get(abstractUnterminal).add(nullSymbol);
             }
-            abstractUnterminator.setFirstSet(firstSet.get(abstractUnterminator));
+            abstractUnterminal.setFirstSet(firstSet.get(abstractUnterminal));
         }
     }
 
@@ -174,14 +174,14 @@ public class CFG implements Serializable {
     public TransformTable getTable() throws PLDLParsingException {
         setBeginProductions();
         setFirstSet();
-        symbolPool.addTerminatorStr("eof");
+        symbolPool.addTerminalStr("eof");
         List<CFGStatement> iterStatements = new ArrayList<>();
         Map<CFGStatement, Integer> checkStatements = new HashMap<>();
 
         CFGStatement beginStatement = new CFGStatement(this);
         for (CFGProduction production : CFGProductions) {
             if (production.getBeforeAbstractSymbol().equals(CFGmarkin)) {
-                beginStatement.add(new PointedCFGProduction(production, symbolPool.getTerminator("eof")));
+                beginStatement.add(new PointedCFGProduction(production, symbolPool.getTerminal("eof")));
             }
         }
         beginStatement.makeClosure();
@@ -201,23 +201,23 @@ public class CFG implements Serializable {
                     }
                     classifiedPointedProductions.get(pointedProduction.getNextSymbol()).add(pointedProduction);
                 } else {
-                    if (!classifiedPointedProductions.containsKey(symbolPool.getTerminator("null"))) {
-                        classifiedPointedProductions.put(symbolPool.getTerminator("null"), new HashSet<>());
+                    if (!classifiedPointedProductions.containsKey(symbolPool.getTerminal("null"))) {
+                        classifiedPointedProductions.put(symbolPool.getTerminal("null"), new HashSet<>());
                     }
-                    classifiedPointedProductions.get(symbolPool.getTerminator("null")).add(pointedProduction);
+                    classifiedPointedProductions.get(symbolPool.getTerminal("null")).add(pointedProduction);
                 }
             }
-            if (classifiedPointedProductions.containsKey(symbolPool.getTerminator("null"))) {
-                for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(symbolPool.getTerminator("null"))) {
-                    result.add(i, pointedProduction.getOutlookAbstractTerminator(), pointedProduction.getProduction());
-                    if (pointedProduction.getOutlookAbstractTerminator().equals(symbolPool.getTerminator("eof"))
+            if (classifiedPointedProductions.containsKey(symbolPool.getTerminal("null"))) {
+                for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(symbolPool.getTerminal("null"))) {
+                    result.add(i, pointedProduction.getOutlookAbstractTerminal(), pointedProduction.getProduction());
+                    if (pointedProduction.getOutlookAbstractTerminal().equals(symbolPool.getTerminal("eof"))
                             && pointedProduction.getProduction().getBeforeAbstractSymbol().equals(CFGmarkin)) {
                         result.addEndStatement(i);
                     }
                 }
             }
             for (AbstractSymbol s : classifiedPointedProductions.keySet()) {
-                if (!s.equals(symbolPool.getTerminator("null"))) {
+                if (!s.equals(symbolPool.getTerminal("null"))) {
                     CFGStatement statement = new CFGStatement(this);
                     for (PointedCFGProduction pointedProduction : classifiedPointedProductions.get(s)) {
                         statement.add(pointedProduction.next());
@@ -242,8 +242,8 @@ public class CFG implements Serializable {
         //Deprecated: case it was implemented in eraseSymbols
         List<Symbol> result = new ArrayList<>();
         for (Symbol symbol: symbols){
-            AbstractTerminator realAbstractTerminator = symbolPool.getTerminator(symbol.getAbstractSymbol().getName());
-            symbol.setAbstractSymbol(realAbstractTerminator);
+            AbstractTerminal realAbstractTerminal = symbolPool.getTerminal(symbol.getAbstractSymbol().getName());
+            symbol.setAbstractSymbol(realAbstractTerminal);
             result.add(symbol);
         }
         return result;
@@ -252,8 +252,8 @@ public class CFG implements Serializable {
     public List<Symbol> eraseComments(List<Symbol> symbols) throws PLDLParsingException {
         List<Symbol> result = new ArrayList<>();
         for (Symbol symbol: symbols){
-            AbstractTerminator realAbstractTerminator = symbolPool.getTerminator(symbol.getAbstractSymbol().getName());
-            if (!realAbstractTerminator.getIsComment()){
+            AbstractTerminal realAbstractTerminal = symbolPool.getTerminal(symbol.getAbstractSymbol().getName());
+            if (!realAbstractTerminal.getIsComment()){
                 result.add(symbol);
             }
         }
