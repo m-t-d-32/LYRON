@@ -1,12 +1,6 @@
 [submodule "sample/LYRON-C-Backend"]
 	path = sample/LYRON-C-Backend
 	url = https://gitee.com/llyronx/LYRON-C-Backend
-	branch = master
 [submodule "sample/LYRON-Yu-Backend"]
 	path = sample/LYRON-Yu-Backend
 	url = https://gitee.com/llyronx/LYRON-Yu-Backend
-	branch = master
-[submodule "sample/LYRON-SysY-Backend"]
-	path = sample/LYRON-SysY-Backend
-	url = https://gitee.com/llyronx/LYRON-SysY-Backend
-	branch = master
