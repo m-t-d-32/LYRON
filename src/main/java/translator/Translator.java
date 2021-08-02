@@ -75,11 +75,11 @@ public class Translator implements MovementCreator, Serializable {
 
     protected void setCFG() {
         Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "+", "str"));
-        Set<String> unterminalStrs = new HashSet<>(Arrays.asList("H", "Var", "E", "G"));
+        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("H", "Var", "E", "G"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminalString(terminalStrs);
-            pool.initUnterminalString(unterminalStrs);
+            pool.initNonterminalString(nonterminalStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> print ( H )", pool)) {
 
@@ -263,11 +263,11 @@ public class Translator implements MovementCreator, Serializable {
     public void checkMovementsMap(){
         for (CFGProduction production: movementsMap.keySet()){
             List<AnalysisTree> movementTrees = movementsMap.get(production);
-            Set<Integer> unterminalIndices = new HashSet<>();
+            Set<Integer> nonterminalIndices = new HashSet<>();
             Set<Integer> trulyWentIndices = new HashSet<>();
             for (int i = 0; i < production.getAfterAbstractSymbols().size(); ++i){
-                if (production.getAfterAbstractSymbols().get(i).getType() == AbstractSymbol.UNTERMINAL){
-                    unterminalIndices.add(i);
+                if (production.getAfterAbstractSymbols().get(i).getType() == AbstractSymbol.NONTERMINAL){
+                    nonterminalIndices.add(i);
                 }
             }
             for (AnalysisTree movementTree : movementTrees) {
@@ -280,9 +280,9 @@ public class Translator implements MovementCreator, Serializable {
                     e.printStackTrace();
                 }
             }
-            unterminalIndices.removeAll(trulyWentIndices);
-            if (unterminalIndices.size() > 0){
-                for (int i: unterminalIndices){
+            nonterminalIndices.removeAll(trulyWentIndices);
+            if (nonterminalIndices.size() > 0){
+                for (int i: nonterminalIndices){
                     PLDLParsingWarning.setLog("在" + production + "中，非终结符节点" + String.valueOf(i + 1) + "("
                             + production.getAfterAbstractSymbols().get(i) + ")不会被遍历，如果你忘记使用go语句，请考虑使用。" +
                             "否则将无法获得该非终结符的综合属性。");

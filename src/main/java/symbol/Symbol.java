@@ -5,7 +5,7 @@ import java.util.Map;
 
 public abstract class Symbol implements Serializable {
 
-    public static final int TERMINAL = 0x01, UNTERMINAL = 0xff;
+    public static final int TERMINAL = 0x01, NONTERMINAL = 0xff;
 
     protected Map<String, Object> properties;
 

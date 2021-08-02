@@ -31,10 +31,6 @@ public class ConsoleApplication {
     private TransformTable table = null;
     private Set<Character> emptyChars = null;
 
-    public List<String> getResults() {
-        return rt4;
-    }
-
     private List<String> rt4 = null;
 
     public void LLBeginFormXML(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException, IOException {
@@ -56,7 +52,7 @@ public class ConsoleApplication {
         cfg = preParse.getCFG();
         table = cfg.getTable();
         System.out.println("表项共" + table.getTableMap().size() + "*" +
-                (cfg.getCFGUnterminals().size() + cfg.getCFGTerminals().size()) + "项");
+                (cfg.getCFGNonterminals().size() + cfg.getCFGTerminals().size()) + "项");
         System.out.println("基于LR（1）分析的语法分析器构建成功。");
 
         System.out.println("特定语言类型的内部编译器架构形成。");
@@ -81,7 +77,7 @@ public class ConsoleApplication {
     public void LLParse(InputStream codeStream)
             throws PLDLAnalysisException, PLDLParsingException, IOException {
 
-//        System.out.println("正在读取代码文件...");
+        System.out.println("正在读取代码文件...");
         int size = codeStream.available();
         byte[] buffer = new byte[size];
         int readin = codeStream.read(buffer);
@@ -91,24 +87,24 @@ public class ConsoleApplication {
         codeStream.close();
         String codestr = new String(buffer, StandardCharsets.UTF_8);
 
-//        System.out.println("正在对代码进行词法分析...");
+        System.out.println("正在对代码进行词法分析...");
         List<Symbol> symbols = lexer.analysis(codestr, emptyChars);
         symbols = cfg.revertToStdAbstractSymbols(symbols);
         symbols = cfg.eraseComments(symbols);
 
-//        System.out.println("正在对代码进行语法分析构建分析树...");
+        System.out.println("正在对代码进行语法分析构建分析树...");
         AnalysisTree tree = table.getAnalysisTree(symbols);
         rt4 = new ArrayList<>();
 
-//        System.out.println("正在对分析树进行语义赋值生成注释分析树...");
+        System.out.println("正在对分析树进行语义赋值生成注释分析树...");
         Translator translator = preParse.getTranslator();
         translator.checkMovementsMap();
         translator.doTreesMovements(tree);
 
-//        System.out.println("正在根据注释分析树生成四元式...");
+        System.out.println("正在根据注释分析树生成四元式...");
         Generator generator = preParse.getGenerator();
         generator.doTreesMovements(tree, rt4);
-//        System.out.println("生成四元式成功");
+        System.out.println("生成四元式成功");
     }
 
     public void LLEnd(OutputStream outputStream){
@@ -144,17 +140,15 @@ public class ConsoleApplication {
             System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
 
             File []testfolders = {
-                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2020"),
-                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/function_test2021"),
-                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/functional_test"),
-                    new File("sample/LYRON-SysY-Backend/compiler2021/公开用例与运行时库/performance_test2021_pre")
+                    new File("sample/LYRON-Yu-Backend/test"),
+                    new File("sample/LYRON-Yu-Backend/examples"),
             };
 
             for (File folder: testfolders){
                 File []testfiles = folder.listFiles();
                 try{
                     for (File f: testfiles){
-                        if (f.getName().endsWith("sy")){
+                        if (f.getName().endsWith("yu")){
                             codeFileName = f.getAbsolutePath();
                             System.out.println(codeFileName);
                             wrongTestFiles.add(codeFileName);

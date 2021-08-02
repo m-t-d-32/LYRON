@@ -3,13 +3,13 @@ package symbol;
 import java.io.Serializable;
 import java.util.Set;
 
-public class AbstractUnterminal extends AbstractSymbol implements Serializable {
+public class AbstractNonterminal extends AbstractSymbol implements Serializable {
 
     private String name = null;
 
     private Set<AbstractTerminal> firstSet = null;
 
-    public AbstractUnterminal(String _name) {
+    public AbstractNonterminal(String _name) {
         name = _name;
     }
 
@@ -18,7 +18,7 @@ public class AbstractUnterminal extends AbstractSymbol implements Serializable {
     }
 
     public int getType() {
-        return AbstractSymbol.UNTERMINAL;
+        return AbstractSymbol.NONTERMINAL;
     }
 
     private boolean canEmpty = false;

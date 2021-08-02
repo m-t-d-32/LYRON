@@ -12,6 +12,6 @@ public class Terminal extends Symbol implements Serializable {
 
     @Override
     public int getType() {
-        return Symbol.UNTERMINAL;
+        return Symbol.NONTERMINAL;
     }
 }

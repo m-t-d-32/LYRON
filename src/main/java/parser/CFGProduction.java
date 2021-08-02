@@ -44,7 +44,7 @@ public class CFGProduction implements Serializable {
                 String[] beforeStrs = beforeStr.trim().split(" +"), afterStrs = afterStr.trim().split(" +");
                 if (beforeStrs.length == 1) {
                     try {
-                        resultProduction.beforeAbstractSymbol = pool.getUnterminal(beforeStrs[0]);
+                        resultProduction.beforeAbstractSymbol = pool.getNonterminal(beforeStrs[0]);
                     } catch (PLDLParsingException e) {
                         throw new PLDLParsingException("产生式左部不是非终结符，因而这不是一个合法的产生式。", e);
                     }

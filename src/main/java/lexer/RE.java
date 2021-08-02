@@ -85,7 +85,7 @@ public abstract class RE implements Serializable {
                         Collections.reverse(tempNFA);
                         Collections.reverse(tempSymbol);
                         nodeStack.push(production.getNFANode(tempNFA, tempSymbol));
-                        Symbol newSymbol = new Unterminal((AbstractUnterminal) production.getBeforeAbstractSymbol());
+                        Symbol newSymbol = new Nonterminal((AbstractNonterminal) production.getBeforeAbstractSymbol());
                         symbolStack.push(newSymbol);
                         --beginI;
                         symbols.set(beginI, newSymbol);

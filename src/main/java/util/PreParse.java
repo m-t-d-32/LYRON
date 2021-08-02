@@ -50,7 +50,7 @@ public class PreParse implements Serializable {
         translator = new Translator();
         generator = new Generator();
         Set<String> terminals = new HashSet<>();
-        Set<String> unterminals = new HashSet<>();
+        Set<String> nonterminals = new HashSet<>();
         Set<String> comments = new HashSet<>();
         Map<String, Set<String>> bannedStrMap = new HashMap<>();
         List<String> prods = new ArrayList<>();
@@ -63,6 +63,10 @@ public class PreParse implements Serializable {
         Element root = document.getRootElement();
         if (root.getName().equals("pldl")) {
             Element el = root.element("terminals");
+            //兼容性
+            if (el == null){
+                el = root.element("terminators");
+            }
             List<Element> terminalsEl = null;
             if (el != null){
                 terminalsEl = el.elements("item");
@@ -81,7 +85,7 @@ public class PreParse implements Serializable {
                 for (Element e : pdsEl) {
                     String production = e.element("production").getText().trim();
                     prods.add(production);
-                    unterminals.add(production.split("->")[0].trim());
+                    nonterminals.add(production.split("->")[0].trim());
 
                     movementsTrees.add(getAnalysisTreeList(e, "movements", translator));
                     beforeGenerationsTrees.add(getAnalysisTreeList(e, "before-generations", generator));
@@ -106,7 +110,7 @@ public class PreParse implements Serializable {
                     String[] afters = production.split("->")[1].trim().split(" +");
                     for (String after : afters) {
                         if (!after.equals("null") && !comments.contains(after.trim()) &&
-                                !unterminals.contains(after.trim()) && !terminals.contains(after.trim())) {
+                                !nonterminals.contains(after.trim()) && !terminals.contains(after.trim())) {
                             terminalsNFA.add(new AbstractMap.SimpleEntry<>(after.trim(), NFA.fastNFA(after.trim())));
                             terminals.add(after.trim());
                         }
@@ -154,7 +158,7 @@ public class PreParse implements Serializable {
 
         SymbolPool pool = new SymbolPool();
         pool.initTerminalString(terminals);
-        pool.initUnterminalString(unterminals);
+        pool.initNonterminalString(nonterminals);
         for (String comment : comments){
             pool.addCommentStr(comment);
         }

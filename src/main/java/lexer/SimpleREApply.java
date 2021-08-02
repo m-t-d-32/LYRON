@@ -22,11 +22,11 @@ public class SimpleREApply extends RE implements Serializable {
     @Override
     protected void setCFG() {
         Set<String> terminalStrs = new HashSet<>(Arrays.asList("|","(", ")", "*", "+", "[", "]", "-", "char", "^", "."));
-        Set<String> unterminalStrs = new HashSet<>(Arrays.asList("E", "T", "F", "Fx", "Fxs"));
+        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("E", "T", "F", "Fx", "Fxs"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminalString(terminalStrs);
-            pool.initUnterminalString(unterminalStrs);
+            pool.initNonterminalString(nonterminalStrs);
             List<REProduction> res = new ArrayList<>(Arrays.asList(
                     new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> E | T", pool)) {
 

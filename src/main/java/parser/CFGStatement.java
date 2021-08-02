@@ -3,7 +3,7 @@ package parser;
 import exception.PLDLParsingException;
 import symbol.AbstractSymbol;
 import symbol.AbstractTerminal;
-import symbol.AbstractUnterminal;
+import symbol.AbstractNonterminal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,9 +49,9 @@ public class CFGStatement implements Serializable {
     private Set<AbstractTerminal> getFirstsOfSymbolList(List<AbstractSymbol> abstractSymbols) {
         Set<AbstractTerminal> result = new HashSet<>();
         for (AbstractSymbol abstractSymbol : abstractSymbols) {
-            if (abstractSymbol.getType() == AbstractSymbol.UNTERMINAL) {
-                result.addAll(((AbstractUnterminal) abstractSymbol).getFirstSet());
-                if (!((AbstractUnterminal) abstractSymbol).getCanEmpty()) {
+            if (abstractSymbol.getType() == AbstractSymbol.NONTERMINAL) {
+                result.addAll(((AbstractNonterminal) abstractSymbol).getFirstSet());
+                if (!((AbstractNonterminal) abstractSymbol).getCanEmpty()) {
                     break;
                 }
             } else {
@@ -76,7 +76,7 @@ public class CFGStatement implements Serializable {
             PointedCFGProduction pointedProduction = iterPointedProductions.get(i);
             if (!pointedProduction.finished()) {
                 AbstractSymbol abstractSymbol = pointedProduction.getNextSymbol();
-                if (abstractSymbol.getType() == AbstractSymbol.UNTERMINAL) {
+                if (abstractSymbol.getType() == AbstractSymbol.NONTERMINAL) {
                     List<AbstractSymbol> outlookAbstractSymbols = new ArrayList<>();
                     for (int j = pointedProduction.getPointer() + 1;
                          j < pointedProduction.getProduction().getAfterAbstractSymbols().size();

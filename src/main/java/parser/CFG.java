@@ -11,13 +11,13 @@ public class CFG implements Serializable {
 
     private List<CFGProduction> CFGProductions;
 
-    private AbstractUnterminal CFGmarkin;
+    private AbstractNonterminal CFGmarkin;
 
     private SymbolPool symbolPool;
 
-    private Map<AbstractUnterminal, Set<CFGProduction>> beginProductions;
+    private Map<AbstractNonterminal, Set<CFGProduction>> beginProductions;
 
-    public Map<AbstractUnterminal, Set<CFGProduction>> getBeginProductions() {
+    public Map<AbstractNonterminal, Set<CFGProduction>> getBeginProductions() {
         return beginProductions;
     }
 
@@ -28,12 +28,12 @@ public class CFG implements Serializable {
         CFGProductions = new ArrayList<>();
         CFGProductions.addAll(productions);
         if (markinStr == null) {
-            CFGmarkin = (AbstractUnterminal) CFGProductions.get(0).getBeforeAbstractSymbol();
+            CFGmarkin = (AbstractNonterminal) CFGProductions.get(0).getBeforeAbstractSymbol();
             PLDLParsingWarning.setLog("警告：您没有传递任何参数作为开始符号，因而自动将第一个产生式的左部符号 " + CFGmarkin.getName() + " 作为开始符号。");
         } else {
             markinStr = markinStr.trim();
-            if (pool.getUnterminalsStr().contains(markinStr)) {
-                CFGmarkin = new AbstractUnterminal(markinStr);
+            if (pool.getNonterminalsStr().contains(markinStr)) {
+                CFGmarkin = new AbstractNonterminal(markinStr);
             } else {
                 throw new PLDLParsingException("解析失败：开始符号不是非终结符。", null);
             }
@@ -56,32 +56,32 @@ public class CFG implements Serializable {
         return symbolPool.getTerminalsStr();
     }
 
-    public Set<String> getCFGUnterminals() {
-        return symbolPool.getUnterminalsStr();
+    public Set<String> getCFGNonterminals() {
+        return symbolPool.getNonterminalsStr();
     }
 
     public void setCanEmpty() throws PLDLParsingException {
-        Map<AbstractUnterminal, Set<CFGProduction>> productions = new HashMap<>();
+        Map<AbstractNonterminal, Set<CFGProduction>> productions = new HashMap<>();
         Set<AbstractSymbol> tempSetOfEmpty = new HashSet<>(), setOfEmpty = new HashSet<>();
         AbstractSymbol nullAbstractSymbol = symbolPool.getTerminal("null");
         tempSetOfEmpty.add(nullAbstractSymbol);
         for (CFGProduction cfgproduction : CFGProductions) {
             if (!productions.containsKey(cfgproduction.getBeforeAbstractSymbol())) {
-                productions.put((AbstractUnterminal) cfgproduction.getBeforeAbstractSymbol(), new HashSet<>());
+                productions.put((AbstractNonterminal) cfgproduction.getBeforeAbstractSymbol(), new HashSet<>());
             }
             productions.get(cfgproduction.getBeforeAbstractSymbol()).add(new CFGProduction(cfgproduction));
         }
         while (!tempSetOfEmpty.isEmpty()) {
             Set<AbstractSymbol> nextTempSetOfEmpty = new HashSet<>();
-            for (AbstractUnterminal abstractUnterminal : productions.keySet()) {
-                Set<CFGProduction> everyProductions = productions.get(abstractUnterminal);
+            for (AbstractNonterminal abstractNonterminal : productions.keySet()) {
+                Set<CFGProduction> everyProductions = productions.get(abstractNonterminal);
                 for (CFGProduction production : everyProductions) {
                     List<AbstractSymbol> afterAbstractSymbols = production.getAfterAbstractSymbols();
                     for (AbstractSymbol s : tempSetOfEmpty) {
                         afterAbstractSymbols.remove(s);
                     }
                     if (afterAbstractSymbols.size() <= 0) {
-                        nextTempSetOfEmpty.add(abstractUnterminal);
+                        nextTempSetOfEmpty.add(abstractNonterminal);
                         break;
                     }
                 }
@@ -91,14 +91,14 @@ public class CFG implements Serializable {
             tempSetOfEmpty = nextTempSetOfEmpty;
         }
         for (AbstractSymbol s : setOfEmpty) {
-            ((AbstractUnterminal) s).setCanEmpty(true);
+            ((AbstractNonterminal) s).setCanEmpty(true);
         }
     }
 
     public void setBeginProductions() {
         beginProductions = new HashMap<>();
         for (CFGProduction cfgproduction : CFGProductions) {
-            AbstractUnterminal beforeSymbol = (AbstractUnterminal) cfgproduction.getBeforeAbstractSymbol();
+            AbstractNonterminal beforeSymbol = (AbstractNonterminal) cfgproduction.getBeforeAbstractSymbol();
             if (beginProductions.get(beforeSymbol) == null) {
                 beginProductions.put(beforeSymbol, new HashSet<>());
             }
@@ -108,23 +108,23 @@ public class CFG implements Serializable {
 
     public void setFirstSet() throws PLDLParsingException {
         setCanEmpty();
-        Map<AbstractUnterminal, Set<AbstractUnterminal>> signalPasses = new HashMap<>();
-        Map<AbstractUnterminal, Set<AbstractTerminal>> firstSet = new HashMap<>();
-        Map<AbstractUnterminal, Set<AbstractTerminal>> tempFirstSet = new HashMap<>();
+        Map<AbstractNonterminal, Set<AbstractNonterminal>> signalPasses = new HashMap<>();
+        Map<AbstractNonterminal, Set<AbstractTerminal>> firstSet = new HashMap<>();
+        Map<AbstractNonterminal, Set<AbstractTerminal>> tempFirstSet = new HashMap<>();
         AbstractTerminal nullSymbol = symbolPool.getTerminal("null");
         for (CFGProduction production : CFGProductions) {
             for (AbstractSymbol s : production.getAfterAbstractSymbols()) {
-                if (s.getType() == AbstractSymbol.UNTERMINAL) {
+                if (s.getType() == AbstractSymbol.NONTERMINAL) {
                     if (!signalPasses.containsKey(s)) {
-                        signalPasses.put((AbstractUnterminal) s, new HashSet<>());
+                        signalPasses.put((AbstractNonterminal) s, new HashSet<>());
                     }
-                    signalPasses.get(s).add((AbstractUnterminal) production.getBeforeAbstractSymbol());
-                    if (!((AbstractUnterminal) s).getCanEmpty()) {
+                    signalPasses.get(s).add((AbstractNonterminal) production.getBeforeAbstractSymbol());
+                    if (!((AbstractNonterminal) s).getCanEmpty()) {
                         break;
                     }
                 } else if (!s.equals(nullSymbol)) {
                     if (!tempFirstSet.containsKey(production.getBeforeAbstractSymbol())) {
-                        tempFirstSet.put((AbstractUnterminal) production.getBeforeAbstractSymbol(), new HashSet<>());
+                        tempFirstSet.put((AbstractNonterminal) production.getBeforeAbstractSymbol(), new HashSet<>());
                     }
                     tempFirstSet.get(production.getBeforeAbstractSymbol()).add((AbstractTerminal) s);
                     break;
@@ -134,39 +134,39 @@ public class CFG implements Serializable {
             }
         }
         while (!tempFirstSet.isEmpty()) {
-            Map<AbstractUnterminal, Set<AbstractTerminal>> newTempFirstSet = new HashMap<>();
-            for (AbstractUnterminal abstractUnterminal : tempFirstSet.keySet()) {
-                if (!firstSet.containsKey(abstractUnterminal)) {
-                    firstSet.put(abstractUnterminal, new HashSet<>());
+            Map<AbstractNonterminal, Set<AbstractTerminal>> newTempFirstSet = new HashMap<>();
+            for (AbstractNonterminal abstractNonterminal : tempFirstSet.keySet()) {
+                if (!firstSet.containsKey(abstractNonterminal)) {
+                    firstSet.put(abstractNonterminal, new HashSet<>());
                 }
-                firstSet.get(abstractUnterminal).addAll(tempFirstSet.get(abstractUnterminal));
-                if (signalPasses.containsKey(abstractUnterminal)) {
-                    for (AbstractUnterminal signalReceiver : signalPasses.get(abstractUnterminal)) {
+                firstSet.get(abstractNonterminal).addAll(tempFirstSet.get(abstractNonterminal));
+                if (signalPasses.containsKey(abstractNonterminal)) {
+                    for (AbstractNonterminal signalReceiver : signalPasses.get(abstractNonterminal)) {
                         if (!newTempFirstSet.containsKey(signalReceiver)) {
                             newTempFirstSet.put(signalReceiver, new HashSet<>());
                         }
-                        newTempFirstSet.get(signalReceiver).addAll(tempFirstSet.get(abstractUnterminal));
+                        newTempFirstSet.get(signalReceiver).addAll(tempFirstSet.get(abstractNonterminal));
                     }
                 }
             }
             tempFirstSet.clear();
-            for (AbstractUnterminal abstractUnterminal : newTempFirstSet.keySet()) {
-                if (firstSet.containsKey(abstractUnterminal)) {
-                    newTempFirstSet.get(abstractUnterminal).removeAll(firstSet.get(abstractUnterminal));
+            for (AbstractNonterminal abstractNonterminal : newTempFirstSet.keySet()) {
+                if (firstSet.containsKey(abstractNonterminal)) {
+                    newTempFirstSet.get(abstractNonterminal).removeAll(firstSet.get(abstractNonterminal));
                 }
-                if (newTempFirstSet.get(abstractUnterminal).size() > 0) {
-                    tempFirstSet.put(abstractUnterminal, newTempFirstSet.get(abstractUnterminal));
+                if (newTempFirstSet.get(abstractNonterminal).size() > 0) {
+                    tempFirstSet.put(abstractNonterminal, newTempFirstSet.get(abstractNonterminal));
                 }
             }
         }
-        for (AbstractUnterminal abstractUnterminal : symbolPool.getUnterminals()) {
-            if (!firstSet.containsKey(abstractUnterminal)) {
-                firstSet.put(abstractUnterminal, new HashSet<>());
+        for (AbstractNonterminal abstractNonterminal : symbolPool.getNonterminals()) {
+            if (!firstSet.containsKey(abstractNonterminal)) {
+                firstSet.put(abstractNonterminal, new HashSet<>());
             }
-            if (abstractUnterminal.getCanEmpty()) {
-                firstSet.get(abstractUnterminal).add(nullSymbol);
+            if (abstractNonterminal.getCanEmpty()) {
+                firstSet.get(abstractNonterminal).add(nullSymbol);
             }
-            abstractUnterminal.setFirstSet(firstSet.get(abstractUnterminal));
+            abstractNonterminal.setFirstSet(firstSet.get(abstractNonterminal));
         }
     }
 

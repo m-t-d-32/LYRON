@@ -60,11 +60,11 @@ public class Generator implements MovementCreator, Serializable {
 
     protected void setCFG() {
         Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "_", "print", "gen", "checkvar"));
-        Set<String> unterminalStrs = new HashSet<>(Arrays.asList("F", "G", "H", "Var", "E", "L", "L_"));
+        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("F", "G", "H", "Var", "E", "L", "L_"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminalString(terminalStrs);
-            pool.initUnterminalString(unterminalStrs);
+            pool.initNonterminalString(nonterminalStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("G -> Var", pool)) {
 

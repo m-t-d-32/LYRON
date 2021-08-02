@@ -11,20 +11,20 @@ import java.util.Set;
 
 public class SymbolPool implements Serializable {
 
-    private Map<String, AbstractUnterminal> unterminals = null;
+    private Map<String, AbstractNonterminal> nonterminals = null;
     
     private Map<String, AbstractTerminal> terminals = null;
 
-    public void initUnterminalString(Set<String> unterminalStrs) throws PLDLParsingException {
-        if (unterminals != null) {
+    public void initNonterminalString(Set<String> nonterminalStrs) throws PLDLParsingException {
+        if (nonterminals != null) {
             PLDLParsingWarning.setLog("非终结符集合已经初始化过，重新初始化可能会导致不可预料的问题。");
         }
-        if (unterminalStrs.contains("null")) {
+        if (nonterminalStrs.contains("null")) {
             throw new PLDLParsingException("null是PLDL语言的保留字，用于表示空串，因而不能表示其他非终结符，请更换非终结符的名字。", null);
         }
-        unterminals = new HashMap<>();
-        for (String str : unterminalStrs) {
-            unterminals.put(str, new AbstractUnterminal(str));
+        nonterminals = new HashMap<>();
+        for (String str : nonterminalStrs) {
+            nonterminals.put(str, new AbstractNonterminal(str));
         }
     }
 
@@ -50,17 +50,17 @@ public class SymbolPool implements Serializable {
         return terminals.values();
     }
 
-    public Set<String> getUnterminalsStr() {
-        return unterminals.keySet();
+    public Set<String> getNonterminalsStr() {
+        return nonterminals.keySet();
     }
 
-    public Collection<AbstractUnterminal> getUnterminals() {
-        return unterminals.values();
+    public Collection<AbstractNonterminal> getNonterminals() {
+        return nonterminals.values();
     }
 
-    public void addUnterminalStr(String str) {
-        if (!unterminals.containsKey(str)) {
-            unterminals.put(str, new AbstractUnterminal(str));
+    public void addNonterminalStr(String str) {
+        if (!nonterminals.containsKey(str)) {
+            nonterminals.put(str, new AbstractNonterminal(str));
         }
     }
 
@@ -78,9 +78,9 @@ public class SymbolPool implements Serializable {
         }
     }
 
-    public AbstractUnterminal getUnterminal(String name) throws PLDLParsingException {
-        if (unterminals.containsKey(name)) {
-            return unterminals.get(name);
+    public AbstractNonterminal getNonterminal(String name) throws PLDLParsingException {
+        if (nonterminals.containsKey(name)) {
+            return nonterminals.get(name);
         }
         throw new PLDLParsingException("符号 " + name + " 不能识别为非终结符。", null);
     }
@@ -93,8 +93,8 @@ public class SymbolPool implements Serializable {
     }
 
     public AbstractSymbol getSymbol(String name) throws PLDLParsingException {
-        if (unterminals.containsKey(name)) {
-            return getUnterminal(name);
+        if (nonterminals.containsKey(name)) {
+            return getNonterminal(name);
         } else if (terminals.containsKey(name)) {
             return getTerminal(name);
         }

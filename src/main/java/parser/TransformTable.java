@@ -38,7 +38,7 @@ public class TransformTable implements Serializable {
 
     public void add(int statementIndex, AbstractSymbol nextAbstractSymbol, int nextStatementIndex) {
         Movement movement;
-        if (nextAbstractSymbol.getType() == AbstractSymbol.UNTERMINAL) {
+        if (nextAbstractSymbol.getType() == AbstractSymbol.NONTERMINAL) {
             movement = new Movement(Movement.GOTO, nextStatementIndex);
         } else {
             movement = new Movement(Movement.SHIFT, nextStatementIndex);
@@ -46,10 +46,10 @@ public class TransformTable implements Serializable {
         if (!table.containsKey(statementIndex)) {
             table.put(statementIndex, new HashMap<>());
         }
-        if (table.get(statementIndex).containsKey(nextAbstractSymbol)){
-            System.err.println("移进/归约冲突发生");
-            System.err.println(table.get(statementIndex).get(nextAbstractSymbol).getRegressionProduction());
-        }
+//        if (table.get(statementIndex).containsKey(nextAbstractSymbol)){
+//            System.err.println("移进/归约冲突发生");
+//            System.err.println(table.get(statementIndex).get(nextAbstractSymbol).getRegressionProduction());
+//        }
         table.get(statementIndex).put(nextAbstractSymbol, movement);
     }
 
@@ -133,7 +133,7 @@ public class TransformTable implements Serializable {
             } else if (movement.getMovement() == Movement.REGRESSION) {
                 CFGProduction production = movement.getRegressionProduction();
 //                System.out.println("归约：" + production.toString());
-                AnalysisNode node = new AnalysisNode(new Unterminal((AbstractUnterminal) production.getBeforeAbstractSymbol()));
+                AnalysisNode node = new AnalysisNode(new Nonterminal((AbstractNonterminal) production.getBeforeAbstractSymbol()));
                 node.setProduction(production);
                 node.setChildren(new ArrayList<>());
                 AbstractTerminal nullTerminal = cfg.getSymbolPool().getTerminal("null");
