@@ -22,12 +22,20 @@ public class SimpleREApply extends RE implements Serializable {
     @Override
     protected void setCFG() {
         Set<String> terminalStrs = new HashSet<>(Arrays.asList("|","(", ")", "*", "+", "[", "]", "-", "char", "^", "."));
-        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("E", "T", "F", "Fx", "Fxs"));
+        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("Program", "E", "T", "F", "Fx", "Fxs"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminalString(terminalStrs);
             pool.initNonterminalString(nonterminalStrs);
             List<REProduction> res = new ArrayList<>(Arrays.asList(
+                    new REProduction(CFGProduction.getCFGProductionFromCFGString("Program -> E", pool)) {
+
+                        @Override
+                        public NFA getNFANode(List<NFA> nodes, List<Symbol> childs) {
+                            return nodes.get(0);
+                        }
+
+                    },
                     new REProduction(CFGProduction.getCFGProductionFromCFGString("E -> E | T", pool)) {
 
                         @Override
@@ -249,7 +257,7 @@ public class SimpleREApply extends RE implements Serializable {
                         }
 
                     }));
-            cfg = new CFG(pool, res, "E");
+            cfg = new CFG(pool, res, "Program");
         } catch (PLDLParsingException e) {
             // TODO 自动生成的 catch 块
             e.printStackTrace();

@@ -60,12 +60,22 @@ public class Generator implements MovementCreator, Serializable {
 
     protected void setCFG() {
         Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "_", "print", "gen", "checkvar"));
-        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("F", "G", "H", "Var", "E", "L", "L_"));
+        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("Program", "F", "G", "H", "Var", "E", "L", "L_"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminalString(terminalStrs);
             pool.initNonterminalString(nonterminalStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Program -> E", pool)) {
+
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
+                            movementTree.getValue().setProperties(new HashMap<>());
+                            for (String str : movementTree.getChildren().get(0).getValue().getProperties().keySet()) {
+                                movementTree.getValue().getProperties().put(str, movementTree.getChildren().get(0).getValue().getProperties().get(str));
+                            }
+                        }
+                    },
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("G -> Var", pool)) {
 
                         @Override
@@ -208,7 +218,7 @@ public class Generator implements MovementCreator, Serializable {
                         }
                     }
             ));
-            cfg = new CFG(pool, res, "E");
+            cfg = new CFG(pool, res, "Program");
         } catch (PLDLParsingException e) {
             e.printStackTrace();
         }

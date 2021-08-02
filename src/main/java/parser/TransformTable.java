@@ -175,7 +175,8 @@ public class TransformTable implements Serializable {
         Stack<AnalysingStatement> rollbackStatements = new Stack<>();
 
         int i = 0;
-        while (streamStack.size() > 1 || !endStatements.contains(statementStack.peek())){
+        while (nodeStack.empty() || nodeStack.peek().getValue().getType() == AbstractSymbol.TERMINAL ||
+                !nodeStack.peek().getValue().getAbstractSymbol().equals(cfg.getBeginAbstractSymbol())){
             int nowStatement = statementStack.peek();
             Symbol nowSymbol = streamStack.peek();
             Set<Movement> nowMovements = table.get(nowStatement).get(nowSymbol.getAbstractSymbol());

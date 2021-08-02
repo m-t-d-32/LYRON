@@ -75,12 +75,23 @@ public class Translator implements MovementCreator, Serializable {
 
     protected void setCFG() {
         Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", "=", "newTemp", "val", "num", "print", "go", "+", "str"));
-        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("H", "Var", "E", "G"));
+        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("Program", "H", "Var", "E", "G"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminalString(terminalStrs);
             pool.initNonterminalString(nonterminalStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
+
+                    new MovementProduction(CFGProduction.getCFGProductionFromCFGString("Program -> E", pool)) {
+
+                        @Override
+                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree) {
+                            AnalysisNode HrightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");   //右树节点
+                            String Hname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");   //索引名
+                            movementTree.getValue().addProperty("rightTreeNode", HrightTreeNode);   //右树节点
+                            movementTree.getValue().addProperty("name", Hname);  //索引名
+                        }
+                    },
                     new MovementProduction(CFGProduction.getCFGProductionFromCFGString("E -> print ( H )", pool)) {
 
                         /* For Debug */
@@ -215,7 +226,7 @@ public class Translator implements MovementCreator, Serializable {
                         }
                     }
             ));
-            cfg = new CFG(pool, res, "E");
+            cfg = new CFG(pool, res, "Program");
         } catch (PLDLParsingException e) {
             e.printStackTrace();
         }

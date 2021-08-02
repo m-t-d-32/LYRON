@@ -21,7 +21,7 @@ public abstract class RE implements Serializable {
         return reString;
     }
 
-    private NFA letNFA= null;
+    private NFA letNFA = null;
 
     protected CFG cfg = null;
 
@@ -60,7 +60,8 @@ public abstract class RE implements Serializable {
         }
 
         int i = 0;
-        while (streamStack.size() > 1 || !endStatements.contains(statementStack.peek())){
+        while (symbolStack.empty() || symbolStack.peek().getAbstractSymbol().getType() == AbstractSymbol.TERMINAL ||
+                !symbolStack.peek().getAbstractSymbol().equals(cfg.getBeginAbstractSymbol())){
             int nowStatement = statementStack.peek();
             Symbol nowSymbol = streamStack.peek();
             Set<Movement> nowMovements = tableMap.get(nowStatement).get(nowSymbol.getAbstractSymbol());
