@@ -20,4 +20,8 @@ public class MovementsList {
             return null;
         }
     }
+
+    public boolean hasNextMovement() {
+        return iterator.hasNext();
+    }
 }

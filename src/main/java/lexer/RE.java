@@ -65,7 +65,7 @@ public abstract class RE implements Serializable {
             Symbol nowSymbol = streamStack.peek();
             Set<Movement> nowMovements = tableMap.get(nowStatement).get(nowSymbol.getAbstractSymbol());
             if (nowMovements == null || nowMovements.size() <= 0){
-                //回滚
+                //这里不回滚
                 throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
             }
             else {

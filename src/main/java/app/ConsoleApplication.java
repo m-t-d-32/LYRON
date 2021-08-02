@@ -107,6 +107,12 @@ public class ConsoleApplication {
         System.out.println("生成四元式成功");
     }
 
+    private void printSymbols(List<Symbol> symbols) {
+        for (int i = 0; i < symbols.size(); ++i){
+            System.out.println("第" + (i + 1) + "个符号是：" + symbols.get(i));
+        }
+    }
+
     public void LLEnd(OutputStream outputStream){
         PrintStream backupStream = System.out;
         System.setOut(new PrintStream(outputStream));

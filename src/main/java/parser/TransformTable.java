@@ -114,6 +114,48 @@ public class TransformTable implements Serializable {
         return result.toString();
     }
 
+    private int doAnalysis(int i, Symbol nowSymbol, Movement movement,
+                           Stack<Integer> statementStack, Stack<AnalysisNode> nodeStack, Stack<Symbol> streamStack)
+            throws PLDLParsingException {
+        if (movement.getMovement() == Movement.SHIFT){
+            nodeStack.push(new AnalysisNode(nowSymbol));
+            statementStack.push(movement.getShiftTo());
+            streamStack.pop();
+            ++i;
+        }
+        else if (movement.getMovement() == Movement.GOTO){
+            statementStack.push(movement.getShiftTo());
+            streamStack.pop();
+            ++i;
+        }
+        else if (movement.getMovement() == Movement.REGRESSION){
+            CFGProduction production = movement.getRegressionProduction();
+            AnalysisNode node = new AnalysisNode(new Nonterminal((AbstractNonterminal) production.getBeforeAbstractSymbol()));
+            node.setProduction(production);
+            node.setChildren(new ArrayList<>());
+            AbstractTerminal nullTerminal = cfg.getSymbolPool().getTerminal("null");
+            Stack<AnalysisNode> tempStack = new Stack<>();
+            for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+                if (symbol != nullTerminal) {
+                    statementStack.pop();
+                    tempStack.push(nodeStack.pop());
+                }
+            }
+            for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+                if (symbol != nullTerminal) {
+                    AnalysisNode childNode = tempStack.pop();
+                    childNode.setParent(node);
+                    node.getChildren().add(childNode);
+                }
+            }
+            nodeStack.push(node);
+            Symbol newSymbol = node.getValue();
+            streamStack.push(newSymbol);
+            --i;
+        }
+        return i;
+    }
+
     public AnalysisTree getAnalysisTree(List<Symbol> stream) throws PLDLAnalysisException, PLDLParsingException {
         AnalysisTree tree = new AnalysisTree();
         if (endStatements.size() <= 0) {
@@ -130,6 +172,8 @@ public class TransformTable implements Serializable {
             streamStack.push(stream.get(i));
         }
 
+        Stack<AnalysingStatement> rollbackStatements = new Stack<>();
+
         int i = 0;
         while (streamStack.size() > 1 || !endStatements.contains(statementStack.peek())){
             int nowStatement = statementStack.peek();
@@ -137,47 +181,38 @@ public class TransformTable implements Serializable {
             Set<Movement> nowMovements = table.get(nowStatement).get(nowSymbol.getAbstractSymbol());
             if (nowMovements == null || nowMovements.size() <= 0){
                 //回滚
-                throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
+                AnalysingStatement willCoverStatements = null;
+                while (!rollbackStatements.isEmpty()) {
+                    willCoverStatements = rollbackStatements.peek();
+                    if (!willCoverStatements.getMovementsList().hasNextMovement()){
+                        willCoverStatements = null;
+                        rollbackStatements.pop();
+                    }
+                    else {
+                        break;
+                    }
+                }
+                if (willCoverStatements == null){
+                    throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
+                }
+                else {
+                    statementStack = willCoverStatements.getStatementStack();
+                    streamStack = willCoverStatements.getStreamStack();
+                    nodeStack = willCoverStatements.getNodeStack();
+                    MovementsList movementsList = willCoverStatements.getMovementsList();
+                    Movement movement = movementsList.nextMovement();
+                    i = willCoverStatements.getI();
+                    i = doAnalysis(i, nowSymbol, movement, statementStack, nodeStack, streamStack);
+                }
             }
             else {
                 MovementsList movementsList = new MovementsList(nowMovements);
                 Movement movement = movementsList.nextMovement();
-                if (movement.getMovement() == Movement.SHIFT){
-                    nodeStack.push(new AnalysisNode(nowSymbol));
-                    statementStack.push(movement.getShiftTo());
-                    streamStack.pop();
-                    ++i;
+
+                if (movementsList.hasNextMovement()){
+                    rollbackStatements.add(new AnalysingStatement(i, movementsList, statementStack, nodeStack, streamStack));
                 }
-                else if (movement.getMovement() == Movement.GOTO){
-                    statementStack.push(movement.getShiftTo());
-                    streamStack.pop();
-                    ++i;
-                }
-                else if (movement.getMovement() == Movement.REGRESSION){
-                    CFGProduction production = movement.getRegressionProduction();
-                    AnalysisNode node = new AnalysisNode(new Nonterminal((AbstractNonterminal) production.getBeforeAbstractSymbol()));
-                    node.setProduction(production);
-                    node.setChildren(new ArrayList<>());
-                    AbstractTerminal nullTerminal = cfg.getSymbolPool().getTerminal("null");
-                    Stack<AnalysisNode> tempStack = new Stack<>();
-                    for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                        if (symbol != nullTerminal) {
-                            statementStack.pop();
-                            tempStack.push(nodeStack.pop());
-                        }
-                    }
-                    for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                        if (symbol != nullTerminal) {
-                            AnalysisNode childNode = tempStack.pop();
-                            childNode.setParent(node);
-                            node.getChildren().add(childNode);
-                        }
-                    }
-                    nodeStack.push(node);
-                    Symbol newSymbol = node.getValue();
-                    streamStack.push(newSymbol);
-                    --i;
-                }
+                i = doAnalysis(i, nowSymbol, movement, statementStack, nodeStack, streamStack);
             }
         }
         tree.setRoot(nodeStack.pop());
