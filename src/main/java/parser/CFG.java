@@ -259,4 +259,8 @@ public class CFG implements Serializable {
         }
         return result;
     }
+
+    public AbstractNonterminal getBeginAbstractSymbol(){
+        return CFGmarkin;
+    }
 }

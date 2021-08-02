@@ -2,8 +2,8 @@ package parser;
 
 import java.io.Serializable;
 
-public class Movement implements Serializable {
-    public static final int SHIFT = 0x01, GOTO = 0xff, REGRESSION = 0xbe;
+public class Movement implements Serializable, Comparable<Movement> {
+    public static final int SHIFT = 0x01, GOTO = 0x02, REGRESSION = 0x03;
     private int movement;
     private int shiftToStatement;
     private CFGProduction regressionProduction;
@@ -44,5 +44,18 @@ public class Movement implements Serializable {
 
     public CFGProduction getRegressionProduction() {
         return regressionProduction;
+    }
+
+    @Override
+    public int compareTo(Movement movement) {
+        if (this.getMovement() != movement.getMovement()){
+            return this.getMovement() - movement.getMovement();
+        }
+        else if (this.getMovement() == Movement.SHIFT || this.getMovement() == Movement.GOTO){
+            return this.getShiftTo() - movement.getShiftTo();
+        }
+        else {
+            return this.getRegressionProduction().getSerialNumber() - movement.getRegressionProduction().getSerialNumber();
+        }
     }
 }

@@ -51,7 +51,7 @@ public class Lexer implements Serializable {
                         //System.out.println("matched: " + str.substring(pointer, pointer + analysisResult.getValue()) + " by " + analysisResult.getKey());
                         pointer += analysisResult.getValue();
                     } else {
-                        throw new PLDLAnalysisException("词法分析错误出现在第  " + getRow(pointer, str) + " 行，第 " + getColumn(pointer, str) + " 列", null);
+                        throw new PLDLAnalysisException("词法分析错误出现在第  " + getRow(pointer, str) + " 行，第 " + getColumn(pointer, str) + " 列，字符[" + str.charAt(pointer) + "]", null);
                     }
                 } else {
                     ++pointer;

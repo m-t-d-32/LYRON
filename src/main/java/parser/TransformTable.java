@@ -2,7 +2,7 @@ package parser;
 
 import exception.PLDLAnalysisException;
 import exception.PLDLParsingException;
-import symbol.Terminal;
+import exception.PLDLParsingWarning;
 import symbol.*;
 
 import java.io.Serializable;
@@ -12,13 +12,13 @@ public class TransformTable implements Serializable {
 
     private static final long serialVersionUID = 8448616257039658718L;
 
-    private final Map<Integer, Map<AbstractSymbol, Movement>> table;
+    private final Map<Integer, Map<AbstractSymbol, Set<Movement> >> table;
     
     private final Set<Integer> endStatements;
     
     private final CFG cfg;
     
-    public Map<Integer, Map<AbstractSymbol, Movement>> getTableMap() {
+    public Map<Integer, Map<AbstractSymbol, Set<Movement> >> getTableMap() {
         return table;
     }
 
@@ -46,11 +46,10 @@ public class TransformTable implements Serializable {
         if (!table.containsKey(statementIndex)) {
             table.put(statementIndex, new HashMap<>());
         }
-//        if (table.get(statementIndex).containsKey(nextAbstractSymbol)){
-//            System.err.println("移进/归约冲突发生");
-//            System.err.println(table.get(statementIndex).get(nextAbstractSymbol).getRegressionProduction());
-//        }
-        table.get(statementIndex).put(nextAbstractSymbol, movement);
+        if (!table.get(statementIndex).containsKey(nextAbstractSymbol)){
+            table.get(statementIndex).put(nextAbstractSymbol, new TreeSet<>());
+        }
+        table.get(statementIndex).get(nextAbstractSymbol).add(movement);
     }
 
     public void add(int statementIndex, AbstractSymbol nextAbstractSymbol, CFGProduction production) {
@@ -58,11 +57,22 @@ public class TransformTable implements Serializable {
         if (!table.containsKey(statementIndex)) {
             table.put(statementIndex, new HashMap<>());
         }
-        if (table.get(statementIndex).containsKey(nextAbstractSymbol)){
-            System.err.println("归约/归约冲突发生");
-            System.err.println(table.get(statementIndex).get(nextAbstractSymbol).getRegressionProduction());
+        if (!table.containsKey(statementIndex)) {
+            table.put(statementIndex, new HashMap<>());
         }
-        table.get(statementIndex).put(nextAbstractSymbol, movement);
+        if (!table.get(statementIndex).containsKey(nextAbstractSymbol)){
+            table.get(statementIndex).put(nextAbstractSymbol, new TreeSet<>());
+        }
+        else if (table.get(statementIndex).get(nextAbstractSymbol).size() > 0){
+            StringBuilder warningStr = new StringBuilder();
+            warningStr.append("归约/归约冲突发生").append("\n");
+            for (Movement movement1: table.get(statementIndex).get(nextAbstractSymbol)){
+                warningStr.append(movement1).append("\n");
+            }
+            warningStr.append("与：").append(movement).append("\n");
+            PLDLParsingWarning.setLog(warningStr.toString());
+        }
+        table.get(statementIndex).get(nextAbstractSymbol).add(movement);
     }
 
     @Override
@@ -104,78 +114,73 @@ public class TransformTable implements Serializable {
         return result.toString();
     }
 
-    public AnalysisTree getAnalysisTree(List<Symbol> symbols) throws PLDLAnalysisException, PLDLParsingException {
+    public AnalysisTree getAnalysisTree(List<Symbol> stream) throws PLDLAnalysisException, PLDLParsingException {
         AnalysisTree tree = new AnalysisTree();
-        Stack<Integer> statementStack = new Stack<>();
-        Stack<AnalysisNode> nodeStack = new Stack<>();
-        Stack<Symbol> symbolStack = new Stack<>();
-        statementStack.push(0);
         if (endStatements.size() <= 0) {
-            return null;
+            throw new PLDLAnalysisException("状态数为0或者小于0，程序失败。", null);
         }
+
+        Stack<Integer> statementStack = new Stack<>();
+        statementStack.push(0);
+        Stack<AnalysisNode> nodeStack = new Stack<>();
+        Stack<Symbol> streamStack = new Stack<>();
+        Symbol endTerminal = new Terminal(cfg.getSymbolPool().getTerminal("eof"));
+        streamStack.push(endTerminal);
+        for (int i = stream.size() - 1; i >= 0; --i){
+            streamStack.push(stream.get(i));
+        }
+
         int i = 0;
-        while(true){
+        while (streamStack.size() > 1 || !endStatements.contains(statementStack.peek())){
             int nowStatement = statementStack.peek();
-            Symbol nowSymbol = i < symbols.size() ? symbols.get(i) : new Terminal(cfg.getSymbolPool().getTerminal("eof"));
-            Movement movement = table.get(nowStatement).get(nowSymbol.getAbstractSymbol());
-            if (movement == null) {
+            Symbol nowSymbol = streamStack.peek();
+            Set<Movement> nowMovements = table.get(nowStatement).get(nowSymbol.getAbstractSymbol());
+            if (nowMovements == null || nowMovements.size() <= 0){
+                //回滚
                 throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
-            } else if (movement.getMovement() == Movement.SHIFT) {
-                nodeStack.push(new AnalysisNode(nowSymbol));
-                symbolStack.push(nowSymbol);
-                statementStack.push(movement.getShiftTo());
-                if (i < symbols.size()){
+            }
+            else {
+                MovementsList movementsList = new MovementsList(nowMovements);
+                Movement movement = movementsList.nextMovement();
+                if (movement.getMovement() == Movement.SHIFT){
+                    nodeStack.push(new AnalysisNode(nowSymbol));
+                    statementStack.push(movement.getShiftTo());
+                    streamStack.pop();
                     ++i;
                 }
-                else {
-                    throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时移进失败。", null);
-                }
-            } else if (movement.getMovement() == Movement.REGRESSION) {
-                CFGProduction production = movement.getRegressionProduction();
-//                System.out.println("归约：" + production.toString());
-                AnalysisNode node = new AnalysisNode(new Nonterminal((AbstractNonterminal) production.getBeforeAbstractSymbol()));
-                node.setProduction(production);
-                node.setChildren(new ArrayList<>());
-                AbstractTerminal nullTerminal = cfg.getSymbolPool().getTerminal("null");
-                Stack<AnalysisNode> tempStack = new Stack<>();
-                for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                    if (symbol != nullTerminal) {
-                        symbolStack.pop();
-                        statementStack.pop();
-                        tempStack.push(nodeStack.pop());
-                    }
-                }
-                for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
-                    if (symbol != nullTerminal) {
-                        AnalysisNode childNode = tempStack.pop();
-                        childNode.setParent(node);
-                        node.getChildren().add(childNode);
-                    }
-                }
-                nodeStack.push(node);
-                symbolStack.push(node.getValue());
-
-                if (endStatements.contains(nowStatement) && i == symbols.size()){
-                    break;
-                }
-
-                movement = table.get(statementStack.peek()).get(node.getValue().getAbstractSymbol());
-
-                if (movement.getMovement() != Movement.GOTO){
-                    throw new PLDLAnalysisException("程序分析到第 " + (i + 1) + " 个符号：" + nowSymbol + " 时既无法移进，也无法归约。", null);
-                }
-                else {
+                else if (movement.getMovement() == Movement.GOTO){
                     statementStack.push(movement.getShiftTo());
+                    streamStack.pop();
+                    ++i;
+                }
+                else if (movement.getMovement() == Movement.REGRESSION){
+                    CFGProduction production = movement.getRegressionProduction();
+                    AnalysisNode node = new AnalysisNode(new Nonterminal((AbstractNonterminal) production.getBeforeAbstractSymbol()));
+                    node.setProduction(production);
+                    node.setChildren(new ArrayList<>());
+                    AbstractTerminal nullTerminal = cfg.getSymbolPool().getTerminal("null");
+                    Stack<AnalysisNode> tempStack = new Stack<>();
+                    for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+                        if (symbol != nullTerminal) {
+                            statementStack.pop();
+                            tempStack.push(nodeStack.pop());
+                        }
+                    }
+                    for (AbstractSymbol symbol : production.getAfterAbstractSymbols()) {
+                        if (symbol != nullTerminal) {
+                            AnalysisNode childNode = tempStack.pop();
+                            childNode.setParent(node);
+                            node.getChildren().add(childNode);
+                        }
+                    }
+                    nodeStack.push(node);
+                    Symbol newSymbol = node.getValue();
+                    streamStack.push(newSymbol);
+                    --i;
                 }
             }
         }
-        if (nodeStack.size() != 1) {
-            throw new PLDLAnalysisException("程序最终没有归约结束。符号栈中剩余：" + nodeStack, null);
-        }
-        else {
-            tree.setRoot(nodeStack.pop());
-        }
-//        System.out.println(tree);
+        tree.setRoot(nodeStack.pop());
         return tree;
     }
 }
