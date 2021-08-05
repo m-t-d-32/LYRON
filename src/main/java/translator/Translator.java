@@ -283,8 +283,9 @@ public class Translator implements MovementCreator, Serializable {
             }
             for (AnalysisTree movementTree : movementTrees) {
                 try {
-                    if (movementTree.getRoot().getProduction().getAfterAbstractSymbols().get(0).equals(cfg.getSymbolPool().getTerminal("go"))) {
-                        String numVal = (String) movementTree.getRoot().getChildren().get(3).getValue().getProperties().get("val");
+                    AnalysisNode ENode = movementTree.getRoot().getChildren().get(0);
+                    if (ENode.getProduction().getAfterAbstractSymbols().get(0).equals(cfg.getSymbolPool().getTerminal("go"))) {
+                        String numVal = (String) ENode.getChildren().get(3).getValue().getProperties().get("val");
                         trulyWentIndices.add(Integer.valueOf(numVal) - 1);
                     }
                 } catch (PLDLParsingException e) {
