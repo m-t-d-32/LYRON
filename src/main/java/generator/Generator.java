@@ -40,7 +40,7 @@ public class Generator implements MovementCreator, Serializable {
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("gen", NFA.fastNFA("gen")));
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("_", NFA.fastNFA("_")));
-        terminalsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[_a-zA-Z][_a-zA-Z0-9]*").getNFA()));
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
 
         lexer = new Lexer(terminalsNFA, null);
@@ -59,24 +59,14 @@ public class Generator implements MovementCreator, Serializable {
 
 
     protected void setCFG() {
-        Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "_", "print", "gen", "checkvar"));
-        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("Program", "F", "G", "H", "Var", "E", "L", "L_"));
+        Set<String> terminalStrs = new HashSet<>(Arrays.asList("$$", "$", "(", ")", ",", "val", "num", "print", "gen"));
+        Set<String> nonterminalStrs = new HashSet<>(Arrays.asList("Program", "H", "Var", "E"));
         SymbolPool pool = new SymbolPool();
         try {
             pool.initTerminalString(terminalStrs);
             pool.initNonterminalString(nonterminalStrs);
             List<CFGProduction> res = new ArrayList<>(Arrays.asList(
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Program -> E", pool)) {
-
-                        @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
-                            movementTree.getValue().setProperties(new HashMap<>());
-                            for (String str : movementTree.getChildren().get(0).getValue().getProperties().keySet()) {
-                                movementTree.getValue().getProperties().put(str, movementTree.getChildren().get(0).getValue().getProperties().get(str));
-                            }
-                        }
-                    },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("G -> Var", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
@@ -97,14 +87,14 @@ public class Generator implements MovementCreator, Serializable {
                             System.out.println(rightTreeNodeValue.getProperties().get(name));
                         }
                     },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( val , L_ , L_ , L_ )", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("E -> gen ( H , H , H , H )", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             /*
                                 0： gen
                                 1: (
-                                2: op
+                                2: L
                                 3: ,
                                 4: L
                                 5: ,
@@ -138,8 +128,7 @@ public class Generator implements MovementCreator, Serializable {
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             String name = (String) movementTree.getChildren().get(2).getValue().getProperties().get("val");
                             AnalysisNode rightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");
-                            movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);   //右树节点
-                            movementTree.getValue().addProperty("name", name);  //索引名
+                            movementTree.getValue().getProperties().put("val", rightTreeNode.getValue().getProperties().get(name));
                         }
                     },
                     new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> $$", pool)) {
@@ -163,54 +152,14 @@ public class Generator implements MovementCreator, Serializable {
                             movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);
                         }
                     },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("Var -> val", pool)) {
-
-                        @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
-                            String varname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("val");
-                            AnalysisNode rightTreeNode;
-                            if (!analysisTree.getValue().getProperties().containsKey("var_" + varname)) {
-                                rightTreeNode = new AnalysisNode(new Terminal(null));
-                                rightTreeNode.getValue().addProperty("val", "var_" + varname);
-                                analysisTree.getValue().getProperties().put("var_" + varname, rightTreeNode);
-                            } else {
-                                rightTreeNode = (AnalysisNode) analysisTree.getValue().getProperties().get("var_" + varname);
-                            }
-                            movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);
-                        }
-                    },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L -> H", pool)) {
-
-                        @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
-                            movementTree.getValue().setProperties(new HashMap<>());
-                            AnalysisNode HrightTreeNode = (AnalysisNode) movementTree.getChildren().get(0).getValue().getProperties().get("rightTreeNode");
-                            String Hname = (String) movementTree.getChildren().get(0).getValue().getProperties().get("name");
-                            movementTree.getValue().getProperties().put("val", HrightTreeNode.getValue().getProperties().get(Hname));
-                        }
-                    },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> L", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("H -> val", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
                             movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
                         }
                     },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> _", pool)) {
-
-                        @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
-                            movementTree.getValue().addProperty("val", "_");
-                        }
-                    },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> num", pool)) {
-
-                        @Override
-                        public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {
-                            movementTree.getValue().addProperty("val", movementTree.getChildren().get(0).getValue().getProperties().get("val"));
-                        }
-                    },
-                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("L_ -> val", pool)) {
+                    new GenerateProduction(CFGProduction.getCFGProductionFromCFGString("H -> num", pool)) {
 
                         @Override
                         public void doMovement(AnalysisNode movementTree, AnalysisNode analysisTree, List<String> resultCOMM) {

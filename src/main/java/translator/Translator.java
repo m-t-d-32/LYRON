@@ -55,7 +55,7 @@ public class Translator implements MovementCreator, Serializable {
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("str", NFA.fastNFA("str")));
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("print", NFA.fastNFA("print")));
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("go", NFA.fastNFA("go")));
-        terminalsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[a-zA-Z][a-zA-Z0-9]*").getNFA()));
+        terminalsNFA.add(new AbstractMap.SimpleEntry<>("val", new SimpleREApply("[_a-zA-Z][_a-zA-Z0-9]*").getNFA()));
         terminalsNFA.add(new AbstractMap.SimpleEntry<>("num", new SimpleREApply("[1-9][0-9]*|0").getNFA()));
 
         lexer = new Lexer(terminalsNFA, null);
