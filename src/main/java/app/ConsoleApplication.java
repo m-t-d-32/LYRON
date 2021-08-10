@@ -152,9 +152,9 @@ public class ConsoleApplication {
 
             for (File folder: testfolders){
                 File []testfiles = folder.listFiles();
-                try{
-                    for (File f: testfiles){
-                        if (f.getName().endsWith("yu")){
+                for (File f: testfiles){
+                    if (f.getName().endsWith("yu")){
+                        try {
                             codeFileName = f.getAbsolutePath();
                             System.out.println(codeFileName);
                             wrongTestFiles.add(codeFileName);
@@ -164,10 +164,11 @@ public class ConsoleApplication {
                             new File(fourtupleFileName).delete();
                             LLEnd(new FileOutputStream(fourtupleFileName));
                         }
+
+                        catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }
-                }
-                catch (Exception e){
-                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {
