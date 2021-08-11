@@ -146,7 +146,7 @@ public class Generator implements MovementCreator, Serializable {
                             int num = Integer.parseInt((String) movementTree.getChildren().get(1).getValue().getProperties().get("val"));
                             --num;
                             if (num < 0 || num >= analysisTree.getChildren().size()) {
-                                throw new PLDLParsingException("$后面的数字超出这条产生式右部元素的范围", null);
+                                throw new PLDLParsingException("$后面的数字超出这条产生式右部元素的范围: " + analysisTree.getProduction(), null);
                             }
                             AnalysisNode rightTreeNode = analysisTree.getChildren().get(num);
                             movementTree.getValue().addProperty("rightTreeNode", rightTreeNode);
