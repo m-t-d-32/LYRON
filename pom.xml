@@ -62,7 +62,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>app.GUIApplication</mainClass>
+                            <mainClass>app.ConsoleApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

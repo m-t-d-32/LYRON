@@ -33,6 +33,12 @@ public class ConsoleApplication {
 
     private List<String> rt4 = null;
 
+    private final File []testfolders = {
+            new File("sample/LYRON-Yu-Backend/test"),
+            new File("sample/LYRON-Yu-Backend/examples"),
+            new File("sample/LYRON-Yu-Backend/geeos"),
+    };
+
     public void LLBeginFormXML(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException, IOException {
         System.out.println("XML文件解析中...");
         preParse = new PreParse(xmlStream, "Program");
@@ -129,45 +135,38 @@ public class ConsoleApplication {
         String codeFileName, fourtupleFileName;
         List<String> wrongTestFiles = new ArrayList<>();
         try {
-            if (args[0].equals("xml")){
-                LLBeginFormXML(new FileInputStream(args[1]));
-                if (args.length >= 4 &&
-                    args[2].equals("save-model")){
-                    LLSaveModel(new FileOutputStream(args[3]));
-                }
-            }
-            else if (args[0].equals("model")){
-                LLBeginFromModel(new FileInputStream(args[1]));
-            }
-            else {
-                throw new Exception("参数错误");
+            switch (args[0]) {
+                case "clean":
+                    CleanFiles();
+                    return;
+                case "xml":
+                    LLBeginFormXML(new FileInputStream(args[1]));
+                    if (args.length >= 4 &&
+                            args[2].equals("save-model")) {
+                        LLSaveModel(new FileOutputStream(args[3]));
+                    }
+                    break;
+                case "model":
+                    LLBeginFromModel(new FileInputStream(args[1]));
+                    break;
+                default:
+                    throw new Exception("参数错误");
             }
 
             System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
-
-            File []testfolders = {
-                    new File("sample/LYRON-Yu-Backend/test"),
-                    new File("sample/LYRON-Yu-Backend/examples"),
-            };
 
             for (File folder: testfolders){
                 File []testfiles = folder.listFiles();
                 for (File f: testfiles){
                     if (f.getName().endsWith("yu")){
-                        try {
-                            codeFileName = f.getAbsolutePath();
-                            System.out.println(codeFileName);
-                            wrongTestFiles.add(codeFileName);
-                            LLParse(new FileInputStream(codeFileName));
-                            wrongTestFiles.remove(codeFileName);
-                            fourtupleFileName = codeFileName + ".4tu";
-                            new File(fourtupleFileName).delete();
-                            LLEnd(new FileOutputStream(fourtupleFileName));
-                        }
-
-                        catch (Exception e){
-                            e.printStackTrace();
-                        }
+                        codeFileName = f.getAbsolutePath();
+                        System.out.println(codeFileName);
+                        wrongTestFiles.add(codeFileName);
+                        LLParse(new FileInputStream(codeFileName));
+                        wrongTestFiles.remove(codeFileName);
+                        fourtupleFileName = codeFileName + ".4tu";
+                        new File(fourtupleFileName).delete();
+                        LLEnd(new FileOutputStream(fourtupleFileName));
                     }
                 }
             }
@@ -185,6 +184,21 @@ public class ConsoleApplication {
             }
         }
         System.out.println("执行完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+    }
+
+    private void CleanFiles() {
+        String codeFileName, fourtupleFileName;
+        for (File folder: testfolders){
+            File []testfiles = folder.listFiles();
+            for (File f: testfiles){
+                if (f.getName().endsWith("yu")){
+                    codeFileName = f.getAbsolutePath();
+                    fourtupleFileName = codeFileName + ".4tu";
+                    new File(fourtupleFileName).delete();
+                }
+            }
+        }
+        System.out.println("清理成功");
     }
 
     public void LLSaveModel(OutputStream fileOutputStream) throws IOException {
