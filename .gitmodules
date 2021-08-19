@@ -3,4 +3,4 @@
 	url = https://gitee.com/llyronx/LYRON-C-Backend
 [submodule "sample/LYRON-Yu-Backend"]
 	path = sample/LYRON-Yu-Backend
-	url = https://gitee.com/llyronx/LYRON-Yu-Backend
+	url = https://gitee.com/llyronx/compiler-yu
