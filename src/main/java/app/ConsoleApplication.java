@@ -17,11 +17,7 @@ import util.PreParse;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ConsoleApplication {
 
@@ -33,13 +29,7 @@ public class ConsoleApplication {
 
     private List<String> rt4 = null;
 
-    private final File []testfolders = {
-            new File("sample/LYRON-Yu-Backend/test"),
-            new File("sample/LYRON-Yu-Backend/examples"),
-            new File("sample/LYRON-Yu-Backend/geeos"),
-    };
-
-    public void LLBeginFormXML(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException, IOException {
+    public void LLBeginFormXML(InputStream xmlStream) throws PLDLParsingException, PLDLAnalysisException, DocumentException {
         System.out.println("XML文件解析中...");
         preParse = new PreParse(xmlStream, "Program");
         System.out.println("XML文件解析成功。");
@@ -131,74 +121,97 @@ public class ConsoleApplication {
     }
 
     public void LLMain(String[] args){
-        System.out.println("开始：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
-        String codeFileName, fourtupleFileName;
-        List<String> wrongTestFiles = new ArrayList<>();
+        System.out.println("欢迎使用LYRON！");
+        System.out.println("请选择程序执行方式");
+        System.out.println("1.输入xml文件，生成程序定义模型文件（model）");
+        System.out.println("2.输入model文件和对应的代码文件，生成四元式文件（4tu）");
+
+        Scanner sc = new Scanner(System.in);
+        String input = sc.nextLine();
+        int i;
+
         try {
-            switch (args[0]) {
-                case "clean":
-                    CleanFiles();
-                    return;
-                case "xml":
-                    LLBeginFormXML(new FileInputStream(args[1]));
-                    if (args.length >= 4 &&
-                            args[2].equals("save-model")) {
-                        LLSaveModel(new FileOutputStream(args[3]));
-                    }
-                    break;
-                case "model":
-                    LLBeginFromModel(new FileInputStream(args[1]));
-                    break;
-                default:
-                    throw new Exception("参数错误");
-            }
-
-            System.out.println("初始化完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
-
-            for (File folder: testfolders){
-                File []testfiles = folder.listFiles();
-                for (File f: testfiles){
-                    if (f.getName().endsWith("yu")){
-                        codeFileName = f.getAbsolutePath();
-                        System.out.println(codeFileName);
-                        wrongTestFiles.add(codeFileName);
-                        LLParse(new FileInputStream(codeFileName));
-                        wrongTestFiles.remove(codeFileName);
-                        fourtupleFileName = codeFileName + ".4tu";
-                        new File(fourtupleFileName).delete();
-                        LLEnd(new FileOutputStream(fourtupleFileName));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+           i = Integer.parseInt(input);
+        }
+        catch (NumberFormatException e){
+            i = 0;
         }
 
-        if (wrongTestFiles.isEmpty()){
-            System.out.println("所有文件执行成功");
+        if (i == 1){
+            System.out.println("请输入xml文件路径");
+            String xmlinputfilename = sc.nextLine();
+            System.out.println("请输入模型文件保存路径");
+            String modeloutputfilename = sc.nextLine();
+            try {
+                InputStream xmlinput = new FileInputStream(xmlinputfilename);
+                LLBeginFormXML(xmlinput);
+                OutputStream modeloutput = new FileOutputStream(modeloutputfilename);
+                LLSaveModel(modeloutput);
+            } catch (FileNotFoundException e) {
+                System.out.println("打开XML文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-1);
+            } catch (DocumentException | PLDLAnalysisException | PLDLParsingException e) {
+                System.out.println("解析XML文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-2);
+            } catch (IOException e) {
+                System.out.println("写入模型文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-3);
+            }
+        }
+        else if (i == 2){
+            System.out.println("请输入模型文件路径");
+            String modelinputfilename = sc.nextLine();
+            System.out.println("请输入代码文件路径");
+            String codeinputfilename = sc.nextLine();
+            System.out.println("请输入四元式保存路径");
+            String fourtuplefilename = sc.nextLine();
+            InputStream modelinput = null;
+            InputStream codeinput = null;
+            OutputStream fourtupleoutput = null;
+            try {
+                modelinput = new FileInputStream(modelinputfilename);
+            } catch (FileNotFoundException e) {
+                System.out.println("打开模型文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-4);
+            }
+            try {
+                codeinput = new FileInputStream(codeinputfilename);
+            } catch (FileNotFoundException e) {
+                System.out.println("打开代码文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-5);
+            }
+            try {
+                LLBeginFromModel(modelinput);
+            } catch (Exception e) {
+                System.out.println("读取模型文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-6);
+            }
+            try {
+                LLParse(codeinput);
+            } catch (PLDLAnalysisException | PLDLParsingException | IOException e) {
+                System.out.println("解析代码文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-7);
+            }
+            try {
+                fourtupleoutput = new FileOutputStream(fourtuplefilename);
+                LLEnd(fourtupleoutput);
+            } catch (FileNotFoundException e) {
+                System.out.println("写入四元式文件时发生了以下错误：");
+                e.printStackTrace();
+                System.exit(-8);
+            }
         }
         else {
-            System.out.println("执行出错的测试文件：");
-            for (String wrongFilename : wrongTestFiles) {
-                System.out.println(wrongFilename);
-            }
+            System.out.println("输入非法，程序将退出.");
+            System.exit(-1);
         }
-        System.out.println("执行完毕：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
-    }
-
-    private void CleanFiles() {
-        String codeFileName, fourtupleFileName;
-        for (File folder: testfolders){
-            File []testfiles = folder.listFiles();
-            for (File f: testfiles){
-                if (f.getName().endsWith("yu")){
-                    codeFileName = f.getAbsolutePath();
-                    fourtupleFileName = codeFileName + ".4tu";
-                    new File(fourtupleFileName).delete();
-                }
-            }
-        }
-        System.out.println("清理成功");
     }
 
     public void LLSaveModel(OutputStream fileOutputStream) throws IOException {
