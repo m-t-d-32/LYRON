@@ -213,5 +213,5 @@ add, t_val1, 6, t_val2
    
 3. 使用maven的package功能生成jar包，使用install功能安装jar包。target文件夹中将生成编译好的文件。
 
-4. 如果需要查看与本项目相关联的c后端项目相关代码，请使用git submodule功能，然后你将在sample-c-backend看到与sample-xml/c.xml定义的文法相关的后端的java项目。
+4. 在sample文件夹中有一些与LYRON相关的项目，例如`LYRON-SysY-Backend`中包含了[2021年全国大学生计算机系统能力大赛——编译系统设计赛（华为毕昇杯）](https://compiler.educg.net/)的`super.calculate`队伍中使用`Java`实现的`SysY`语言的编译器，而`LYRON-Yu-Backend`中包含了[2021全国大学生计算机系统能力大赛 - 操作系统赛- 功能设计赛道](https://course.educg.net/sv2/indexexp/contest/contest.jsp?doVisit=true&contestID=15N_psy6TIw&my=false&contestCID=0)的NK-伏羲-X队伍中使用Java实现的Yu语言的编译器。
    
